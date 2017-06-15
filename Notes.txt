@@ -1,0 +1,115 @@
+
+
+
+
+//offer opportunity to favorite the lines!!
+/*
+
+?????? Question Marks signal that the move shouldn't be entered into the repertoire
+
+Notes
+-----
+
+Build shouldn't be a mode, just a set of requests
+jk should also be a mode to do a whole bunch of moves at once
+take in PGN format?
+store in PGN format?
+
+
+analyze until user asks for the evaluation/line (different thread)
+cap it?
+
+App Requests
+------------
+
+Change mode
+Change color
+Instruction Help
+write back to file
+exit (ask if user wants to write back)
+restart (double check, ask if user wants to write back)
+
+
+Mode Requests
+-------------
+
+Explore Requests:
+
+traverse parent
+traverse child (no opcode?)
+analyze
+database search (?)
+
+Build Mode
+
+import pgn
+list game
+
+
+Node Requests
+-------------
+
+new child
+erase (double check to make sure)
+
+Read/Write:
+
+hint
+notes
+key
+heritage
+children
+parent
+repertoires
+(basically all the member variables)
+
+
+*/
+
+//enum repertoires
+
+
+// test by:
+
+// opening name
+
+// repertoire
+// opponent type
+// opponent name
+// player name
+
+
+//simulate users
+
+//null node
+//dificulty setting dictated by annotations
+
+//focus on studies and analysis later
+//also ignore modifying for now
+
+//MAKE THE TREE RECOMBINING!!!!! (By Fen without move count)
+//instant search by FEN Hashmap
+
+//store Long term FEN file for stats
+//stats for FEN, Openings, Chapters, Opp Types, Reprtoires, ELO
+
+//node to line functionality (with or without sidelines)
+
+//FENS are NODES!!! MOVES are EDGES!!!!
+
+//search nodes by both PGN and FEN - FENS recombine PGNs
+
+//different test feedback speeds
+
+// use the Annotated By field to specify which annotations to use: notify user if there exists inconsistencies
+
+//Train by ECO code
+
+//ASCII representation of the FEN!!! FUnction
+
+//measure (!) trie vs. hashtable
+
+//FEN trie
+
+
+//ECO ENUM!!!!!!!!!!!!!!!!!!!!!!!!!!!
