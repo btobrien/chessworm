@@ -1,129 +1,43 @@
-//
-//  reader.cpp
-//  ChessWorm
-//
-//  Created by Bret O'Brien on 1/27/17.
-//  Copyright © 2017 Bret O'Brien. All rights reserved.
-//
 
 #include "Parse.hpp"
 
-const string Game::NAG[Game::NUM_NAGS] = {"", "!", "?", "!!", "??", "!?", "?!", "□", "< singular move >", "< worst move >", "=", "< equal chances, quiet position >", "< equal chances, active position >", "∞", "+=", "+=", "+-", "-+", "+−", "−+" };
+const string Game::NAG[Game::NUM_NAGS] = {"", "!", "?", "!!", "??", "!?", "?!",
+										  "□", "< singular move >", "< worst move >",
+										  "=", "< equal chances, quiet position >",
+										  "< equal chances, active position >",
+										  "∞", "+=", "+=", "+-", "-+", "+−", "−+"};
 
 
-//can make personalized NAGs
-
-const char t = 9;
-
-int Game::nagToInt(string nag) {
-    
+int Game::nagToInt(const string& nag) {
     for (int i = 0; i < NUM_NAGS; i++) {
-        if (nag == NAG[i]) {
+        if (nag == NAG[i])
             return i;
-        }
     }
-    
-    assert(false);
     return -1;
 }
 
+
+// TODO: move these to formatting/UI file
+
+const char t = 9;
 void tab() {
-    cout << t << t << t << t << t << t << t << t << t << t << t;
+    cout << t << t << t << t << t << t << t << t
+		 << t << t << t << t << t << t << t << t
+		 << t << t << t;
     cout.flush();
 }
-
 void dot(int clock, string indent) {
-    
     cout << indent << (clock / 2) + 1;
-    
-    if (clock % 2 == 0) {
+    if (clock % 2 == 0)
         cout << ". ";
-    }
-    else {
+    else
         cout << "... ";
-    }
 }
-
 
 
 /*-----------------------------------------------------------------------*/
-/*----------------------------  Move  -----------------------------------*/
+/*----------------------------  Game Node  ------------------------------*/
 /*-----------------------------------------------------------------------*/
-
-
-Move::Move(string t) : text(t) {}
-
-
-int  Move::newSquare() {
-    
-    //currently ignores queening!
-    
-    int file = text.length() - 2;
-    int rank = text.length() - 1;
-    
-    if (check()) {
-        file -= 1;
-        rank -=1;
-    }
-
-    return (((text[rank] - '1') * 8) + text[file] - 'a');
-    
-}
-char Move::file() {
-    return ('a' + newSquare() % 8);
-}
-int Move::rank() {
-    return (1 + newSquare() / 8);
-}
-
-char Move::piece() {
-    
-    if (castlesLong() || castlesShort()) {
-        return 'K';
-    }
-    else if (text[0] >= 'a' && text[0] <= 'h') {
-        return 'P';
-    }
-    return text[0];
-}
-
-bool Move::check() {
-    return (text.find('+') != string::npos);
-}
-
-bool Move::castlesShort() {
-    return (text == "O-O");
-}
-
-bool Move::castlesLong() {
-    return (text == "O-O-O");
-}
-
-bool Move::takes() {
-    return (text.find('x') != string::npos);
-}
-
-
-char Move::oldFile() {
-    return 0;
-}
-int Move::oldRank() {
-    return 0;
-}
-bool Move::promoted() {
-    return false;
-}
-char Move::newPiece() {
-    return 'Q';
-}
-
-
-
-/*-----------------------------------------------------------------------*/
-/*----------------------------  Game Node  -----------------------------*/
-/*-----------------------------------------------------------------------*/
-
-
 
 
 //MODIFIES: updates "i" to point to the next instance of d
@@ -160,7 +74,7 @@ bool GameNode::parse(string &text, int& i) {
     int start = i + 1;
     
     if (text[i] == ')' || text[i + 1] == '*') {
-       // cout << endl << endl << " - end - " << endl;
+       //cout << endl << endl << " - end - " << endl;
         return false;
     }
     
@@ -210,10 +124,7 @@ bool GameNode::parse(string &text, int& i) {
             
             //cout << endl << endl << comment << endl;
             
-            if (comment == "1. Read the chapter introductions and illustrative games.") {
-                //
-            }
-            
+
             next(text, i);
             
             
@@ -250,13 +161,19 @@ bool GameNode::parse(string &text, int& i) {
 
             if (parent) {
                 parent->stepChildren.push_back(new GameNode(parent, m, text, i, pre));
-            }
-            
-            char c = text[i];
 
+            }
+            else {
+                //cout << endl << "IGNORED" << endl;
+                next(text, i, ')');
+            }
+
+            char c = text[i];
 
             assert(text[i] == ')');
             next(text, i);
+            c = text[i];
+
             break;
         }
             
@@ -273,26 +190,25 @@ bool GameNode::parse(string &text, int& i) {
 //NOTE: i points to first char of movetext
 //REQUIRES: next move exists
 string GameNode::parseMove(string &text, int &i) {
-    
     int start = i;
     next(text, i);
-    
     return text.substr(start, i - start);
 }
 
-GameNode::GameNode(GameNode* p, string m, string& text, int& i, string pre = "") :  move(m), parent(p), glyph(0), precomment(pre) {
-    
+GameNode::GameNode(GameNode* p, string m, const string& text, int& i, string pre = "")
+: move(m),
+  parent(p),
+  child(nullptr),
+  precomment(pre)
+{
     //cout << endl << "move: " << m << endl;
-    
-    if (parse(text, i)) {
+    if (parse(text, i))
         child = new GameNode(this, parseMove(text, i), text, i);
-    }
+    stripGlyph();
 }
 
 GameNode::~GameNode() {
-    
     delete child;
-    
     for (int i = 0; i < stepChildren.size(); i++) {
         delete stepChildren[i];
         stepChildren[i] = nullptr;
@@ -300,16 +216,37 @@ GameNode::~GameNode() {
 }
 
 void GameNode::print(bool annotations) {
-    cout << move.text << Game::NAG[glyph] << endl;
+    cout << move << Game::NAG[glyph] << endl;
     if (annotations && comment.size()) {
-        cout << endl << comment << endl;
+        cout << endl << endl << comment << endl << endl;
     }
 }
 
-bool GameNode::moveMatch(string m) {
-    return m == move.text;
-}
+void GameNode::stripGlyph() {
+    
+    size_t len = move.length();
+    
+    if (len < 4)
+        return;
+    
+    string s = move.substr(len - 2);
+    int g = Game::nagToInt(s);
 
+    if (g > 0) {
+        glyph = g;
+        move.pop_back();
+        move.pop_back();
+        return;
+    }
+    
+    s = move.substr(len - 1);
+    g = Game::nagToInt(s);
+    
+    if (g > 0) {
+        glyph = g;
+        move.pop_back();
+    }
+}
 
 /*-----------------------------------------------------------------------*/
 /*----------------------------  Game  -----------------------------------*/
@@ -330,12 +267,10 @@ Game::Game(ifstream& pgn) {
     while (c != '[')
         pgn >> c;
     
-    
     while(c == '[') {
         
         pgn >> tname;
     
-
         pgn >> c;
         assert(c == '"');
 
@@ -379,7 +314,6 @@ Game::Game(ifstream& pgn) {
             start++;
         
         intro = moveText.substr(start, i - start);
-        //cout << endl << intro << endl << endl;
         
         GameNode::next(moveText, i, '.');
     }
@@ -388,33 +322,26 @@ Game::Game(ifstream& pgn) {
     i++;
     
     root = new GameNode(nullptr, GameNode::parseMove(moveText, i), moveText, i);
-
 }
 
 Game::~Game() {
     delete root;
 }
 
-void Game::addTag(string tname, string tval) {
+void Game::addTag(string tname, const string& tval) {
     
-    if (tname == "Event" && tval[0] != '?') {
+    if (tname == "Event" && tval[0] != '?')
         name = tval;
-    }
-    else if (tname == "White" && tval[0] != '?') {
+    else if (tname == "White" && tval[0] != '?')
         white = tval;
-    }
     else if (tname == "Black" && tval[0] != '?') {
-        white = tval;
-    }
+        black = tval;
     else if ((tname == "Date" || tname == "UTCDate") && tval[0] != '?') {
         date = tval;
-    }
     else if (tname == "Opening" && tval[0] != '?') {
         opening = tval;
-    }
     else if (tname == "Annotator" && tval[0] != '?') {
         annotator = tval;
-    }
     return;
 }
 

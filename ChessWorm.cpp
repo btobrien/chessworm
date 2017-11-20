@@ -14,10 +14,27 @@
 
 string vid[3] = {"* ", "- ", "+ "};
 
-
-void ChessWorm::visit(GameNode* gn, int clock, string indent = "", bool main) {
+void ChessWorm::init() {
     
-    if (!parseCommand(gn, clock, indent)) {
+    if (studying) {
+        study(currentGame);
+    }
+    else {
+        train();
+    }
+    
+    init();
+}
+
+
+
+void ChessWorm::sVisit(GameNode* gn, int clock, string indent = "", bool main) {
+    
+    if (annotations && gn->precomment.length()) {
+        cout << endl << endl << gn->precomment << endl << endl;
+    }
+    
+    if (!sParse(gn, clock, indent)) {
         return;
     }
     
@@ -30,29 +47,34 @@ void ChessWorm::visit(GameNode* gn, int clock, string indent = "", bool main) {
     if (variations && main) {
         for (int i = 0; i < size; i++) {
             string newIndent = indent + vid[i % 3];
-            cout << endl;
-            tab();
-            cout << "variation" << endl;
-            tab();
-            cout << "---------" << endl;
+            
+            if (!read) {
+                cout << endl;
+                tab();
+                cout << "variation" << endl;
+                tab();
+                cout << "---------" << endl;
+            }
 
-            visit(gn->parent->stepChildren[i], clock, newIndent, false);
-            cout << endl;
-            tab();
-            cout << "return" << endl;
-            tab();
-            cout << "------" << endl;
-
+            sVisit(gn->parent->stepChildren[i], clock, newIndent, false);
+            
+            if (!read) {
+                cout << endl;
+                tab();
+                cout << "return" << endl;
+                tab();
+                cout << "------" << endl;
+            }
         }
     }
     
     if (gn->child)
-        visit(gn->child, clock + 1, indent);
+        sVisit(gn->child, clock + 1, indent);
 
 }
 
 
-bool ChessWorm::parseCommand(GameNode* gn, int clock, string indent, bool main) {
+bool ChessWorm::sParse(GameNode* gn, int clock, string indent, bool main) {
     
     tab();
     string move;
@@ -68,27 +90,31 @@ bool ChessWorm::parseCommand(GameNode* gn, int clock, string indent, bool main) 
         case 'w':
             getchar();
             annotations = !annotations;
-            return parseCommand(gn, clock, indent, main);
+            return sParse(gn, clock, indent, main);
             
         case 'v':
             getchar();
             variations = !variations;
-            return parseCommand(gn, clock, indent, main);
+            return sParse(gn, clock, indent, main);
             
-        case 's':
+        case 'r':
             getchar();
-            return false;
+            read = !read;
+            return sParse(gn, clock, indent, main);
             
         case 'n':
             getchar();
-            currentGame++;
-            currentGame = currentGame % games.size();
             return false;
             
         case 'j':
             cin >> currentGame;
             getchar();
             currentGame = currentGame % games.size();
+            return false;
+            
+        case 'p':
+            studying = false;
+            getchar();
             return false;
 
         default:
@@ -108,13 +134,22 @@ bool ChessWorm::parseCommand(GameNode* gn, int clock, string indent, bool main) 
                 
                 tab();
                 cout << "incorrect" << endl << endl;
-                return parseCommand(gn, clock, indent, main);
+                return sParse(gn, clock, indent, main);
             }
     }
 }
 
 
 void ChessWorm::study(int game) {
+    
+    if (!studying) {
+        return;
+    }
+    
+    getchar();
+    
+    cout << endl << "------------------------------------------------------------------";
+    cout << endl << "------------------------------------------------------------------" << endl << endl;
     
     currentGame = game;
     
@@ -128,13 +163,7 @@ void ChessWorm::study(int game) {
         cout << endl << games[game]->intro << endl;
     }
     
-    visit(games[game]->root, 0);
-    
-    getchar();
-    
-    cout << endl << "---------------------------------";
-    cout << endl << "---------------------------------" << endl << endl;
-
+    sVisit(games[game]->root, 0);
     
     if (currentGame != game) {
         study(currentGame);
@@ -146,7 +175,94 @@ void ChessWorm::study(int game) {
     study(currentGame);
 }
 
-ChessWorm::ChessWorm() : annotations(true), variations(true), currentGame(0) {}
+//invariant: nextNodes not empty
+
+void ChessWorm::tVisit(vector<GameNode*> &nextNodes, int clock) {
+    
+    tab();
+    string move;
+    bool match = false;
+    char c = getchar();
+    
+    switch (c) {
+            
+        case '\n': {
+            int r = rand() % nextNodes.size();
+            move = nextNodes[r]->move;
+            break;
+        }
+            
+        case 's': {
+            cout << endl;
+            return;
+        }
+        
+        case 'c': {
+            //
+        }
+            
+        default: {
+            cin >> move;
+            getchar();
+            move = c + move;
+            break;
+        }
+    }
+    
+    vector<GameNode*> temp;
+    
+    for (int i = 0; i < nextNodes.size(); i++) {
+        
+        GameNode* current = nextNodes[i];
+        
+        if (current->moveMatch(move)) {
+            
+            match = true;
+            
+            if (current->child) {
+                temp.push_back(current->child);
+            }
+            
+            for (int j = 0; j < current->stepChildren.size(); j++) {
+                temp.push_back(current->stepChildren[j]);
+            }
+        }
+    }
+    
+    if (!match) {
+        tab();
+        cout << "no match" << endl << endl;
+        return tVisit(nextNodes, clock);
+    }
+    
+    dot(clock);
+    cout << move << endl;
+    
+    nextNodes = temp;
+    
+    if (!nextNodes.size()) {
+        cout << endl << "------------------------------------------------------------------";
+        cout << endl << "------------------------------------------------------------------" << endl << endl;
+        return;
+    }
+    
+    tVisit(nextNodes, clock + 1);
+}
+
+
+void ChessWorm::train() {
+    
+    int g = currentGame;
+    
+    while (g == currentGame) {
+        vector<GameNode*> nextNodes = roots;
+        tVisit(nextNodes, 0);
+    }
+    
+    study(currentGame);
+}
+
+ChessWorm::ChessWorm() : annotations(true), variations(true), read(false), currentGame(0) {}
 
 
 

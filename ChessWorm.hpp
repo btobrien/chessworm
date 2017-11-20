@@ -30,37 +30,43 @@ using namespace std;
 
 class Move;
 
-class Node {
-    
-public:
-    vector<GameNode*> friends;
-    
-    int size();
-};
 
 //eventually introduce db class? mvp now
 class ChessWorm {
     
 public:
     
+    bool studying;
+    
     bool annotations;
     bool variations;
+    bool read;
     
-    //vector<string> players;
+    vector<Game*> games;
+    int currentGame;
+    
+    
+    /////////////
+    
+    vector<GameNode*> roots;
+    bool bMistakes;
+    bool wMistakes;
     
     //unordered_map<string, Node*> fenMapWhite;
     //unordered_map<string, Node*> fenMapBlack;
     
-    //vector<Node*> whiteRoot;
-    //vector<Node*> blackRoot;
     
-    vector<Game*> games;
-    
-    int currentGame;
+    void init();
 
     void study(int game = 0);
-    void visit(GameNode* gn, int clock, string variation, bool main = true);
-    bool parseCommand(GameNode*, int depth, string variation, bool main = true);
+    void sVisit(GameNode* gn, int clock, string variation, bool main = true);
+    bool sParse(GameNode* gn, int depth, string variation, bool main = true);
+    
+
+    void train();
+    void tVisit(vector<GameNode*> &nextNodes, int clock);
+    
+
     
     ChessWorm();
 
