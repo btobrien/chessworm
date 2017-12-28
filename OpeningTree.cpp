@@ -1,5 +1,5 @@
 
-#include "OpeningTree.hpp"
+#include "OpeningTree.h"
 
 Edge::Edge(Node* p, Node* c, const GameNode &input) : parent(p),
 												      child(c),

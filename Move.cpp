@@ -1,3 +1,4 @@
+#include <iostream>
 #include <string>
 
 struct Move {
@@ -15,12 +16,22 @@ struct Move {
 	bool mate;
 	bool isValid;
 	
-	Move(const std::string& move) {
+	Move(const std::string& move) : piece(0), 
+									castleLong(false),
+									castleShort(false),
+									fromFile(0),
+									fromRank(0),
+									takes(false),
+									toFile(0),
+									toRank(0),
+									promoted(0),
+									check(false),
+									mate(false),
+									isValid(false) {
 
-		isValid = false;
 
-		size_t frontIndex = 0;
-		size_t backIndex = move.length() - 1; 
+		int frontIndex = 0;
+		int backIndex = move.length() - 1; 
 
 		if (backIndex <= frontIndex)
 			return;
@@ -35,14 +46,14 @@ struct Move {
 			backIndex--;
 		}
 
-		if (move.length() >= 3 && move.substr(0,3) == "o-o") {
-			castleShort = true;
+		if (move.length() >= 5 && move.substr(0,5) == "o-o-o") {
+			castleLong = true;
 			piece = 'K';
 			isValid = true;
 			return;
 		}	
-		if (move.length() >= 5 && move.substr(0,5) == "o-o-o") {
-			castleLong = true;
+		if (move.length() >= 3 && move.substr(0,3) == "o-o") {
+			castleShort = true;
 			piece = 'K';
 			isValid = true;
 			return;
@@ -59,31 +70,44 @@ struct Move {
 		else
 			return;
 
-		if (move[1] == 'x') {
-			takes = true;
-			frontIndex = 2;
-		}
 
 		if (move[backIndex - 1] == '=') {
+			if (piece != 'P')
+				return;
+			if (move[backIndex] == 'K' || !IsValidPiece(move[backIndex]))
+				return;
 			promoted = move[backIndex];
 			backIndex -= 2;
 		}
 
-		if (backIndex <= frontIndex)
+		if (backIndex < frontIndex)
 			return;
 
 		toRank = move[backIndex--];
 		if (!IsValidRank(toRank))
 			return;
 
+		if (promoted != (toRank == '1' || toRank == '8'))
+			return;
+
+		if (backIndex < frontIndex)
+			return;
+
 		toFile = move[backIndex--];
 		if (!IsValidFile(toFile))
 			return;
+
 
 		isValid = true;
 	
 		if (backIndex < frontIndex)
 			return;
+
+
+		if (move[backIndex] == 'x') {
+			takes = true;
+			backIndex--;
+		}
 
 		if (IsValidRank(move[backIndex]))
 			fromRank = move[backIndex--];
@@ -103,6 +127,7 @@ struct Move {
 			case 'B':
 			case 'R':
 			case 'Q':
+			case 'K':
 				return true;
 				break;
 

@@ -13,7 +13,7 @@ struct BoardState {
 public:
 
     char squares[64];
-    int clock; // num of half moves made so far
+    int clock; // ply
     bool whiteCastleK;
     bool whiteCastleQ;
     bool blackCastleK;
@@ -27,12 +27,12 @@ public:
 			  blackCastleQ(true),
 			  enPassant(-1) 
 	{
-		std::string init =  "RNBQKBNRPPPPPPPP" + std::string(16, 0) +  "pppppppprnbqkbnr";
+		std::string init =  "RNBQKBNRPPPPPPPP" + std::string(32, 0) +  "pppppppprnbqkbnr";
 		memcpy(squares, init.data(), 64);
 	}	  
 
-    bool TryMoveWhite(const Move& move);
-    bool TryMoveBlack(const Move& move);
+    bool TryMoveWhite(Move move);
+    bool TryMoveBlack(Move move);
 
     bool IsValid();
 
@@ -41,21 +41,48 @@ public:
 
 private:
 
-    static int NewSquare(const Move& move) {
+    static int NewSquare(Move move) {
         return (move.toRank - '1') * 8 + move.toFile - 'a';
     }
 
-	int FindOriginalSquare(char piece, int newSquare, const Move& move);
-    bool IsLegalMove(int orginalSquare, int newSquare, const Move& move);
+	int FindOriginalSquare(char piece, int toSquare, Move move);
+    bool IsLegalMove(int orginalSquare, int toSquare, Move move);
 
-	void SetEnPassantSquareWhite(int originalSquare, int newSquare, const Move& move);
-	void SetEnPassantSquareBlack(int originalSquare, int newSquare, const Move& move);
+	void SetEnPassantSquareWhite(int fromSquare, int toSquare, Move move);
+	void SetEnPassantSquareBlack(int fromSquare, int toSquare, Move move);
 
-	void SetCastleRightsWhite(int originalSquare, int newSquare);
-	void SetCastleRightsBlack(int originalSquare, int newSquare);
+	void SetCastleRightsWhite(int fromSquare, int toSquare);
+	void SetCastleRightsBlack(int fromSquare, int toSquare);
 
-    bool BlockTest(int originaSquare, int newSquare);
-	bool IsThreatened(int square);
+    bool BlockTest(int fromSquare, int toSquare);
+	bool IsThreatenedByBlack(int square);
+	bool IsThreatenedByWhite(int square);
+
+	bool IsWhitePiece(char piece) {
+		switch (piece) {
+			case 'P':
+			case 'N':
+			case 'B':
+			case 'R':
+			case 'Q':
+			case 'K':
+				return true;
+		}
+		return false;
+	}
+
+	bool IsBlackPiece(char piece) {
+		switch (piece) {
+			case 'p':
+			case 'n':
+			case 'b':
+			case 'r':
+			case 'q':
+			case 'k':
+				return true;
+		}
+		return false;
+	}
 
     enum Square {a1, b1, c1, d1, e1, f1, g1, h1,
 				 a2, b2, c2, d2, e2, f2, g2, h2,
@@ -77,18 +104,24 @@ public:
 	virtual bool TryMove(const std::string& m) {
 	
 		Move move(m);
-		if (!move.isValid)
+
+		if (!move.isValid) {
+			std::cerr << m << ": Invalid Move\n";
 			return false;
+		}
+		std::cerr << m << ": Valid Move\n";
 
 		return WhiteToMove() ?
 			   _state->TryMoveWhite(move) :
 			   _state->TryMoveBlack(move);
 	}
 
-	virtual bool WhiteToMove() const { return _state->WhiteToMove(); }
-	virtual int clock() const { return _state->clock; }
-	virtual std::string ToString() const { return _state->ToString(); }
-	virtual const char* data() const { return _state->squares; }
+	bool WhiteToMove() const { return _state->WhiteToMove(); }
+	int clock() const { return _state->clock; }
+	std::string ToString() const { return _state->ToString(); }
+	const char* data() const { return _state->squares; }
+	char operator [](int i) const { return _state->squares[i]; }
+
 
 protected:
 	BoardState* _state;
