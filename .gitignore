@@ -1,2 +1,6 @@
 *.swp
 ncurses-6.0/
+FreeBoard
+.*
+FreeBoard.dSYM/
+

@@ -67,8 +67,7 @@ struct Move {
 			fromFile = move[0];
 			piece = 'P';
 		}
-		else
-			return;
+		else return;
 
 
 		if (move[backIndex - 1] == '=') {
@@ -87,8 +86,10 @@ struct Move {
 		if (!IsValidRank(toRank))
 			return;
 
-		if (promoted != (toRank == '1' || toRank == '8'))
-			return;
+		if (piece == 'P') {
+			if (promoted != (toRank == '1' || toRank == '8'))
+				return;
+		}
 
 		if (backIndex < frontIndex)
 			return;
@@ -102,7 +103,6 @@ struct Move {
 	
 		if (backIndex < frontIndex)
 			return;
-
 
 		if (move[backIndex] == 'x') {
 			takes = true;

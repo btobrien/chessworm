@@ -12,8 +12,7 @@ void ClearScreen() {
 	cout << string(10, '\n');
 }
 
-string ToUnicode(char p, int row, int column) {
-	bool isDarkSquare = ((row + column) % 2) == 0;
+string ToUnicode(char p) {
 	switch(p) {
 		case 'P': return " \u2659";
 		case 'N': return " \u2658";
@@ -27,13 +26,13 @@ string ToUnicode(char p, int row, int column) {
 		case 'r': return " \u265C";
 		case 'q': return " \u265B";
 		case 'k': return " \u265A";
-		default: return isDarkSquare ?  " -" : " -";
+		case 0  : return " -";
 	}
 }
 
 void DisplayRow(Board board, int row) {
 	for (int j = 0; j < 8; j++)
-		cout << ToUnicode(board[row * 8 + j], row, j);
+		cout << ToUnicode(board[row * 8 + j]);
 }
 
 void Display(Board board) {
@@ -44,7 +43,7 @@ void Display(Board board) {
 	}
 }
 
-int main(int argc, const char * argv[]) {
+int main(int argc, const char* argv[]) {
 
 	cout << endl;
 
@@ -60,7 +59,7 @@ int main(int argc, const char * argv[]) {
 		}
 		else {
 			Display(board);
-			cout << "Move failed";
+			cout << "Move Failed: ";
 		}
 	}
 

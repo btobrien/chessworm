@@ -27,25 +27,61 @@ public:
 			  blackCastleQ(true),
 			  enPassant(-1) 
 	{
+		// make static...
 		std::string init =  "RNBQKBNRPPPPPPPP" + std::string(32, 0) +  "pppppppprnbqkbnr";
 		memcpy(squares, init.data(), 64);
 	}	  
 
-    bool TryMoveWhite(Move move);
-    bool TryMoveBlack(Move move);
+	BoardState(const BoardState& other) : clock(other.clock),
+			  whiteCastleK(other.whiteCastleK),
+			  whiteCastleQ(other.whiteCastleQ),
+			  blackCastleK(other.blackCastleK),
+			  blackCastleQ(other.blackCastleQ),
+			  enPassant(other.enPassant) 
+	{
+		memcpy(squares, other.squares, 64);
+	}	  
 
-    bool IsValid();
+	bool TryMove(Move move) {
+		clock++;
+		return WhiteToMove() ?
+			   TryMoveWhite(move) :
+			   TryMoveBlack(move);
+	}
 
-    inline bool WhiteToMove() const { return clock % 2 == 0; }
+    inline bool WhiteToMove() const { return clock % 2 != 0; }
 	std::string ToString() const;	
 
 private:
+
+    bool TryMoveWhite(Move move);
+    bool TryMoveBlack(Move move);
+
+	bool CheckTest() {
+		return true;
+	}
+
+	bool CheckTest(int fromSquare, int toSquare) {
+
+		char capturingPiece = squares[fromSquare];
+		char capturedPiece = squares[toSquare];	
+
+		squares[fromSquare] = 0;
+		squares[toSquare] = capturingPiece;
+		
+		bool success = CheckTest();
+
+		squares[toSquare] = capturedPiece;
+		squares[fromSquare] = capturingPiece;
+
+		return success;
+	}
 
     static int NewSquare(Move move) {
         return (move.toRank - '1') * 8 + move.toFile - 'a';
     }
 
-	int FindOriginalSquare(char piece, int toSquare, Move move);
+	int TryFindAndMovePiece(char piece, int toSquare, Move move);
     bool IsLegalMove(int orginalSquare, int toSquare, Move move);
 
 	void SetEnPassantSquareWhite(int fromSquare, int toSquare, Move move);
@@ -55,8 +91,7 @@ private:
 	void SetCastleRightsBlack(int fromSquare, int toSquare);
 
     bool BlockTest(int fromSquare, int toSquare);
-	bool IsThreatenedByBlack(int square);
-	bool IsThreatenedByWhite(int square);
+	bool IsThreatened(int square);
 
 	bool IsWhitePiece(char piece) {
 		switch (piece) {
@@ -111,9 +146,17 @@ public:
 		}
 		std::cerr << m << ": Valid Move\n";
 
-		return WhiteToMove() ?
-			   _state->TryMoveWhite(move) :
-			   _state->TryMoveBlack(move);
+		auto prevState = new BoardState(*_state);
+
+		if (_state->TryMove(move)) {
+			delete prevState;
+			return true;
+		}
+		
+		delete _state;
+		_state = prevState;	
+		
+		return false;
 	}
 
 	bool WhiteToMove() const { return _state->WhiteToMove(); }
