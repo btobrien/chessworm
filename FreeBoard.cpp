@@ -9,38 +9,61 @@
 using namespace std;
 
 void ClearScreen() {
-	cout << string(10, '\n');
+	cout << string(100, '\n');
 }
 
-string ToUnicode(char p) {
+void DisplayPiece(char p, int row, int column) {
+
+	string whitePiece = "\033[97";
+	string blackPiece = "\033[30";
+	string background = (row + column) % 2 ? ";47m" : ";44m";
+	string width = " ";
+
 	switch(p) {
-		case 'P': return " \u2659";
-		case 'N': return " \u2658";
-		case 'B': return " \u2657";
-		case 'R': return " \u2656";
-		case 'Q': return " \u2655";
-		case 'K': return " \u2654";
-		case 'p': return " \u265F";
-		case 'n': return " \u265E";
-		case 'b': return " \u265D";
-		case 'r': return " \u265C";
-		case 'q': return " \u265B";
-		case 'k': return " \u265A";
-		case 0  : return " -";
+		case 'P': cout << whitePiece << background << width << "\u265F" << width; break;
+		case 'N': cout << whitePiece << background << width << "\u265E" << width; break;
+		case 'B': cout << whitePiece << background << width << "\u265D" << width; break;
+		case 'R': cout << whitePiece << background << width << "\u265C" << width; break;
+		case 'Q': cout << whitePiece << background << width << "\u265B" << width; break;
+		case 'K': cout << whitePiece << background << width << "\u265A" << width; break;
+		case 'p': cout << blackPiece << background << width << "\u265F" << width; break;
+		case 'n': cout << blackPiece << background << width << "\u265E" << width; break;
+		case 'b': cout << blackPiece << background << width << "\u265D" << width; break;
+		case 'r': cout << blackPiece << background << width << "\u265C" << width; break;
+		case 'q': cout << blackPiece << background << width << "\u265B" << width; break;
+		case 'k': cout << blackPiece << background << width << "\u265A" << width; break;
+		case  0 : cout << blackPiece << background << width << " "      << width; break;
 	}
 }
 
 void DisplayRow(Board board, int row) {
-	for (int j = 0; j < 8; j++)
-		cout << ToUnicode(board[row * 8 + j]);
+	for (int column = 0; column < 8; column++) {
+		DisplayPiece(board[row * 8 + column], row, column);
+	}
+	cout << "\033[0m";
 }
 
-void Display(Board board) {
+void DisplayRowFlipped(Board board, int row) {
+	for (int column = 7; column >= 0; column--) {
+		DisplayPiece(board[row * 8 + column], row, column);
+	}
+	cout << "\033[0m";
+}
+
+void Display(Board board, bool isFlipped = false) {
 	ClearScreen();
-	for (int i = 7; i >= 0; i--) {
-		DisplayRow(board, i);
+	for (int i = 0; i < 8; i++) {
+		cout << " ";
+		if (!isFlipped)
+			DisplayRow(board, 7 - i);
+		else
+			DisplayRowFlipped(board, i);
 		cout << endl;
 	}
+}
+
+void DisplayFlipped(Board board) {
+	ClearScreen();
 }
 
 int main(int argc, const char* argv[]) {
@@ -48,21 +71,21 @@ int main(int argc, const char* argv[]) {
 	cout << endl;
 
 	Board board;
-	Display(board);
-
+	bool isFlipped = false;
+	Display(board, isFlipped);
 	string input;
 
 	while(true) {
 		getline(cin, input);
-		if (board.TryMove(input)) {
-			Display(board);
-		}
-		else {
-			Display(board);
+		if (input == "f") 
+			isFlipped = !isFlipped;
+		if (!board.TryMove(input)) {
+			Display(board, isFlipped);
 			cout << "Move Failed: ";
+			continue;
 		}
+		Display(board, isFlipped);
+
 	}
-
 }
-
 

@@ -5,6 +5,8 @@ using std::string;
 using std::cerr;
 using std::endl;
 
+
+
 int BoardState::TryFindAndMovePiece(char piece, int toSquare, Move move) {
 
 	int result = -1;
@@ -26,8 +28,6 @@ int BoardState::TryFindAndMovePiece(char piece, int toSquare, Move move) {
 
 	return result;
 }
-
-
 
 void BoardState::SetEnPassantSquareWhite(int fromSquare, int toSquare, Move move) {
 
@@ -53,7 +53,7 @@ void BoardState::SetEnPassantSquareBlack(int fromSquare, int toSquare, Move move
 
 	if (fromSquare >= Square::a7 &&
 		fromSquare <= Square::h7 &&
-		fromSquare == NewSquare(move) + 16)
+		fromSquare == Square(move) + 16)
 	{
 		enPassant = fromSquare - 8;
 	}
@@ -117,14 +117,6 @@ void BoardState::SetCastleRightsBlack(int fromSquare, int toSquare) {
 	}
 }
 
-bool BoardState::BlockTest(int fromSquare, int toSquare) {
-	if (fromSquare == toSquare)
-		return false;
-	if (squares[fromSquare] == 'N' || squares[fromSquare] == 'n')
-		return true;
-	
-    return true;
-}
 
 bool BoardState::IsThreatened(int sq) {
 	return false;
@@ -132,9 +124,7 @@ bool BoardState::IsThreatened(int sq) {
 
 bool BoardState::TryMoveBlack(Move move) {
 
-	cerr << "TryMoveBlack: Entered\n";
-
-	int toSquare = NewSquare(move);
+	int toSquare = Square(move);
     
 	if (move.castleShort) {
         
@@ -175,12 +165,17 @@ bool BoardState::TryMoveBlack(Move move) {
 		return true;
    }
 	
+	if (IsBlackPiece(squares[toSquare]))
+		return false;
     if (move.piece == 'P' && enPassant == toSquare) {
-        squares[enPassant + 8] = 0;
 		move.takes = true;
+        squares[enPassant + 8] = 0;
     }
 	else {
-		move.takes = IsWhitePiece(squares[toSquare]);
+		if (move.takes && !squares[toSquare])
+			return false;
+		if (IsWhitePiece(squares[toSquare]))
+			move.takes = true;
 	}
 
 	char piece = move.piece - ('A' - 'a');
@@ -200,7 +195,7 @@ bool BoardState::TryMoveWhite(Move move) {
 
 	cerr << "TryMoveWhite: Entered" << endl; 
 
-	int toSquare = NewSquare(move);
+	int toSquare = Square(move);
     
 	if (move.castleShort) {
         
@@ -239,14 +234,19 @@ bool BoardState::TryMoveWhite(Move move) {
 		whiteCastleK = false;
 		whiteCastleQ = false;
 		return true;
-   }
+	}
 	
+	if (IsWhitePiece(squares[toSquare]))
+		return false;
     if (move.piece == 'P' && enPassant == toSquare) {
 		move.takes = true;
         squares[enPassant - 8] = 0;
     }
 	else {
-		move.takes = IsBlackPiece(squares[toSquare]);
+		if (move.takes && !squares[toSquare])
+			return false;
+		if (IsBlackPiece(squares[toSquare]))
+			move.takes = true;
 	}
 
     int fromSquare = TryFindAndMovePiece(move.piece, toSquare, move);
@@ -262,14 +262,15 @@ bool BoardState::TryMoveWhite(Move move) {
 
 bool BoardState::IsLegalMove(int fromSquare, int toSquare, Move move) {
 	
-    char fromFile = 'a' + (fromSquare % 8);
-    char fromRank = '1' + (fromSquare / 8);
+	if (fromSquare == toSquare)
+		return false;
+
+    char fromFile = File(fromSquare);
+    char fromRank = Rank(fromSquare);
     
     if (move.fromFile && fromFile != move.fromFile)
         return false;
     if (move.fromRank && fromRank != move.fromRank)
-        return false;
-    if (!BlockTest(fromSquare, toSquare))
         return false;
     
 	int fileDistance = abs(fromFile - move.toFile);
@@ -277,6 +278,13 @@ bool BoardState::IsLegalMove(int fromSquare, int toSquare, Move move) {
 	int manhattanDistance = fileDistance + rankDistance;
 	int manhattanDifference = abs(fileDistance - rankDistance); 
 	bool isMovingUp = move.toRank - fromRank > 0;
+
+	if (fileDistance && !rankDistance && FileBlocked(fromSquare, toSquare)) 
+		return false;
+	if (!fileDistance && rankDistance && RankBlocked(fromSquare, toSquare)) 
+		return false;
+	if (!manhattanDistance && DiagBlocked(fromSquare, toSquare)) 
+		return false;
 
 	switch (move.piece) {
         case 'P':

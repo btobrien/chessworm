@@ -77,9 +77,44 @@ private:
 		return success;
 	}
 
-    static int NewSquare(Move move) {
-        return (move.toRank - '1') * 8 + move.toFile - 'a';
-    }
+    static int Square(char file, char rank) { return (rank - '1') * 8 + file - 'a'; }
+    static int Square(Move move) { return (move.toRank - '1') * 8 + move.toFile - 'a'; }
+	static char File(int square) { return (square % 8) + 'a'; }
+	static char Rank(int square) { return (square / 8) + '1'; }
+
+	// REQUIRES: fromSquare and toSquare to be on the same file
+	// EFFECTS: returns true iff all squares strictly between toSquare and fromSquare are empty
+	bool FileBlocked(char fromSquare, char toSquare) {
+		int direction = (fromSquare - toSquare) > 0 ? 8 : -8;
+		for (int i = fromSquare + direction; i != toSquare; i += direction) {
+			if (squares[i])
+				return false;
+		}
+		return true;
+	}
+
+	// REQUIRES: fromSquare and toSquare to be on the same rank
+	// EFFECTS: returns true iff all squares strictly between toSquare and fromSquare are empty
+	bool RankBlocked(char fromSquare, char toSquare) {
+		int direction = (fromSquare - toSquare) > 0 ? 1 : -1;
+		for (int i = fromSquare + direction; i != toSquare; i += direction) {
+			if (squares[i])
+				return false;
+		}
+		return true;
+	}
+
+	// REQUIRES: fromSquare and toSquare to be on the same diagonal
+	// EFFECTS: returns true iff all squares strictly between toSquare and fromSquare are empty
+	bool DiagBlocked(char fromSquare, char toSquare) {
+		int direction = (fromSquare - toSquare) > 0 ? 8 : -8;
+		direction += ((Rank(fromSquare) - Rank(toSquare)) > 0 ? 1 : -1);
+		for (int i = fromSquare + direction; i != toSquare; i += direction) {
+			if (squares[i])
+				return false;
+		}
+		return true;
+	}
 
 	int TryFindAndMovePiece(char piece, int toSquare, Move move);
     bool IsLegalMove(int orginalSquare, int toSquare, Move move);
@@ -90,7 +125,6 @@ private:
 	void SetCastleRightsWhite(int fromSquare, int toSquare);
 	void SetCastleRightsBlack(int fromSquare, int toSquare);
 
-    bool BlockTest(int fromSquare, int toSquare);
 	bool IsThreatened(int square);
 
 	bool IsWhitePiece(char piece) {
