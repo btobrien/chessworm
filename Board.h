@@ -84,8 +84,8 @@ private:
 
 	// REQUIRES: fromSquare and toSquare to be on the same file
 	// EFFECTS: returns true iff all squares strictly between toSquare and fromSquare are empty
-	bool FileBlocked(char fromSquare, char toSquare) {
-		int direction = (fromSquare - toSquare) > 0 ? 8 : -8;
+	bool FileOpen(char fromSquare, char toSquare) {
+		int direction = (toSquare - fromSquare) > 0 ? 8 : -8;
 		for (int i = fromSquare + direction; i != toSquare; i += direction) {
 			if (squares[i])
 				return false;
@@ -95,8 +95,8 @@ private:
 
 	// REQUIRES: fromSquare and toSquare to be on the same rank
 	// EFFECTS: returns true iff all squares strictly between toSquare and fromSquare are empty
-	bool RankBlocked(char fromSquare, char toSquare) {
-		int direction = (fromSquare - toSquare) > 0 ? 1 : -1;
+	bool RankOpen(char fromSquare, char toSquare) {
+		int direction = (toSquare - fromSquare) > 0 ? 1 : -1;
 		for (int i = fromSquare + direction; i != toSquare; i += direction) {
 			if (squares[i])
 				return false;
@@ -106,9 +106,9 @@ private:
 
 	// REQUIRES: fromSquare and toSquare to be on the same diagonal
 	// EFFECTS: returns true iff all squares strictly between toSquare and fromSquare are empty
-	bool DiagBlocked(char fromSquare, char toSquare) {
-		int direction = (fromSquare - toSquare) > 0 ? 8 : -8;
-		direction += ((Rank(fromSquare) - Rank(toSquare)) > 0 ? 1 : -1);
+	bool DiagOpen(char fromSquare, char toSquare) {
+		int direction = (toSquare - fromSquare) > 0 ? 8 : -8;
+		direction += ((File(toSquare) - File(fromSquare)) > 0 ? 1 : -1);
 		for (int i = fromSquare + direction; i != toSquare; i += direction) {
 			if (squares[i])
 				return false;

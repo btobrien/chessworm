@@ -279,11 +279,11 @@ bool BoardState::IsLegalMove(int fromSquare, int toSquare, Move move) {
 	int manhattanDifference = abs(fileDistance - rankDistance); 
 	bool isMovingUp = move.toRank - fromRank > 0;
 
-	if (fileDistance && !rankDistance && FileBlocked(fromSquare, toSquare)) 
+	if (fileDistance && !rankDistance && !RankOpen(fromSquare, toSquare)) 
 		return false;
-	if (!fileDistance && rankDistance && RankBlocked(fromSquare, toSquare)) 
+	if (!fileDistance && rankDistance && !FileOpen(fromSquare, toSquare)) 
 		return false;
-	if (!manhattanDistance && DiagBlocked(fromSquare, toSquare)) 
+	if (!manhattanDifference && !DiagOpen(fromSquare, toSquare)) 
 		return false;
 
 	switch (move.piece) {
