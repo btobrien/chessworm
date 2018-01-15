@@ -6,9 +6,33 @@
 #include <iostream>
 #include <string>
 #include <stack>
+#include <cassert>
 
 
 struct BoardState {
+
+	static char NULL_PIECE = -1;
+	static char EMPTY_PIECE = 0;
+
+	static char PAWN_W = 'P';
+	static char PAWN_B = 'p';
+
+	static char KNIGHT_W = 'K';
+	static char KNIGHT_B = 'k';
+
+	static char BISHOP_W = 'B';
+	static char BISHOP_B = 'b';
+
+	static char ROOK_W = 'R';
+	static char ROOK_B = 'r';
+
+	static char QUEEN_W = 'Q';
+	static char QUEEN_B = 'q';
+
+	static char KING_W = 'K';
+	static char KING_B = 'k';
+
+	static int NUM_SQUARES = 64; // ??
 
 public:
 
@@ -27,7 +51,7 @@ public:
 			  blackCastleQ(true),
 			  enPassant(-1) 
 	{
-		// make static...
+		// make static...AND use STATIC CONST VARS!!!!!!!!!!!!!
 		std::string init =  "RNBQKBNRPPPPPPPP" + std::string(32, 0) +  "pppppppprnbqkbnr";
 		memcpy(squares, init.data(), 64);
 	}	  
@@ -57,8 +81,18 @@ private:
     bool TryMoveWhite(Move move);
     bool TryMoveBlack(Move move);
 
+	// Checks the safety of the king who's turn it is according to the clock
 	bool CheckTest() {
-		return true;
+
+		char king = WhiteToMove() ? 'K' : 'k';
+		int i = 63;
+		while(i >= 0 && squares[i] != king)
+			i--;
+
+		if (i < 0)
+			assert(false);
+
+		return WhiteToMove() ? !IsThreatenedByBlack(i) : !IsThreatenedByWhite(i);
 	}
 
 	bool CheckTest(int fromSquare, int toSquare) {
@@ -115,6 +149,7 @@ private:
 		}
 		return true;
 	}
+	bool IsSquare(int square) {return (-1 < square || square > 63); }
 
 	int TryFindAndMovePiece(char piece, int toSquare, Move move);
     bool IsLegalMove(int orginalSquare, int toSquare, Move move);
@@ -125,7 +160,61 @@ private:
 	void SetCastleRightsWhite(int fromSquare, int toSquare);
 	void SetCastleRightsBlack(int fromSquare, int toSquare);
 
-	bool IsThreatened(int square);
+	int (*Direction) (int);
+
+	bool IsFirstInDirection(int square, Direction, char piece0, char piece1 = NULL_PIECE) {
+		for (int testSquare = Direction(square); IsSquare(testSquare) ; Direction(square)) {
+			if (square[i])
+				return (square[i] == piece0 || square[i] == piece1);
+		}
+		return false;
+	}
+
+	bool IsThreatenedByWhite(int square) { return false; }
+
+	bool IsThreatenedByBlack(int square) { 
+
+		int testSquare = MoveRightUpKnight(square);
+		if (IsSquare(testSquare) && squares[testSquare] == knight) return false;
+
+		testSquare = MoveUpRightKnight(square);
+		if (IsSqaure(testSquare) && squares[testSquare] == knight) return false;
+
+		testSquare = MoveRightDownKnight(square);
+		if (IsSqaure(testSquare) && squares[testSquare] == knight) return false;
+
+		testSquare = MoveLeftDownKnight(square);
+		if (IsSqaure(testSquare) && squares[testSquare] == knight) return false;
+
+		
+		if IsFirstInDirection(square, &MoveUp(), ROOK_W, QUEEN_W) return false;
+		if IsFirstInDirection(square, &MoveUp(), ROOK_W, QUEEN_W) return false;
+		if IsFirstInDirection(square, &MoveUp(), ROOK_W, QUEEN_W) return false;
+		if IsFirstInDirection(square, &MoveUp(), ROOK_W, QUEEN_W) return false;
+
+	}
+
+	int MoveUp(int square) { return square + 8; }
+	int MoveDown(int square) { return square - 8; }
+	int MoveRight(int square) { return square + 1; }
+	int MoveLeft(int square) { return square - 1; }
+
+	int MoveUpRight(int square) { return MoveUp(MoveRight(square)); }
+	int MoveDownRight(int square) { return MoveDown(MoveRight(square)); }
+	int MoveDownLeft(int square) { return MoveDown(MoveLeft(square)); }
+	int MoveUpLeft(int square) { return MoveUp(MoveLeft(square)); }
+
+	int MoveUpRightKnight(int square) { return MoveUp(MoveUp(MoveRight(square))); }
+	int MoveDownRightKnight(int square) { return MoveDown(MoveDown(MoveRight(square))); }
+	int MoveDownLeftKnight(int square) { return MoveDown(MoveDown(MoveLeft(square))); }
+	int MoveUpLeftKnight(int square) { return MoveUp(MoveUp(MoveLeft(square))); }
+
+	int MoveRightUpKnight(int square) { return MoveRight(MoveRight(MoveUp(square))); }
+	int MoveRightDownKnight(int square) { return MoveRight(MoveRight(MoveDown(square))); }
+	int MoveLeftDownKnight(int square) { return MoveLeft(MoveLeft(MoveDown(square))); }
+	int MoveLeftUpKnight(int square) { return MoveLeft(MoveLeft(MoveUp(square))); }
+
+
 
 	bool IsWhitePiece(char piece) {
 		switch (piece) {

@@ -9,7 +9,7 @@
 using namespace std;
 
 void ClearScreen() {
-	cout << string(100, '\n');
+	cout << string(10, '\n') << endl;
 }
 
 void DisplayPiece(char p, int row, int column) {
@@ -62,10 +62,6 @@ void Display(Board board, bool isFlipped = false) {
 	}
 }
 
-void DisplayFlipped(Board board) {
-	ClearScreen();
-}
-
 int main(int argc, const char* argv[]) {
 
 	cout << endl;
@@ -77,8 +73,10 @@ int main(int argc, const char* argv[]) {
 
 	while(true) {
 		getline(cin, input);
-		if (input == "f") 
+		if (input == "f") {
 			isFlipped = !isFlipped;
+			continue;
+		}
 		if (!board.TryMove(input)) {
 			Display(board, isFlipped);
 			cout << "Move Failed: ";

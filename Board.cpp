@@ -12,10 +12,6 @@ int BoardState::TryFindAndMovePiece(char piece, int toSquare, Move move) {
 	int result = -1;
 
     for (int i = 0; i < 64; i++) {
-
-		if (i == Square::e2)
-			cerr << "Ding Ding";
-
         if (squares[i] == piece && IsLegalMove(i, toSquare, move)) {
             if (result >= 0)
                 return -1;
@@ -118,10 +114,6 @@ void BoardState::SetCastleRightsBlack(int fromSquare, int toSquare) {
 }
 
 
-bool BoardState::IsThreatened(int sq) {
-	return false;
-}
-
 bool BoardState::TryMoveBlack(Move move) {
 
 	int toSquare = Square(move);
@@ -132,9 +124,9 @@ bool BoardState::TryMoveBlack(Move move) {
             squares[Square::f8] ||
             squares[Square::g8]) return false;
         
-		if (IsThreatened(Square::e8) ||
-			IsThreatened(Square::f8) ||
-			IsThreatened(Square::g8)) return false;
+		if (IsThreatenedByWhite(Square::e8) ||
+			IsThreatenedByWhite(Square::f8) ||
+			IsThreatenedByWhite(Square::g8)) return false;
 
         squares[Square::f8] = 'r';
         squares[Square::g8] = 'k';
@@ -152,9 +144,9 @@ bool BoardState::TryMoveBlack(Move move) {
             squares[Square::c8] ||
             squares[Square::d8]) return false;
         
-		if (IsThreatened(Square::e8) ||
-			IsThreatened(Square::d8) ||
-			IsThreatened(Square::c8)) return false;
+		if (IsThreatenedByWhite(Square::e8) ||
+			IsThreatenedByWhite(Square::d8) ||
+			IsThreatenedByWhite(Square::c8)) return false;
 
         squares[Square::c8] = 'k';
         squares[Square::d8] = 'r';
@@ -203,9 +195,9 @@ bool BoardState::TryMoveWhite(Move move) {
             squares[Square::f1] ||
             squares[Square::g1]) return false;
         
-		if (IsThreatened(Square::e1) ||
-			IsThreatened(Square::f1) ||
-			IsThreatened(Square::g1)) return false;
+		if (IsThreatenedByBlack(Square::e1) ||
+			IsThreatenedByBlack(Square::f1) ||
+			IsThreatenedByBlack(Square::g1)) return false;
 
         squares[Square::f1] = 'R';
         squares[Square::g1] = 'K';
@@ -223,9 +215,9 @@ bool BoardState::TryMoveWhite(Move move) {
             squares[Square::c1] ||
             squares[Square::d1]) return false;
         
-		if (IsThreatened(Square::e1) ||
-			IsThreatened(Square::d1) ||
-			IsThreatened(Square::c1)) return false;
+		if (IsThreatenedByBlack(Square::e1) ||
+			IsThreatenedByBlack(Square::d1) ||
+			IsThreatenedByBlack(Square::c1)) return false;
 
         squares[Square::c1] = 'K';
         squares[Square::d1] = 'R';
@@ -281,9 +273,9 @@ bool BoardState::IsLegalMove(int fromSquare, int toSquare, Move move) {
 
 	if (fileDistance && !rankDistance && !RankOpen(fromSquare, toSquare)) 
 		return false;
-	if (!fileDistance && rankDistance && !FileOpen(fromSquare, toSquare)) 
+	if (!fileDistance && rankDistance && !IsFileOpen(fromSquare, toSquare)) 
 		return false;
-	if (!manhattanDifference && !DiagOpen(fromSquare, toSquare)) 
+	if (!manhattanDifference && !IsDiagOpen(fromSquare, toSquare)) 
 		return false;
 
 	switch (move.piece) {
