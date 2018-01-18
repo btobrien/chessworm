@@ -1,7 +1,19 @@
+
+#pragma once
+
 #include <iostream>
 #include <string>
 
+
+
 struct Move {
+
+	static const char PAWN = 'P';
+	static const char KNIGHT = 'N';
+	static const char BISHOP = 'B';
+	static const char ROOK = 'R';
+	static const char QUEEN = 'Q';
+	static const char KING = 'K';
 
 	char piece;
 	bool castleLong;
@@ -48,13 +60,13 @@ struct Move {
 
 		if (move.length() >= 5 && move.substr(0,5) == "o-o-o") {
 			castleLong = true;
-			piece = 'K';
+			piece = KING;
 			isValid = true;
 			return;
 		}	
 		if (move.length() >= 3 && move.substr(0,3) == "o-o") {
 			castleShort = true;
-			piece = 'K';
+			piece = KING;
 			isValid = true;
 			return;
 		}	
@@ -65,15 +77,14 @@ struct Move {
 		}
 		else if (IsValidFile(move[0])) {
 			fromFile = move[0];
-			piece = 'P';
+			piece = PAWN;
 		}
 		else return;
 
-
 		if (move[backIndex - 1] == '=') {
-			if (piece != 'P')
+			if (piece != PAWN)
 				return;
-			if (move[backIndex] == 'K' || !IsValidPiece(move[backIndex]))
+			if (move[backIndex] == KING || !IsValidPiece(move[backIndex]))
 				return;
 			promoted = move[backIndex];
 			backIndex -= 2;
@@ -86,8 +97,8 @@ struct Move {
 		if (!IsValidRank(toRank))
 			return;
 
-		if (piece == 'P') {
-			if (promoted != (toRank == '1' || toRank == '8'))
+		if (piece == PAWN) {
+			if ((promoted != 0) != (toRank == '1' || toRank == '8'))
 				return;
 		}
 
@@ -97,7 +108,6 @@ struct Move {
 		toFile = move[backIndex--];
 		if (!IsValidFile(toFile))
 			return;
-
 
 		isValid = true;
 	
@@ -123,14 +133,12 @@ struct Move {
 	
 	static bool IsValidPiece(char p) {
 		switch (p) {
-			case 'N':
-			case 'B':
-			case 'R':
-			case 'Q':
-			case 'K':
+			case KNIGHT:
+			case BISHOP:
+			case ROOK:
+			case QUEEN:
+			case KING:
 				return true;
-				break;
-
 			default:
 				return false;
 		}
@@ -143,7 +151,6 @@ struct Move {
 	static bool IsValidRank(char r) {
 		return (r >= '1' && r <= '8');
 	}
-
 };
 
 

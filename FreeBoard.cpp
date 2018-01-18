@@ -4,7 +4,7 @@
 
 #include <locale.h>
 #include <ncurses.h>
-#include "Board.h"
+#include "Board.cpp"
 
 using namespace std;
 
@@ -20,19 +20,19 @@ void DisplayPiece(char p, int row, int column) {
 	string width = " ";
 
 	switch(p) {
-		case 'P': cout << whitePiece << background << width << "\u265F" << width; break;
-		case 'N': cout << whitePiece << background << width << "\u265E" << width; break;
-		case 'B': cout << whitePiece << background << width << "\u265D" << width; break;
-		case 'R': cout << whitePiece << background << width << "\u265C" << width; break;
-		case 'Q': cout << whitePiece << background << width << "\u265B" << width; break;
-		case 'K': cout << whitePiece << background << width << "\u265A" << width; break;
-		case 'p': cout << blackPiece << background << width << "\u265F" << width; break;
-		case 'n': cout << blackPiece << background << width << "\u265E" << width; break;
-		case 'b': cout << blackPiece << background << width << "\u265D" << width; break;
-		case 'r': cout << blackPiece << background << width << "\u265C" << width; break;
-		case 'q': cout << blackPiece << background << width << "\u265B" << width; break;
-		case 'k': cout << blackPiece << background << width << "\u265A" << width; break;
-		case  0 : cout << blackPiece << background << width << " "      << width; break;
+		case White::PAWN:      cout << whitePiece << background << width << "\u265F" << width; break;
+		case White::KNIGHT:    cout << whitePiece << background << width << "\u265E" << width; break;
+		case White::BISHOP:    cout << whitePiece << background << width << "\u265D" << width; break;
+		case White::ROOK:      cout << whitePiece << background << width << "\u265C" << width; break;
+		case White::QUEEN:     cout << whitePiece << background << width << "\u265B" << width; break;
+		case White::KING:      cout << whitePiece << background << width << "\u265A" << width; break;
+		case Black::PAWN:      cout << blackPiece << background << width << "\u265F" << width; break;
+		case Black::KNIGHT:    cout << blackPiece << background << width << "\u265E" << width; break;
+		case Black::BISHOP:    cout << blackPiece << background << width << "\u265D" << width; break;
+		case Black::ROOK:      cout << blackPiece << background << width << "\u265C" << width; break;
+		case Black::QUEEN:     cout << blackPiece << background << width << "\u265B" << width; break;
+		case Black::KING:      cout << blackPiece << background << width << "\u265A" << width; break;
+		case BoardState::nullpiece: cout << blackPiece << background << width << " "      << width; break;
 	}
 }
 
@@ -66,22 +66,29 @@ int main(int argc, const char* argv[]) {
 
 	cout << endl;
 
-	Board board;
+	MemoryBoard board;
 	bool isFlipped = false;
-	Display(board, isFlipped);
+	Display(board);
 	string input;
 
 	while(true) {
+
 		getline(cin, input);
 		if (input == "f") {
 			isFlipped = !isFlipped;
-			continue;
 		}
-		if (!board.TryMove(input)) {
+		else if (input == "u") {
+			board.TryUndoMove();
+		}
+		else if (input == "r") {
+			board.TryRedoMove();
+		}
+		else if (!board.TryMove(input)) {
 			Display(board, isFlipped);
 			cout << "Move Failed: ";
 			continue;
 		}
+
 		Display(board, isFlipped);
 	}
 }
