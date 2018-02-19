@@ -11,7 +11,7 @@
 class Board {
 
 public:
-	Board() : _clock(0), _state(new BoardState()) {}
+	Board() : _state(new BoardState()) {}
 	Board(const Board& rhs) : _state(new BoardState(*rhs._state)) {}
 
 	virtual bool TryMove(const std::string& m) {
@@ -19,16 +19,13 @@ public:
 		Move move(m);
 
 		if (!move.isValid) {
-			std::cerr << m << ": Invalid Move\n";
 			return false;
 		}
-		std::cerr << m << ": Valid Move\n";
 
 		auto prevState = new BoardState(*_state);
 
 		if (TryUpdateBoard(move)) {
 			delete prevState;
-			_clock++;
 			return true;
 		}
 		
@@ -38,9 +35,10 @@ public:
 		return false;
 	}
 
-    inline bool WhiteToMove() const { return _clock % 2 == 0; }
-	int clock() const { return _clock; }
-	std::string ToString() const { return _state->ToString(WhiteToMove()); }
+    inline bool WhiteToMove() const { return !_state->clock % 2; }
+
+	int clock() const { return _state->clock; }
+	std::string key() const { return _state->key(); }
 	const char* data() const { return _state->squares; }
 	char operator [](int i) const { return _state->squares[i]; }
 
@@ -79,35 +77,33 @@ public:
 			_future.pop();
 		}
 
-		_clock++;
 		return true;
 	}			
 
 
-    bool TryUndoMove() { 
+    bool TryUndo() { 
 		if (_history.empty())
 			return false;
 		_future.push(_state);
 		_state = _history.top();
 		_history.pop();
-		_clock--;
 		return true;
 	}
 
-    bool TryRedoMove() { 
+    bool TryRedo() { 
 		if (_future.empty())
 			return false;
 		_history.push(_state);
 		_state = _future.top();
 		_future.pop();
-		_clock++;
 		return true;
 	}
 
-
+	vector<string> GetMoveList() {}
     
 protected:
 	std::stack<BoardState*> _history;
 	std::stack<BoardState*> _future;
+	std::vector<string> _moveList;
 };
 

@@ -20,6 +20,7 @@ public:
     bool blackCastleK;
     bool blackCastleQ;
     int  enPassant;
+	int clock;
 
 	BoardState();
 	BoardState(const BoardState& other);
@@ -27,9 +28,11 @@ public:
 	template <class color>
 	bool TryMove(Move move) {
 
+		clock++;
+
 		int toSquare = Square(move);
 
-		if (move.check && !static_cast<color*>(this)->checktest())
+		if (move.check && !CheckTest<color>())
 			return false;
 
 		if (move.castleShort)
@@ -50,7 +53,6 @@ public:
 			move.takes = true;
 
 		int fromSquare = TryFindAndMovePiece<color>(move);
-		
 
 		if (fromSquare == nullsquare)
 			return false;

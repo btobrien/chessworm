@@ -1,23 +1,15 @@
-//
-//  reader.hpp
-//  ChessWorm
-//
-//  Created by Bret O'Brien on 1/27/17.
-//  Copyright © 2017 Bret O'Brien. All rights reserved.
-//
 
-#ifndef Parse_hpp
-#define Parse_hpp
+#pragma once
 
 #include <stdio.h>
 #include <iostream>
 #include <vector>
 #include <fstream>
 
-using namespace std;
-
 #include <cassert>
 #include <algorithm>
+
+using std::string;
 
 struct Game;
 
@@ -33,18 +25,19 @@ struct GameNode {
     
     GameNode(GameNode* p, string m, string& text, int& i, string pre);
     ~GameNode();
-    
-    static void next(string &text, int &i, char d);
-    static string parseMove(string &text, int &i);
-    
+
+//private:
+    static void next(string &text, int &i, char delim);
     bool parse(string &text, int &i);
-    void print(bool annotations);
+    static string parseMove(string &text, int &i);
+
     void stripGlyph();
 };
 
+
 struct Game {
     GameNode* root;
-    vector<GameNode*> varRoots; //variations
+    vector<GameNode*> varRoots; 
     
     Game(ifstream& pgn);
     ~Game();
@@ -55,8 +48,9 @@ struct Game {
     string date;
     string opening;
     string annotator;
-    string intro;
     bool result;
+
+    string intro;
     
     void addTag(string tname, const string& tval);
 
@@ -67,4 +61,3 @@ struct Game {
     void Print();
 };
 
-#endif /* Parse_hpp */

@@ -1,12 +1,12 @@
 
 #include "Parse.hpp"
 
+// TODO: turn to enum
 const string Game::NAG[Game::NUM_NAGS] = {"", "!", "?", "!!", "??", "!?", "?!",
 										  "□", "< singular move >", "< worst move >",
 										  "=", "< equal chances, quiet position >",
 										  "< equal chances, active position >",
 										  "∞", "+=", "+=", "+-", "-+", "+−", "−+"};
-
 
 int Game::nagToInt(const string& nag) {
     for (int i = 0; i < NUM_NAGS; i++) {
@@ -17,40 +17,16 @@ int Game::nagToInt(const string& nag) {
 }
 
 
-// TODO: move these to formatting/UI file
-
-const char t = 9;
-void tab() {
-    cout << t << t << t << t << t << t << t << t
-		 << t << t << t << t << t << t << t << t
-		 << t << t << t;
-    cout.flush();
-}
-void dot(int clock, string indent) {
-    cout << indent << (clock / 2) + 1;
-    if (clock % 2 == 0)
-        cout << ". ";
-    else
-        cout << "... ";
-}
-
-
-/*-----------------------------------------------------------------------*/
-/*----------------------------  Game Node  ------------------------------*/
-/*-----------------------------------------------------------------------*/
-
-
-//MODIFIES: updates "i" to point to the next instance of d
-void GameNode::next(string &text, int &i, char d = ' ') {
+//MODIFIES: index to point to the next instance of delim
+void GameNode::next(string &text, int& i, char delim = ' ') {
     
-    while(text[++i] != d) {
-        
-        assert(i <= text.length());
-        
+    while(text[++i] != delim) {
+
+        assert(i <= text.length()); // parser should handle malformed pgns gracefully
+
         //ignore closing parentheses when scanning commments
-        if (text[i] == ')' && d != '}') {
+        if (text[i] == ')' && delim != '}')
             return;
-        }
     }
 }
 
@@ -59,8 +35,6 @@ void GameNode::next(string &text, int &i, char d = ' ') {
 //EFFECTS: returns false if there is no next move
 
 bool GameNode::parse(string &text, int& i) {
-    
-    char c = text[i];
     
     //base case: last move
     if (text[i] == ')' || text[i + 1] == '*') {
@@ -89,7 +63,7 @@ bool GameNode::parse(string &text, int& i) {
             return false;
     }
     
-    //recurse: ignore move numbers
+    //recurse: ignore move numbers (use is digit func)
     if (text[i] > '0' && text[i] <= '9') {
         next(text, i);
         return parse(text, i);
@@ -110,27 +84,16 @@ bool GameNode::parse(string &text, int& i) {
             
         case '{': {
             
-            char c = text[i];
-            
-            
             next(text, i, '}');
-            
-            c = text[i];
-            
-            if (text[start] == ' ')
+
+            while (text[start] == ' ')
                 start++;
-            
+
             comment = text.substr(start, i - start);
             
             //cout << endl << endl << comment << endl;
-            
 
             next(text, i);
-            
-            
-            c = text[i];
-
-
             break;
         }
             
@@ -161,19 +124,14 @@ bool GameNode::parse(string &text, int& i) {
 
             if (parent) {
                 parent->stepChildren.push_back(new GameNode(parent, m, text, i, pre));
-
-            }
+}
             else {
                 //cout << endl << "IGNORED" << endl;
                 next(text, i, ')');
             }
 
-            char c = text[i];
-
             assert(text[i] == ')');
             next(text, i);
-            c = text[i];
-
             break;
         }
             
@@ -195,11 +153,10 @@ string GameNode::parseMove(string &text, int &i) {
     return text.substr(start, i - start);
 }
 
-GameNode::GameNode(GameNode* p, string m, const string& text, int& i, string pre = "")
-: move(m),
-  parent(p),
-  child(nullptr),
-  precomment(pre)
+GameNode::GameNode(GameNode* p, string m, const string& text, int& i, string pre = "") : move(m),
+																					     parent(p),
+																					     child(nullptr),
+																					     precomment(pre)
 {
     //cout << endl << "move: " << m << endl;
     if (parse(text, i))
@@ -247,11 +204,6 @@ void GameNode::stripGlyph() {
         move.pop_back();
     }
 }
-
-/*-----------------------------------------------------------------------*/
-/*----------------------------  Game  -----------------------------------*/
-/*-----------------------------------------------------------------------*/
-
 
 Game::Game(ifstream& pgn) {
     
