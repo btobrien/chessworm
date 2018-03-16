@@ -5,59 +5,63 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
-
 #include <cassert>
 #include <algorithm>
+#include "Glyph.cpp"
 
-using std::string;
+//class Parser {
+//	Game* CreateGame(std::ifstream& pgn);
+//
+//private:
+//	std::string pgn;
+//	int index;
+//    static void next(std::string &text, int &i, char delim);
+//    bool parse(std::string &text, int &i);
+//    std::string parseMove();
+//
+//	template <class PgnNode>
+//	void createNode(PgnNode* parent) 
+//};
 
 struct Game;
 
 struct GameNode {
-    string move;
+	std::string move;
     int glyph;
-    string comment;
-    string precomment;
-    
+	std::string comment;
+	std::string precomment;
     GameNode* parent;
     GameNode* child;
-    vector<GameNode*> stepChildren;
-    
-    GameNode(GameNode* p, string m, string& text, int& i, string pre);
+	std::vector<GameNode*> variations;
+    GameNode(GameNode* p, std::string m, std::string& text, int& i, std::string pre);
     ~GameNode();
 
-//private:
-    static void next(string &text, int &i, char delim);
-    bool parse(string &text, int &i);
-    static string parseMove(string &text, int &i);
+private:
+    static void next(std::string &text, int &i, char delim);
+    bool parse(std::string &text, int &i);
+    static std::string parseMove(std::string &text, int &i);
 
-    void stripGlyph();
 };
 
+struct Tags {
+	std::string name; //event tag
+	std::string white;
+	std::string black;
+	std::string date;
+	std::string opening;
+	std::string annotator;
+	std::string result;
+};
 
 struct Game {
     GameNode* root;
-    vector<GameNode*> varRoots; 
-    
-    Game(ifstream& pgn);
+	std::vector<GameNode*> varRoots; 
+	Tags tags
+	std::string intro;
+    Game(std::ifstream& pgn);
     ~Game();
-    
-    string name; //event tag
-    string white;
-    string black;
-    string date;
-    string opening;
-    string annotator;
-    bool result;
-
-    string intro;
-    
-    void addTag(string tname, const string& tval);
-
-    static int nagToInt(const string& nag);
-    static const int NUM_NAGS = 20;
-    static string const NAG[NUM_NAGS];
-    
-    void Print();
+private:
+    void addTag(std::string tname, const std::string& tval);
 };
+
 

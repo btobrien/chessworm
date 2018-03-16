@@ -5,8 +5,9 @@
 #include "Move.cpp"
 #include <iostream>
 #include <string>
-#include <stack>
 #include <cassert>
+
+using std::string;
 
 class BoardState {
 
@@ -20,7 +21,7 @@ public:
     bool blackCastleK;
     bool blackCastleQ;
     int  enPassant;
-	int clock;
+	int  clock;
 
 	BoardState();
 	BoardState(const BoardState& other);
@@ -29,7 +30,6 @@ public:
 	bool TryMove(Move move) {
 
 		clock++;
-
 		int toSquare = Square(move);
 
 		if (move.check && !CheckTest<color>())
@@ -66,7 +66,7 @@ public:
 		return true;
 	}
 
-	std::string ToString(bool whiteToMove) const;	
+	string ToString() const;	
 
 protected:
 	static const char nullsquare = -1;

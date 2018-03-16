@@ -1,24 +1,9 @@
 
-#include "Parse.hpp"
-
-// TODO: turn to enum
-const string Game::NAG[Game::NUM_NAGS] = {"", "!", "?", "!!", "??", "!?", "?!",
-										  "□", "< singular move >", "< worst move >",
-										  "=", "< equal chances, quiet position >",
-										  "< equal chances, active position >",
-										  "∞", "+=", "+=", "+-", "-+", "+−", "−+"};
-
-int Game::nagToInt(const string& nag) {
-    for (int i = 0; i < NUM_NAGS; i++) {
-        if (nag == NAG[i])
-            return i;
-    }
-    return -1;
-}
-
+#include "Parse.h"
+using std::string
 
 //MODIFIES: index to point to the next instance of delim
-void GameNode::next(string &text, int& i, char delim = ' ') {
+void Parser::next(string &text, int& i, char delim = ' ') {
     
     while(text[++i] != delim) {
 
@@ -83,12 +68,9 @@ bool GameNode::parse(string &text, int& i) {
         }
             
         case '{': {
-            
             next(text, i, '}');
-
             while (text[start] == ' ')
                 start++;
-
             comment = text.substr(start, i - start);
             
             //cout << endl << endl << comment << endl;
@@ -123,7 +105,7 @@ bool GameNode::parse(string &text, int& i) {
             string m = parseMove(text, i);
 
             if (parent) {
-                parent->stepChildren.push_back(new GameNode(parent, m, text, i, pre));
+                parent->variations.push_back(new GameNode(parent, m, text, i, pre));
 }
             else {
                 //cout << endl << "IGNORED" << endl;
@@ -161,14 +143,14 @@ GameNode::GameNode(GameNode* p, string m, const string& text, int& i, string pre
     //cout << endl << "move: " << m << endl;
     if (parse(text, i))
         child = new GameNode(this, parseMove(text, i), text, i);
-    stripGlyph();
+    Gaem::StripGlyph(move);
 }
 
 GameNode::~GameNode() {
     delete child;
-    for (int i = 0; i < stepChildren.size(); i++) {
-        delete stepChildren[i];
-        stepChildren[i] = nullptr;
+    for (int i = 0; i < variations.size(); i++) {
+        delete variations[i];
+        variations[i] = nullptr;
     }
 }
 
@@ -176,32 +158,6 @@ void GameNode::print(bool annotations) {
     cout << move << Game::NAG[glyph] << endl;
     if (annotations && comment.size()) {
         cout << endl << endl << comment << endl << endl;
-    }
-}
-
-void GameNode::stripGlyph() {
-    
-    size_t len = move.length();
-    
-    if (len < 4)
-        return;
-    
-    string s = move.substr(len - 2);
-    int g = Game::nagToInt(s);
-
-    if (g > 0) {
-        glyph = g;
-        move.pop_back();
-        move.pop_back();
-        return;
-    }
-    
-    s = move.substr(len - 1);
-    g = Game::nagToInt(s);
-    
-    if (g > 0) {
-        glyph = g;
-        move.pop_back();
     }
 }
 
@@ -219,7 +175,7 @@ Game::Game(ifstream& pgn) {
     while (c != '[')
         pgn >> c;
     
-    while(c == '[') {
+    while (c == '[') {
         
         pgn >> tname;
     
@@ -254,25 +210,19 @@ Game::Game(ifstream& pgn) {
         getline(pgn, s);
     }
     
-    
     int i = 0;
     int start = 1;
     
     if (moveText[0] == '{') {
-        
         GameNode::next(moveText, i, '}');
-        
         if (moveText[start] == ' ')
             start++;
-        
         intro = moveText.substr(start, i - start);
-        
         GameNode::next(moveText, i, '.');
     }
 
     GameNode::next(moveText, i);
     i++;
-    
     root = new GameNode(nullptr, GameNode::parseMove(moveText, i), moveText, i);
 }
 
@@ -283,17 +233,17 @@ Game::~Game() {
 void Game::addTag(string tname, const string& tval) {
     
     if (tname == "Event" && tval[0] != '?')
-        name = tval;
+        tags.name = tval;
     else if (tname == "White" && tval[0] != '?')
-        white = tval;
+        tags.white = tval;
     else if (tname == "Black" && tval[0] != '?') {
-        black = tval;
+        tags.black = tval;
     else if ((tname == "Date" || tname == "UTCDate") && tval[0] != '?') {
-        date = tval;
+        tags.date = tval;
     else if (tname == "Opening" && tval[0] != '?') {
-        opening = tval;
+        tags.opening = tval;
     else if (tname == "Annotator" && tval[0] != '?') {
-        annotator = tval;
+        tags.annotator = tval;
     return;
 }
 

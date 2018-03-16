@@ -6,7 +6,8 @@ BoardState::BoardState() : whiteCastleK(true),
 						   whiteCastleQ(true),
 						   blackCastleK(true),
 						   blackCastleQ(true),
-						   enPassant(nullsquare) 
+						   enPassant(nullsquare),
+						   clock(0)
 {
 	// make static...AND use STATIC CONST VARS!!!!!!!!!!!!!
 	std::string init =  "RNBQKBNRPPPPPPPP" + std::string(NUM_SQUARES / 2, 0) +  "pppppppprnbqkbnr";
@@ -18,7 +19,8 @@ BoardState::BoardState(const BoardState& other) : whiteCastleK(other.whiteCastle
 												  whiteCastleQ(other.whiteCastleQ),
 												  blackCastleK(other.blackCastleK),
 												  blackCastleQ(other.blackCastleQ),
-												  enPassant(other.enPassant) 
+												  enPassant(other.enPassant),
+												  clock(other.clock)
 { memcpy(squares, other.squares, NUM_SQUARES); }	  
 
 
@@ -69,7 +71,8 @@ bool BoardState::IsNextInDirection(int square, Direction direction, char piece) 
 	return false;
 }
 
-std::string BoardState::ToString(bool whiteToMove) const {
+std::string BoardState::ToString() const {
+	bool whiteToMove = (clock % 2 == 0);
 	std::string fen;
     int empties = 0;
 
