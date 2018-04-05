@@ -1,9 +1,11 @@
 
 #include "Parse.h"
-using std::string
+
+using std::string;
+using std::ifstream;
 
 //MODIFIES: index to point to the next instance of delim
-void Parser::next(string &text, int& i, char delim = ' ') {
+void GameNode::next(const string &text, int& i, char delim = ' ') {
     
     while(text[++i] != delim) {
 
@@ -19,11 +21,11 @@ void Parser::next(string &text, int& i, char delim = ' ') {
 //MODIFIES: i to point to next move
 //EFFECTS: returns false if there is no next move
 
-bool GameNode::parse(string &text, int& i) {
+bool GameNode::parse(const string &text, int& i) {
     
     //base case: last move
     if (text[i] == ')' || text[i + 1] == '*') {
-        //cout << endl << endl << " - end - " << endl;
+		Logger::log("GameNode::parse reached end of pgn line");
         return false;
     }
     
@@ -33,7 +35,7 @@ bool GameNode::parse(string &text, int& i) {
     int start = i + 1;
     
     if (text[i] == ')' || text[i + 1] == '*') {
-       //cout << endl << endl << " - end - " << endl;
+		Logger::log("GameNode::parse reached end of pgn line");
         return false;
     }
     
@@ -62,7 +64,7 @@ bool GameNode::parse(string &text, int& i) {
         case '$': {
             next(text, i);
             glyph = stoi(text.substr(start, i - start));
-            //cout << endl << Game::NAG[glyph];
+			Logger::log("GameNode::parse found glyph: " + Glyph::ToString(glyph));
 
             break;
         }
@@ -73,7 +75,7 @@ bool GameNode::parse(string &text, int& i) {
                 start++;
             comment = text.substr(start, i - start);
             
-            //cout << endl << endl << comment << endl;
+			Logger::log("GameNode::parse found comment: " + comment);
 
             next(text, i);
             break;
@@ -81,7 +83,7 @@ bool GameNode::parse(string &text, int& i) {
             
         case '(': {
             
-            //cout << endl << endl << " - sideline - " << endl;
+			Logger::log("GameNode::parse creating new sideline");
             string pre;
             
             if (text[i + 1] == '{') {
@@ -94,7 +96,7 @@ bool GameNode::parse(string &text, int& i) {
                 
                 pre = text.substr(start, i - start);
                 
-                //cout << endl << endl << pre << endl;
+				Logger::log("GameNode::parse found pre-comment: " + pre);
                 
                 next(text, i, '.');
             }
@@ -108,7 +110,7 @@ bool GameNode::parse(string &text, int& i) {
                 parent->variations.push_back(new GameNode(parent, m, text, i, pre));
 }
             else {
-                //cout << endl << "IGNORED" << endl;
+				Logger::log("GameNode::parse something was ignore...");
                 next(text, i, ')');
             }
 
@@ -129,7 +131,7 @@ bool GameNode::parse(string &text, int& i) {
 
 //NOTE: i points to first char of movetext
 //REQUIRES: next move exists
-string GameNode::parseMove(string &text, int &i) {
+string GameNode::parseMove(const string &text, int &i) {
     int start = i;
     next(text, i);
     return text.substr(start, i - start);
@@ -140,10 +142,10 @@ GameNode::GameNode(GameNode* p, string m, const string& text, int& i, string pre
 																					     child(nullptr),
 																					     precomment(pre)
 {
-    //cout << endl << "move: " << m << endl;
+	Logger::log("GameNode::Constructor found new move: " + move);
     if (parse(text, i))
         child = new GameNode(this, parseMove(text, i), text, i);
-    Gaem::StripGlyph(move);
+    glyph = Glyph::Strip(move);
 }
 
 GameNode::~GameNode() {
@@ -154,10 +156,11 @@ GameNode::~GameNode() {
     }
 }
 
-void GameNode::print(bool annotations) {
-    cout << move << Game::NAG[glyph] << endl;
-    if (annotations && comment.size()) {
-        cout << endl << endl << comment << endl << endl;
+string GameNode::ToString() {
+	std::stringstream out;
+    out << move << Glyph::ToString(glyph);
+    if (comment.size()) {
+        out << ": " << comment;
     }
 }
 
@@ -236,13 +239,13 @@ void Game::addTag(string tname, const string& tval) {
         tags.name = tval;
     else if (tname == "White" && tval[0] != '?')
         tags.white = tval;
-    else if (tname == "Black" && tval[0] != '?') {
+    else if (tname == "Black" && tval[0] != '?')
         tags.black = tval;
-    else if ((tname == "Date" || tname == "UTCDate") && tval[0] != '?') {
+    else if ((tname == "Date" || tname == "UTCDate") && tval[0] != '?')
         tags.date = tval;
-    else if (tname == "Opening" && tval[0] != '?') {
+    else if (tname == "Opening" && tval[0] != '?')
         tags.opening = tval;
-    else if (tname == "Annotator" && tval[0] != '?') {
+    else if (tname == "Annotator" && tval[0] != '?')
         tags.annotator = tval;
     return;
 }

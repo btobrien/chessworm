@@ -1,5 +1,8 @@
 
 #include "BoardState.h"
+#include "Color.h"
+
+using std::string;
 
 
 BoardState::BoardState() : whiteCastleK(true),
@@ -90,7 +93,7 @@ std::string BoardState::ToString() const {
             empties++;
         }
         
-        if (i % 8 == 7) {
+        if (File(i) == 'h') {
             if (empties) {
                 fen += std::to_string(empties);
                 empties = 0;
@@ -112,24 +115,24 @@ std::string BoardState::ToString() const {
     
     if (!whiteCastleQ && !whiteCastleK && !blackCastleK && !blackCastleQ)
         fen += '-';
-    else if (whiteCastleK)
-        fen += 'K';
-    else if (whiteCastleQ)
-        fen += 'K';
-    else if (blackCastleK)
-        fen += 'k';
-    else if (blackCastleQ)
-        fen += 'q';
+    if (whiteCastleK)
+        fen += White::KING;
+    if (whiteCastleQ)
+        fen += White::QUEEN;
+    if (blackCastleK)
+        fen += Black::KING;
+    if (blackCastleQ)
+        fen += Black::QUEEN;
     
     fen += ' ';
     
     if (enPassant == -1)
         fen += '-';
     else {
-        fen += ('a' + enPassant / 8);
-        fen += (enPassant % 8);
+        fen += File(enPassant);
+        fen += Rank(enPassant);
     }
-    
+	Logger::log("BoardState::ToString returning " + fen);
     return fen;
 }
 

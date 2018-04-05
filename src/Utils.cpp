@@ -1,6 +1,7 @@
+#pragma once
 
 template <typename SourceContainer, typename TargetContainer>
-void push_all(const SourceContainer& source, TargetContainer& target) {
+void append(const SourceContainer& source, TargetContainer& target) {
 	for (auto x : source) {
 		target.push_back(x);
 	}
@@ -9,7 +10,7 @@ void push_all(const SourceContainer& source, TargetContainer& target) {
 template <typename SourceContainer, typename TargetContainer>
 void cpy(const SourceContainer& source, TargetContainer& target) {
 	target.clear();
-	push_all(source, target);
+	append(source, target);
 }
 
 

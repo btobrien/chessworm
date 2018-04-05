@@ -3,11 +3,9 @@
 
 #include <stdio.h>
 #include "Move.cpp"
+#include "Log.h"
 #include <iostream>
 #include <string>
-#include <cassert>
-
-using std::string;
 
 class BoardState {
 
@@ -66,7 +64,7 @@ public:
 		return true;
 	}
 
-	string ToString() const;	
+	std::string ToString() const;	
 
 protected:
 	static const char nullsquare = -1;

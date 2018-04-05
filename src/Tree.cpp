@@ -1,10 +1,10 @@
 
 #include "Tree.h"
 
-Edge::Edge(Node* parentIn, Node* childIn, const GameNode& input) :
+Edge::Edge(Node* parentIn, Node* childIn, const GameNode& input):
 	parent(parentIn),
 	child(childIn),
-	move(input.move)
+	AnnotatedMove(input)
 {
     child->AddParent(this);
 }
@@ -17,20 +17,20 @@ bool Edge::TryPromote() {
 	return parent->TryPromote(this);
 }
 
-void Node::Connect(Node* child, const GameNode& input) {
+void Node::Connect(Node& child, const GameNode& input) {
     for (auto edge : children) {
-        if (edge->child == child) {
-			edge->AddComment(input.comment, input.glyph, input.author);
+        if (edge->child == &child) {
+			edge->AddComment(input);
             return;
         }
     }
-    AddChild(new Edge(this, child, input));
+    AddChild(new Edge(this, &child, input));
 }
 
 void Node::AddChild(Edge* child) {
     children.push_back(child);
     if (Strength(child->glyph) > Strength(children[0]->glyph)) { // TODO: priority queue
-        children[childeEdges.size() - 1] = children[0];
+        children[children.size() - 1] = children[0];
         children[0] = child;
     }
 }
@@ -57,27 +57,30 @@ Node::~Node() {
         delete c;
 }
 
-Node& Tree::FindOrCreateNode(string nodeKey) {
+Node& Tree::FindOrCreateNode(const string& nodeKey) {
     Node* child = _nodeMap[nodeKey];
     if (!child) {
+		Logger::log("Tree::FindOrCreateNode creating node: " + nodeKey);
         child = new Node();
         _nodeMap[nodeKey] = child;
     }
 	return *child;
 }
 
-void Tree::CreateEdge(Node& parent, const GameNode* input, Board board) {
+bool Tree::CreateEdge(Node& parent, const GameNode* input, Board board) {
     if (!input)
-        return;
+        return false;
+	Logger::log("Tree::CreateEdge calling Board::TryMove with " + input->move);
     if (!board.TryMove(input->move)) { 
-		_invalidMoves.push(input);
-        return;
+		Logger::log("Tree::CreateEdge received invalid move: " + input->move, Logger::INPUT);
+        return true;
 	}
-	FindOrCreate(node board.Key());
+	Node& child = FindOrCreateNode(board.key());
     parent.Connect(child, *input);
     for (auto stepChild : input->variations)
         CreateEdge(child, stepChild, board);
     CreateEdge(child, input->child, board);
+	return true;
 }
 
 void Tree::Reset() {
@@ -85,14 +88,24 @@ void Tree::Reset() {
 	_currentNode = &_root;
 }
 
+void Tree::Invalidate() {
+	_prevNode = nullptr;
+	_currentNode = nullptr;
+}
+
 bool Tree::TrySet(string nodeKey) {
+	Logger::log("Tree::TrySet start");
 	if (nodeKey.empty()) {
 		Reset();
+		Logger::log("Tree::TrySet reset the tree to root");
 		return true;
 	}
 	auto result = _nodeMap.find(nodeKey);
-	if (result == _node.end())
+	if (result == _nodeMap.end()) {
+		Invalidate();
+		Logger::log("Tree::TrySet failed to find nodeKey", Logger::WARN);
 		return false;
+	}
 	_prevNode = _currentNode;
 	_currentNode = result->second;
 	return true;

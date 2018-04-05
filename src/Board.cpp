@@ -1,4 +1,6 @@
 
+#pragma once
+
 #include <stdio.h>
 #include "BoardState.h"
 #include "Color.h"
@@ -6,124 +8,131 @@
 #include <string>
 #include <stack>
 #include <vector>
-#include <cassert>
 #include "Utils.cpp"
-//#include "Parse.h" for GLYPH parsing
+#include "Log.h"
+#include <boost/ptr_container/ptr_vector.hpp>
 
-using std::stack;
-using std::vector;
-using std::string;
+template <typename T>
+class Memorable {
+protected:
+	virtual bool TryUpdate(const std::string&) = 0;
+	// implement move semantics?
+	// template transition param as well
+	// make unique ptrs?
+	Memorable() : _state(new T()) {}
+	Memorable(const Memorable& rhs) : _state(new T(rhs._state)) {}
+	Memorable(T* state) : _state(state) {}
+	virtual ~Memorable() { delete _state; }
+	inline T* GetState() { return _state }
+	inline T* CopyState() { return new T(_state); }
+	inline T* SwapState(T* newState) { 
+		oldState = _state;
+		_state = newState;
+		return oldState;
+	}
+private:
+	T* _state;
+};
 
-class Board {
-
+class Board : protected Memorable<BoardState> {
 public:
-	Board() : _state(new BoardState()) {}
-	Board(const Board& rhs) : _state(new BoardState(*rhs._state)) {}
-	Board(BoardState* state) : _state(state) {}
+	Board() {}
+	Board(const Board& rhs) : Memorable(rhs) {}
+	virtual ~Board();
 
-	virtual bool TryMove(const std::string& m) {
-	
+	virtual bool Board::TryUpdate(const std::string& moveStr) override {
 		Move move(m);
 		if (!move.isValid) {
 			return false;
 		}
-
-		auto prevState = new BoardState(*_state);
-
-		if (TryUpdateState(move)) {
-			delete prevState;
-			return true;
+		auto prevState = CopyState();
+		if (!TryUpdateState(move)) {
+			delete SwapState(prevState);
+			return false;
 		}
-		
-		delete _state;
-		_state = prevState;	
-		
-		return false;
+		delete prevState;
+		return true;
 	}
 
-    inline bool whiteToMove() const { return _state->clock % 2 == 0; }
-	int clock() const { return _state->clock; }
-	std::string key() const { return _state->ToString(); }
-	const char* data() const { return _state->squares; }
-	char operator [](int i) const { return _state->squares[i]; }
-
-
-protected:
-	BoardState* _state;
-
-	inline bool TryUpdateState(Move move) { return whiteToMove() ? _state->TryMove<White>(move) : _state->TryMove<Black>(move); }
+    inline bool whiteToMove() const { return GetState()->whiteToMove; }
+	int clock() const { return GetState()->clock; }
+	std::string key() const { return GetState()->toString(); }
+	std::string fen() const { return GetState()->toString(); }
+	char operator [](int i) const { return GetState()->squares[i]; }
+private:
+	inline bool TryUpdateState(Move move) { return whiteToMove() ? GetState()->TryMove<White>(move) : GetState()->TryMove<Black>(move); }
 };
 
-
-class MemoryBoard : public Board {
-	
+template <typename T>
+class Memory : public T {
 public:
-
-    virtual bool TryMove(const std::string& m) override {
-
-
-		Move move(m);
-
-		if (!move.isValid)
-			return false;
-
-		_history.push(_state);
-		_state = new BoardState(*_state);
-
-		if (!TryUpdateState(move)) {
-			delete _state;
-			_state = _history.top();
-			_history.pop();
-			return false;
-		}	
-		
+	virtual ~Memory() {
 		while (!_future.empty()) {
 			delete _future.top();
 			_future.pop();
-			delete _moveList.back();
-			_moveList.pop_back();
 		}
+		while (!_history.empty()) {
+			delete _history.top();
+			_fhistory.pop();
+		}
+	}
 
-		_moveList.push_back(new string(m));
-
+	virtual bool TryUpdate(const std::string& transition) override {
+		_history.push(CopyState());
+		if (!T::TryUpdate(transition)) {
+			delete _history.top();
+			_history.pop();
+			return false;
+		}	
+		_transitionList.push_back(new string(transition));
+		while (!_future.empty()) {
+			delete _future.top();
+			_future.pop();
+			_transitionList.pop_back();
+		}
 		return true;
 	}			
 
-    virtual bool TryUndo() { 
+	virtual bool TryUndo() { 
 		if (_history.empty())
 			return false;
-		_future.push(_state);
-		_state = _history.top();
+		_future.push(SwapState(_history.top()));
 		_history.pop();
 		return true;
 	}
 
-    virtual bool TryRedo() { 
+	bool Memory<T>::TryRedo() { 
 		if (_future.empty())
 			return false;
-		_history.push(_state);
-		_state = _future.top();
+		_history.push(SwapState(_future.top()));
 		_future.pop();
 		return true;
 	}
+	typedef boost::ptr_vector<std::string>::iterator iterator
+	iterator begin() const; 
+	iterator end() const;
 
-	template <typename Container>
-	void GetMoveHistory(Container& container) {
-		container.clear();
-		push_all(_moveList, container);
-	}
-
-	string prev_key() {
-		if (!TryUndo())
-			return "";
-		string result = key();
-		TryRedo();
-		return result;
-	}
-	
-protected:
-	stack<BoardState*> _history;
-	stack<BoardState*> _future;
-	vector<const string*> _moveList;
+private:
+	typedef decltype(T::GetState()) state
+	std::stack<state*> _history;
+	std::stack<state*> _future;
+	boost::ptr_vector<std::string> _transitionList;
 };
+
+string prevKey(const Memory<Board>& memBrd) {
+	if (!memBrd.Memory<Board>::TryUndo())
+		return "";
+	string result = memBrd.key();
+	memBrd.Memory<Board>::TryRedo();
+	return result;
+}
+
+inline void UndoAll(Memory<Board>& memBrd) {
+	while (memBrd.TryUndo()) {}
+}
+
+inline void RedoAll(Memory<Board>& memBrd) {
+	while (memBrd.TryRedo()) {}
+}
+
 

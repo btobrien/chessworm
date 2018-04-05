@@ -56,15 +56,16 @@ struct Move {
 			check = true;
 			mate = true;
 			backIndex--;
+
 		}
 
-		if (move.length() >= 5 && move.substr(0,5) == "o-o-o") {
+		if (IsCastlesLong(move)) {
 			castleLong = true;
 			piece = KING;
 			isValid = true;
 			return;
 		}	
-		if (move.length() >= 3 && move.substr(0,3) == "o-o") {
+		if (IsCastlesShort(move)) {
 			castleShort = true;
 			piece = KING;
 			isValid = true;
@@ -150,6 +151,20 @@ struct Move {
 
 	static bool IsValidRank(char r) {
 		return (r >= '1' && r <= '8');
+	}
+
+	static bool IsCastlesLong(std::string move) {
+		if (move.length() < 5)
+			return false;
+		move = move.substr(0,5);
+		return (move == "o-o-o" || move == "O-O-O");
+	}
+
+	static bool IsCastlesShort(std::string move) {
+		if (move.length() < 3)
+			return false;
+		move = move.substr(0,3);
+		return (move == "o-o" || move == "O-O");
 	}
 };
 
