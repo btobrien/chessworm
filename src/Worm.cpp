@@ -16,65 +16,20 @@ using std::string;
 using std::vector;
 using std::ifstream;
 
-class Worm : View<Board> {
+class Worm {
 
 public:
-    template <typename GameContainer>
-    ChessView(const GameContainer& games) : board(games), isFlipped(false) {
+
+    ChessView() {
 		Logger::log("ChessView::Constructor");
-		NcursesInit();
+	}
+
+    template <typename GameContainer>
+	AddGames(const GameContainer& games) {
+		board.AddGames(games)
 	}
 
 	~ChessView() {
-		endwin();
-	}
-
-	bool TryReadInput() {
-		char input = getch();
-		string move;
-
-		switch (input) {
-			case 'f':
-				boardDisplay.FlipBoard();
-				break;
-			case 'g':
-				input = getch();
-				if (input = 'g')
-					while(board.TryUndo()) {}
-				break;
-			case 'G':
-				while(board.TryRedo()) {}
-				break;
-			case '/':
-				DisplayMovePrompt();
-				move = GetEcho(commandWin);
-				if (!board.TryMove(move)) {
-					flash();
-				}
-				break;
-			case 'j':
-				if (!board.TryRedo())
-					flash();
-				break;
-			case 'k':
-
-			case 'N':
-				if (!board.TryUndo())
-					flash();
-				break;
-			case 'n':
-				if (!board.TryRedo())
-					flash();
-				break;
-			case ':':
-				werase(commandWin);
-				wmove(commandWin, 0, 0);
-				waddch(commandWin, ':');
-				wrefresh(commandWin);
-				if (GetEcho(commandWin) == "q")
-					return false;
-		}
-		return true;
 	}
 
 protected:

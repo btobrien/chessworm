@@ -1,36 +1,48 @@
-
 class Controller {
 public:
-private:
-	void BackSpace() {
-		int x, y;
-		getyx(win, y, x);
-		wmove(win, y, x - 1);
-		wdelch(win);
-	}
-	bool IsDeleteChar(char input) {
-		return input == KEY_BACKSPACE || input == KEY_DC || input == 127 || input == 8;
-	}
-	std::string GetEcho() {
-		string result;
+	virtual bool Execute() {
 		char input = getch();
-		while(input != '\n' && input != KEY_ENTER) {
-			if (input == 27)
-				return "";
-			if (IsDeleteChar(input)) {
-				if (!result.empty()) {
-					result.pop_back();
-					BackSpace(commandWin);
-				}
-			}
-			else  {
-				waddch(win, input);
-				result += input;
-			}
-			wrefresh(commandWin);
-			input = getch();
+		string move;
+		switch (input) {
+			case 'f':
+				boardDisplayer.Flip();
+				break;
+			case 'g':
+				if (getch() = 'g')
+					UndoAll(board);
+				break;
+			case 'G':
+				RedoAll(board);
+				break;
+			case '/':
+				if (!board.TryMove(view.GetMoveEcho()))
+					view.Flash();
+				break;
+			case 'j':
+				if (!board.TryRedo())
+					view.Flash();
+				break;
+			case 'k':
+				if (!board.TryUndo())
+					view.Flash();
+				break;
+			case 'n':
+			case 'N':
+				break;
+			case ':':
+				if (view.GetCommandEcho() == "q")
+					return false;
+				break;
+			default:
+				view.Write("ERROR: key not recognized");
 		}
-		return result;
+		return true;
 	}
-
+private:
+	TreeBoard board;
+	View view;
+	BoardDisplayer boardDisplayer;
+	ChoiceDisplayer choiceDisplayer;
+	HistoryDisplayer historyDisplayer;
+	CommentDisplayer commentDisplayer;
 };

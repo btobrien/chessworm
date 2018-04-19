@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Tree.h"
-#include "Board.h"
+#include "Board.cpp"
 
 class TreeBoard : public Tree, public Memory<Board> {
     

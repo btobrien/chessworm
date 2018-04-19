@@ -20,11 +20,11 @@ protected:
 	// template transition param as well
 	// make unique ptrs?
 	Memorable() : _state(new T()) {}
-	Memorable(const Memorable& rhs) : _state(new T(rhs._state)) {}
+	Memorable(const Memorable& rhs) : _state(new T(*(rhs._state))) {}
 	Memorable(T* state) : _state(state) {}
 	virtual ~Memorable() { delete _state; }
-	inline T* GetState() { return _state }
-	inline T* CopyState() { return new T(_state); }
+	inline T* getState() const { return _state }
+	inline T* copyState() const { return new T(*_state); }
 	inline T* SwapState(T* newState) { 
 		oldState = _state;
 		_state = newState;
@@ -40,12 +40,12 @@ public:
 	Board(const Board& rhs) : Memorable(rhs) {}
 	virtual ~Board();
 
-	virtual bool Board::TryUpdate(const std::string& moveStr) override {
-		Move move(m);
+	virtual bool TryUpdate(const std::string& moveStr) override {
+		Move move(moveStr);
 		if (!move.isValid) {
 			return false;
 		}
-		auto prevState = CopyState();
+		auto prevState = copyState();
 		if (!TryUpdateState(move)) {
 			delete SwapState(prevState);
 			return false;
@@ -54,13 +54,15 @@ public:
 		return true;
 	}
 
-    inline bool whiteToMove() const { return GetState()->whiteToMove; }
-	int clock() const { return GetState()->clock; }
-	std::string key() const { return GetState()->toString(); }
-	std::string fen() const { return GetState()->toString(); }
-	char operator [](int i) const { return GetState()->squares[i]; }
+    inline bool whiteToMove() const { return getState()->whiteToMove(); }
+	inline int clock() const { return getState()->clock(); }
+	inline castleRights whiteCastleRights() { return getState()->whiteCastleRights(); }
+	inline castleRights blackCastleRights() { return getState()->blackCastleRights(); }
+	inline std::string key() const { return getState()->key(); }
+	inline std::string fen() const { return Chess::Fen(getState()); }
+	inline char operator [](int i) const { return getState()->[i]; } // bounds checking ??
 private:
-	inline bool TryUpdateState(Move move) { return whiteToMove() ? GetState()->TryMove<White>(move) : GetState()->TryMove<Black>(move); }
+	inline bool TryUpdateState(Move move) { return whiteToMove() ? getState()->TryMove<White::BoardState>(move) : getState()->TryMove<Black::BoardState>(move); }
 };
 
 template <typename T>
@@ -78,7 +80,7 @@ public:
 	}
 
 	virtual bool TryUpdate(const std::string& transition) override {
-		_history.push(CopyState());
+		_history.push(copyState());
 		if (!T::TryUpdate(transition)) {
 			delete _history.top();
 			_history.pop();
@@ -108,12 +110,14 @@ public:
 		_future.pop();
 		return true;
 	}
-	typedef boost::ptr_vector<std::string>::iterator iterator
+
+	// factor this out into an iterator extended class
+	typedef boost::ptr_vector<std::string>::iterator iterator 
 	iterator begin() const; 
 	iterator end() const;
 
 private:
-	typedef decltype(T::GetState()) state
+	typedef decltype(T::getState()) state
 	std::stack<state*> _history;
 	std::stack<state*> _future;
 	boost::ptr_vector<std::string> _transitionList;
