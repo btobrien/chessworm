@@ -60,7 +60,7 @@ public:
 	inline castleRights blackCastleRights() { return getState()->blackCastleRights(); }
 	inline std::string key() const { return getState()->key(); }
 	inline std::string fen() const { return Chess::Fen(getState()); }
-	inline char operator [](int i) const { return getState()->[i]; } // bounds checking ??
+	inline char operator [](int i) const { return getState()->[i]; } 
 private:
 	inline bool TryUpdateState(Move move) { return whiteToMove() ? getState()->TryMove<White::BoardState>(move) : getState()->TryMove<Black::BoardState>(move); }
 };
