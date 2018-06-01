@@ -41,10 +41,10 @@ public:
 	virtual ~Board();
 
 	virtual bool TryUpdate(const std::string& moveStr) override {
-		Move move(moveStr);
-		if (!move.isValid) {
-			return false;
-		}
+
+		try { Move move(moveStr); }
+		catch { return false; }
+
 		auto prevState = copyState();
 		if (!TryUpdateState(move)) {
 			delete SwapState(prevState);
@@ -56,11 +56,13 @@ public:
 
     inline bool whiteToMove() const { return getState()->whiteToMove(); }
 	inline int clock() const { return getState()->clock(); }
-	inline castleRights whiteCastleRights() { return getState()->whiteCastleRights(); }
-	inline castleRights blackCastleRights() { return getState()->blackCastleRights(); }
+	inline bool whiteCastleShort() const { return getState()->whiteCastleShort(); }
+	inline bool whiteCastleLong()  const { return getState()->whiteCastleLong(); }
+	inline bool blackCastleShort() const { return getState()->blackCastleShort(); }
+	inline bool blackCastleLong()  const { return getState()->blackCastleLong(); }
+	inline int enPassant() const { return getState()->enPassant(); }
 	inline std::string key() const { return getState()->key(); }
-	inline std::string fen() const { return Chess::Fen(getState()); }
-	inline char operator [](int i) const { return getState()->[i]; } 
+	inline char operator[](int i) const { return getState()->[i]; } 
 private:
 	inline bool TryUpdateState(Move move) { return whiteToMove() ? getState()->TryMove<White::BoardState>(move) : getState()->TryMove<Black::BoardState>(move); }
 };
@@ -103,7 +105,7 @@ public:
 		return true;
 	}
 
-	bool Memory<T>::TryRedo() { 
+	bool TryRedo() { 
 		if (_future.empty())
 			return false;
 		_history.push(SwapState(_future.top()));
@@ -111,7 +113,6 @@ public:
 		return true;
 	}
 
-	// factor this out into an iterator extended class
 	typedef boost::ptr_vector<std::string>::iterator iterator 
 	iterator begin() const; 
 	iterator end() const;
@@ -122,6 +123,7 @@ private:
 	std::stack<state*> _future;
 	boost::ptr_vector<std::string> _transitionList;
 };
+
 
 string prevKey(const Memory<Board>& memBrd) {
 	if (!memBrd.Memory<Board>::TryUndo())

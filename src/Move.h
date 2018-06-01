@@ -8,31 +8,29 @@ namespace Chess {
 
 class Move {
 public:
-	inline char piece();
-	inline char newFile();
-	inline char newRank();
-	inline char oldFile();
-	inline char oldRank();
+	inline char newSquare() const  { return toSquare(_newFile, _newRank); }
 
-	inline bool isShortCastle() { return _castleShort; }
-	inline bool isLongCastle() { return _castleLong; }
+	inline bool isShortCastle() const { return _castleShort; }
+	inline bool isLongCastle() const { return _castleLong; }
 
-	inline bool check() { return _check; }
-	inline bool checkMate() { return _checkMate; }
-	inline bool takes() { return _takes; }
-	inline char promotion() { return _promotion; }
+	inline bool check() const { return _check; }
+	inline bool checkMate() const { return _checkMate; }
+	inline bool takes() const { return _takes; }
+
+	inline char promotion() const { return _promotion; }
 
 
-	bool TryMatch(char piece, char oldFile, char oldRank) {
-
+	bool TryMatch(char piece, int oldSquare) {
+		if (_piece && piece != _piece)
+			return false;
+		int oldFile = file(oldSquare)
+		int oldRank = rank(oldSquare)
 		if (_oldFile && oldFile != _oldFile)
 			return false;
 		if (_oldRank && oldRank != _oldRank)
 			return false;
 		if (oldFile == _newFile && oldRank ==  _newRank)
 			return false;
-		_oldRank = oldRank;
-		_oldFile = oldFile;
 		
 		int fileDist = abs(_oldFile - newFile);
 		int rankDist = abs(oldRank - newRank);
@@ -54,11 +52,11 @@ public:
 			case Chess::BISHOP: return !manhattanDiff;
 			case Chess::ROOK:   return !rankDist || !fileDist;
 			case Chess::QUEEN:  return !manhattanDiff || !rankDist || !fileDist;
-			case Chess::KING:   return (manhattanDiff && manhattanDist == 1) ||
-									   (!manhattanDiff && manhattanDist == 2);
+			case Chess::KING:   return (manhattanDiff && manhattanDist == 1) || (!manhattanDiff && manhattanDist == 2);
 		}
 		return false;
 	}
+
 
 	// break this up into more functions
 	Move(std::string move) {
@@ -69,42 +67,42 @@ public:
 			throw Exception;
 
 		while (move[backIndex] == '+') { // support double check notation
-			check = true;
-			backIndex--;
+			_check = true;
+			_backIndex--;
 		}
 		else if (move[backIndex] == '#') {
-			check = true;
-			mate = true;
+			_check = true;
+			_mate = true;
 			backIndex--;
 		}
 
-		if (IsCastlesLong(move)) {
-			castleLong = true;
-			piece = KING;
+		if (isCastlesLong(move)) {
+			_castleLong = true;
+			_piece = KING;
 			return;
 		}	
-		if (IsCastlesShort(move)) {
-			castleShort = true;
-			piece = KING;
+		if (isCastlesShort(move)) {
+			_castleShort = true;
+			_piece = KING;
 			return;
 		}	
 
-		if (Piece(move[0])) {
-			piece = move[0];
+		if (isPiece(move[0])) {
+			_piece = move[0];
 			frontIndex = 1;
 		}
 		else if (isFile(move[0])) {
-			oldFile = move[0];
-			piece = PAWN;
+			_oldFile = move[0];
+			_piece = PAWN;
 		}
 		else throw Exception;
 
 		if (move[backIndex - 1] == '=') {
-			if (piece != PAWN)
+			if (_piece != PAWN)
 				throw Exception;
 			if (move[backIndex] == KING || !isPiece(move[backIndex]))
 				throw Exception;
-			promoted = move[backIndex];
+			_promoted = move[backIndex];
 			backIndex -= 2;
 		}
 
@@ -115,34 +113,34 @@ public:
 		if (!isRank(newRank))
 			throw Exception;
 
-		if (piece == PAWN) {
-			if ((promoted != 0) != (newRank == '1' || newRank == '8'))
+		if (_piece == PAWN) {
+			if ((_promoted != 0) != (_newRank == '1' || _newRank == '8'))
 				throw Exception;
 		}
 
 		if (backIndex < frontIndex)
 			throw Exception;
 
-		newFile = move[backIndex--];
-		if (!isFile(newFile))
+		_newFile = move[backIndex--];
+		if (!isFile(_newFile))
 			throw Exception;
 
 		if (backIndex < frontIndex)
 			return;
 
 		if (move[backIndex] == 'x') {
-			takes = true;
+			_takes = true;
 			backIndex--;
 		}
 
 		if (isRank(move[backIndex]))
-			oldRank = move[backIndex--];
+			_oldRank = move[backIndex--];
 					
 		if (backIndex < frontIndex)
 			return;
 
 		if (isFile(move[backIndex]))
-			oldFile = move[backIndex--];
+			_oldFile = move[backIndex--];
 
 		if (backIndex >= frontIndex)
 			throw Exception;
@@ -161,13 +159,5 @@ private:
 	bool _check;
 	bool _mate;
 };
-
-oldSquare(const Move& move) { 
-	if (!move.oldFile() || !move.oldRank())
-		return false;
-	return toSquare(move.oldFile(), move.oldRank());
-}
-
-newSquare(const Move& move) { return toSquare(move.newFile(), move.newRank()); }
 
 }
