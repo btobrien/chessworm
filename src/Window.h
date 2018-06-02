@@ -23,9 +23,9 @@ public:
 	// overload stream operator!!!
 	void EnableAttribute(int attr);
 	void DisableAttribute(int attr);
-
 	void Refresh();
 	frame frame();
+	Win* getWin();
 
 protected:
 	Win* _win; //??
@@ -57,19 +57,20 @@ public:
 	}
 };
 
-class EchoWindow : public Window {
+class InputWindow : public Window {
+public:
 	std::string GetEcho() {
 		string result;
 		char input = getch();
-		while(input != '\n' && input != KEY_ENTER) {
-			if (input == 27)
+		while(!isEnterChar(input)) {
+			if (isEscChar(input))
 				return "";
 			if (IsDeleteChar(input) && !result.empty()) {
 				TryBackSpace();
 				result.pop_back();
 			}
 			else  {
-				WriteText(input);
+				Write(input);
 				result += input;
 			}
 			Refresh();
@@ -78,9 +79,20 @@ class EchoWindow : public Window {
 		return result;
 	}
 
-	bool IsDeleteChar(char input) {
+private:
+	bool isDeleteChar(char input) {
 		return input == KEY_BACKSPACE || input == KEY_DC || input == 127 || input == 8;
 	}
+	bool isEnterChar(char input) {
+		return input == '\n' || input == KEY_ENTER;
+	}
+	bool isEscChar(char input) {
+		return input == 27;
+	}
+};
+
+};
+
 };
 
 class Display {
@@ -91,7 +103,7 @@ public:
 		if (!_disp)
 			return false;
 		_win.Clear();
-		_disp.DisplayTo(&_win); // exception safety?
+		_disp.TryDisplayTo(&_win); // exception safety?
 		_win.Refresh();
 		return true;
 	}

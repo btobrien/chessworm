@@ -68,7 +68,7 @@ bool isCastleShort(std::string move) {
 	return (move == "o-o" || move == "O-O");
 }
 
-//TMP
+//TMP?
 const int UP  = 8;
 const int RIGHT  = 1;
 const int DOWN = -8;

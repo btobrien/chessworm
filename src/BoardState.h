@@ -36,19 +36,22 @@ public:
 	bool TryMove(Move move) {
 
 		_clock++;
-		int newSquare = newSquare(move);
+
+		int newSquare = move.newSquare();
 
 		if (color::isMyPiece([newSquare])) return false;
-
-		if (!move.piece() && !tryMatchPiece<color>(move)) return false;
 
 		if (move.isCastleShort())
 			return static_cast<color*>(this)->TryCastleShort();
 		if (move.isCastleLong())
 			return static_cast<color*>(this)->TryCastleLong();
 		
-		if (!isSquare(oldSquare(move)) && !tryMatchOldSquare<color>(move)) return false;
-		int oldSquare = oldSquare(move);
+		int oldSquare = tryFindOldSquare<color>(move)
+		if (!isSquare(oldSquare)) return false
+
+		if (isEnPassantCapture<color>(oldSquare, newSquare))
+			[color::opposite::PAWN_DIRECTION + _enPassant] = nullpiece;
+		else if (move.takes() && ![newSquare]) return false;
 
 		[newSquare] = [oldSquare];
 		[oldSquare] = nullpiece;
@@ -56,7 +59,7 @@ public:
 		if (move.promotion())
 			[newSquare] = color::myPiece(move.promotion());
 
-		if (move.checkMate() && !isCheckMated<color::opposite>()) return false;
+		//if (move.checkMate() && !isCheckMated<color::opposite>()) return false;
 		if (move.check() && !isInCheck<color::opposite>()) return false;
 
 		static_cast<color*>(this)->SetEnPassant(oldSquare, newSquare);
@@ -66,8 +69,8 @@ public:
 	}
 
 	inline char operator[](int i) const { return _squares[i]; } 
-	inline bool clock() const { return _clock; }
-	inline std::string enPassant() const { return Chess::toString(_enPassant); }
+	inline int clock() const { return _clock; }
+	inline int enPassant() const { return _enPassant; }
 	inline bool whiteCastleShort() const { return _whiteCastleShort; }
 	inline bool whiteCastleLong()  const { return _whiteCastleLong; }
 	inline bool blackCastleShort() const { return _blackCastleShort; }
@@ -104,39 +107,59 @@ private:
 	friend Black;
 
 	template<typename color>
-	bool IsThreateningWithPiece(int square) { 
-	if (isThere<UP_UP_RIGHT, color::KNIGHT>(square)) return true;
-	if (isThere<UP_RIGHT_RIGHT, color::KNIGHT>(square)) return true;
-	if (isThere<DOWN_RIGHT_RIGHT, color::KNIGHT>(square)) return true;
-	if (isThere<DOWN_DOWN_RIGHT, color::KNIGHT>(square)) return true;
-	if (isThere<DOWN_DOWN_LEFT, color::KNIGHT>(square)) return true;
-	if (isThere<DOWN_LEFT_LEFT, color::KNIGHT>(square)) return true;
-	if (isThere<UP_LEFT_LEFT, color::KNIGHT>(square)) return true;
-	if (isThere<UP_UP_LEFT, color::KNIGHT>(square)) return true;
-	if (isFirst<UP, color::ROOK, color::QUEEN>(square)) return true;
-	if (isFirst<RIGHT, color::ROOK, color::QUEEN>(square)) return true;
-	if (isFirst<DOWN, color::ROOK, color::QUEEN>(square)) return true;
-	if (isFirst<LEFT, color::ROOK, color::QUEEN>(square)) return true;
-	if (isFirst<UP_RIGHT, color::ROOK, color::QUEEN>(square)) return true;
-	if (isFirst<DOWN_RIGHT, color::ROOK, color::QUEEN>(square)) return true;
-	if (isFirst<DOWN_LEFT, color::ROOK, color::QUEEN>(square)) return true;
-	if (isFirst<UP_LEFT, color::ROOK, color::QUEEN>(square)) return true;
-	return false;
+	bool isEnPassantCapture(int oldSquare, int newSquare) {
+		return color::piece([oldSquare]) == PAWN && newSquare == _enPassant;
 	}
 
 	template<typename color>
-	bool IsThreatening(int square) {
-		return static_cast<color*>(this)->IsThreateningWithPawn(square) || IsThreateningWithPiece<color>(square);
+	bool isThreatentingWithKnight(int square) { 
+		if (isThere<UP_UP_RIGHT, color::KNIGHT>(square)) return true;
+		if (isThere<UP_RIGHT_RIGHT, color::KNIGHT>(square)) return true;
+		if (isThere<DOWN_RIGHT_RIGHT, color::KNIGHT>(square)) return true;
+		if (isThere<DOWN_DOWN_RIGHT, color::KNIGHT>(square)) return true;
+		if (isThere<DOWN_DOWN_LEFT, color::KNIGHT>(square)) return true;
+		if (isThere<DOWN_LEFT_LEFT, color::KNIGHT>(square)) return true;
+		if (isThere<UP_LEFT_LEFT, color::KNIGHT>(square)) return true;
+		if (isThere<UP_UP_LEFT, color::KNIGHT>(square)) return true;
+		return false;
+	}
+
+	template<typename color>
+	bool isThreateningFromSide(int square) { 
+		if (isFirst<UP, color::ROOK, color::QUEEN>(square)) return true;
+		if (isFirst<RIGHT, color::ROOK, color::QUEEN>(square)) return true;
+		if (isFirst<DOWN, color::ROOK, color::QUEEN>(square)) return true;
+		if (isFirst<LEFT, color::ROOK, color::QUEEN>(square)) return true;
+		return false;
+	}
+
+	template<typename color>
+	bool isThreateningFromDiag(int square) { 
+		if (isFirst<UP_RIGHT, color::BISHOP, color::QUEEN>(square)) return true;
+		if (isFirst<DOWN_RIGHT, color::BISHOP, color::QUEEN>(square)) return true;
+		if (isFirst<DOWN_LEFT, color::BISHOP, color::QUEEN>(square)) return true;
+		if (isFirst<UP_LEFT, color::BISHOP, color::QUEEN>(square)) return true;
+		return false;
+	}
+
+	template<typename color>
+	bool isThreatening(int square) {
+		if (static_cast<color*>(this)->IsThreateningWithPawn(square)) return true;
+		if isThreatentingWithKnight<color>(square) return true;
+		if isThreateningFromSide<color>(square) return true;
+		if isThreateningFromDiag<color>(square) return true;
+		return false;
 	}
 
 	template <int direction, char piece0, char piece1>
 	bool isFirst(int square) {
-		for (int i = square + direction; isSquare(i); i = i + direction) {
+		for (int i = square + direction; isSquare(i); i += direction) {
 			if ([i])
 				return ([i] == piece0 || [i] == piece1);
 		}
 		return false;
 	}
+
 
 	template <int direction, char piece>
 	bool isThere(int square);
@@ -147,22 +170,25 @@ private:
 	bool isBlocked(char oldSquare, char newSquare) {
 		int direction = lineDirection(oldSquare, newSquare);
 		if (!direction)
-			return true;
-		for (int i = oldSquare + direction; i + direction; i != newSquare - direction) {
-			if ([i]) return false;
+			return false;
+		for (int i = oldSquare + direction; i != (newSquare - direction); i += direction) {
+			if ([i]) return true;
 		}
-		return true;
+		return false;
 	}
 
 	template<typename color>
 	int findKing() const {
 		int i = NUM_SQUARES - 1;
-		while(i >= 0 && _squares[i] != color::KING) i--;
+		while(i >= 0 && _squares[i] != color::KING)
+			i--;
 		return i;
 	}
 
+
 	template<typename color>
 	bool isInCheck(int oldSquare, int newSquare) {
+
 		char capturingPiece = [oldSquare];
 		char capturedPiece = [newSquare];	
 
@@ -177,11 +203,12 @@ private:
 		return result;
 	}
 
+
 	template<typename color>
 	int tryFindOldSquare(Move& move) {
 		int oldSquare = nullsquare;
 		for (int i = 0; i < NUM_SQUARES; i++) {
-			if (isLegalMove<color>(i, move)) {
+			if (isLegalMove<color>(move, i)) {
 				if (isSquare(oldSquare))
 					return nullsquare;
 				oldSquare = i;
@@ -191,37 +218,21 @@ private:
 	}
 
 	template<typename color>
-	bool isLegalMove(int oldSquare, Move& move) {
-		if ([oldSquare] != color::myPiece(move.piece()))
+	bool isLegalMove(Move& move, int oldSquare) {
+		char piece = color::piece([oldSquare])
+		if (!move.TryMatch(piece, oldSquare))
 			return false;
-		if (!move.TryMatchOldSquare(oldSquare))
+		int newSquare = move.newSquare();
+		if (piece == Chess:PAWN && !isRightPawnDirection<color>(oldSquare, newSquare)
 			return false;
-		if ([oldSquare] == Chess:PAWN) {
-			if (!pawnDirectionTest<color>(move))
-				return false;
-			if (!pawnCaptureTest<color>(move))
-				return false;
-		}
-		if (move.takes() && ![newSquare]) return false;
-		int newSquare = newSquare(move);
-		return !isBlocked(oldSquare, newSquare) && isInCheck<color>(oldSquare, newSquare);
+		return !isBlocked(oldSquare, newSquare) && !isInCheck<color>(oldSquare, newSquare);
 	}
 
 	template<typename color>
-	bool pawnCaptureTest(oldSquare, newSquare) {
-		if (_enPassant == newSquare) {
-			[color::opposite::PAWN_DIRECTION + _enPassant] = nullpiece;
-			[_enPassant] = color::opposite::PAWN;
-		}
-	}
-
-	template<typename color>
-	bool pawnDirectionTest(Move move) {
-		bool isMovingUp = move.newRank() - move.oldRank() > 0;
-		bool shouldMoveUp = (color::PAWN_DIRECTION == Chess::UP);
-		if (isMovingUp != shouldMoveUp)
-			return false;
-		return true;
+	bool isRightPawnDirection(int oldSquare, int newSquare) {
+		bool isMovingUp = (rank(oldSquare) - rank(newSquare)) > 0;
+		bool shouldMoveUp = (color::PAWN_DIRECTION > 0);
+		return isMovingUp == shouldMoveUp;
 	}
 
 };

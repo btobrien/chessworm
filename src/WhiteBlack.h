@@ -25,6 +25,7 @@ public:
 	}
 	static inline bool isOppPiece(char piece) { return piece && !IsMyPiece(piece); }
 	static inline char piece(char p) { return p; }
+	static inline char myPiece(char p) { return p; }
 
 	static const int PAWN_DIRECTION = CHESS::UP;
 };
@@ -53,6 +54,7 @@ public:
 	}
 	static inline bool isOppPiece(char piece) { return piece && !IsMyPiece(piece); }
 	static inline char piece(char p) { return p - SHIFT; }
+	static inline char myPiece(char p) { return p + SHIFT; }
 
 	static const int PAWN_DIRECTION = CHESS::DOWN;
 };

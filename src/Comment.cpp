@@ -20,6 +20,7 @@ class ICommentable {
 public:
 	virtual void AddComment(Comment comment) = 0;
 	virtual void DeleteComment() = 0;
+	// use iterators
 	virtual Comment& GetComment() = 0;
 	virtual void NextComment() = 0;
 };

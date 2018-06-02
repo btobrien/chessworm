@@ -7,8 +7,8 @@ struct dimension {
 
 class IDisplayer {
 	virtual bool TryDisplayTo(Window& win) = 0;
-	virtual bool RequiresDimension(const dimension& dim) { return false; } 
-	virtual bool IsValidDimension(dimension dim) { return true; } 
+	virtual bool requiresDimension(const dimension& dim) { return false; } 
+	virtual bool isValidDimension(dimension dim) { return true; } 
 };
 
 string MoveString(const AnnotatedMove& move) {
@@ -43,7 +43,7 @@ public:
 		win.DisableAttribute(A_BOLD);
 	}
 
-	virtual bool RequiresDimension(const dimension& dim) {
+	virtual bool requiresDimension(const dimension& dim) {
 		dim.height = SQUARES_PER_ROW;
 		dim.width = reqWidth();
 		return true;
