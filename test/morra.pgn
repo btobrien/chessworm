@@ -6,7 +6,7 @@
 [ECO "B21"]
 [Opening "Sicilian Defense: Smith-Morra Gambit"]
 [Result "*"]
-[Annotator "https://lichess.org/@/MagoDaChicago"]
+[Annotator "Marc Esserman"]
 
 { The following example, which made a great impression upon me as a young Morraphile, can be found in Graham Burgess's groundbreaking 1994 Smith-Morra Gambit book. Burgess featured the sequence to
 explain why Black cannot make simple developmental moves in the Morra Gambit and survive. We will be viewing it from a different lens, with an eye for rabidly chasing the black queen to and fro. }
@@ -24,7 +24,7 @@ the passive 9...Bd7 also blocks the d-file pin but interferes with the Queen's g
 [ECO "B21"]
 [Opening "Sicilian Defense: Smith-Morra Gambit"]
 [Result "*"]
-[Annotator "https://lichess.org/@/MagoDaChicago"]
+[Annotator "Marc Esserman"]
 
 1. e4 c5 2. d4 cxd4 3. c3 dxc3 4. Nxc3 Nc6 5. Nf3 e6 6. Bc4 Qc7 (6... Nf6! 7. Qe2 (7. O-O? Nxe4 8. Nxe4 d5!)) 7. O-O Nf6 8. Nb5! (8. Qe2? Ng4! 9. h3?? Nd4!) 8... Qb8 { The queen must retreat to "Siberia" in order to keep watch over f4 } (8... Qd8? 9. Bf4! d6 10. Bxd6 Bxd6 11. Nxd6+ Ke7 12. e5 Ne8 13. Qe2 Nxd6 14. Rfd1 $18) 9. e5! Nxe5?! 10. Nxe5! Qxe5 11. Re1 $16 Qc5 (11... Qb8 12. Qd4! { Threatening Bf4! } 12... Nh5 13. Bg5 $16) 12. Bf1 a6 13. Be3 Qc6 14. Na7 Qc7 15. Rc1 Qd8 16. Qc2 Bb4 17. Nxc8 *
 
@@ -37,7 +37,7 @@ the passive 9...Bd7 also blocks the d-file pin but interferes with the Queen's g
 [ECO "B21"]
 [Opening "Sicilian Defense: Smith-Morra Gambit Accepted, Scheveningen Formation"]
 [Result "*"]
-[Annotator "https://lichess.org/@/MagoDaChicago"]
+[Annotator "Marc Esserman"]
 
 1. e4 c5 2. d4 cxd4 3. c3 dxc3 4. Nxc3 Nc6 5. Nf3 d6 6. Bc4 e6 7. O-O a6 8. Qe2 Nf6 9. Rd1 Qc7 10. Bf4! Be7 11. Rac1!? O-O 12. Bb3! *
 
