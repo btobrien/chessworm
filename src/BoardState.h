@@ -47,7 +47,7 @@ public:
 			return static_cast<color*>(this)->TryCastleLong();
 		
 		int oldSquare = tryFindOldSquare<color>(move)
-		if (!isSquare(oldSquare)) return false
+		if (!isSquare(oldSquare)) return false;
 
 		if (isEnPassantCapture<color>(oldSquare, newSquare))
 			[color::opposite::PAWN_DIRECTION + _enPassant] = nullpiece;
@@ -144,7 +144,7 @@ private:
 
 	template<typename color>
 	bool isThreatening(int square) {
-		if (static_cast<color*>(this)->IsThreateningWithPawn(square)) return true;
+		if (static_cast<color*>(this)->isThreateningWithPawn(square)) return true;
 		if isThreatentingWithKnight<color>(square) return true;
 		if isThreateningFromSide<color>(square) return true;
 		if isThreateningFromDiag<color>(square) return true;
