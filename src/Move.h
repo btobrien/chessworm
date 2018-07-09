@@ -20,7 +20,7 @@ public:
 	inline char promotion() const { return _promotion; }
 
 
-	bool TryMatch(char piece, int oldSquare) {
+	bool tryMatch(char piece, int oldSquare) {
 		if (_piece && piece != _piece)
 			return false;
 		int oldFile = file(oldSquare)

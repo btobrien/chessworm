@@ -34,7 +34,6 @@ public:
 
 	template <typename color>
 	bool TryMove(Move move) {
-
 		_clock++;
 
 		int newSquare = move.newSquare();
@@ -180,7 +179,7 @@ private:
 	template<typename color>
 	int findKing() const {
 		int i = NUM_SQUARES - 1;
-		while(i >= 0 && _squares[i] != color::KING)
+		while(i >= 0 && [i] != color::KING)
 			i--;
 		return i;
 	}
@@ -220,7 +219,7 @@ private:
 	template<typename color>
 	bool isLegalMove(Move& move, int oldSquare) {
 		char piece = color::piece([oldSquare])
-		if (!move.TryMatch(piece, oldSquare))
+		if (!move.tryMatch(piece, oldSquare))
 			return false;
 		int newSquare = move.newSquare();
 		if (piece == Chess:PAWN && !isRightPawnDirection<color>(oldSquare, newSquare)

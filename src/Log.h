@@ -15,7 +15,7 @@ public:
 	static const int ERROR = 3;
 
 private:
-	static std::string ToString(int tag);
+	static std::string toString(int tag);
 	static std::string _name;
 	static std::ofstream* _file;
 };

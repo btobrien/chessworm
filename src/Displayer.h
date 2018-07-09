@@ -1,4 +1,3 @@
-#include "ColorCombo.h"
 
 struct dimension {
 	int height;
@@ -6,7 +5,7 @@ struct dimension {
 };
 
 class IDisplayer {
-	virtual bool TryDisplayTo(Window& win) = 0;
+	virtual bool tryDisplayTo(Window& win) = 0;
 	virtual bool requiresDimension(const dimension& dim) { return false; } 
 	virtual bool isValidDimension(dimension dim) { return true; } 
 };
@@ -26,31 +25,21 @@ string MovePrefix(bool whiteToMove) {
 }
 
 template <typename T>
-class BoardDisplayer : Displayer {
+class BoardDisplayerBase : Displayer {
 public:
-	BoardDisplayer(const& T brd) board(brd) {
-	}
 
-	virtual bool TryDisplayTo(Window& win) override {
+	BoardDisplayerBase(const& T brd) board(brd) {}
+
+	virtual bool tryDisplayTo(Window& win) override {
 		win.Reset();
 		win.EnableAttribute(A_BOLD);
-		for (int i = 0; i < SQUARES_PER_ROW; i++) {
+		for (int i = 0; i < BOARD_LENGTH; i++) {
 			if (!isFlipped)
-				DisplayRowTo(win, SQUARES_PER_ROW - i - 1);
+				DisplayRowTo(win, BOARD_LENGTH - i - 1);
 			else
 				DisplayFlippedRowTo(win, i);
 		}
 		win.DisableAttribute(A_BOLD);
-	}
-
-	virtual bool requiresDimension(const dimension& dim) {
-		dim.height = SQUARES_PER_ROW;
-		dim.width = reqWidth();
-		return true;
-	}
-
-	virtual bool IsValidDimension(dimension dim) {
-		return dim.height >= SQUARES_PER_ROW && dim.width == regWidth();
 	}
 
 	void Flip() {
@@ -58,46 +47,14 @@ public:
 	}
 
 protected:
+	static const int BOARD_LENGTH = 8;
+private:
+
 	const T& board;
-	static const int SQUARES_PER_ROW = 8;
-	static const int SQUARE_BUFFER = 1;
-	// use const expr
-	static const reqWidth() { return (1 + (2 * SQUARE_BUFFER)) * 8; }
-	void DisplayPieceTo(Window win, char piece, bool isLightSquare) {
-		string buffer = string(" ", SQUARE_BUFFER);
-		bool isWhitePiece = White::IsMyPiece(piece);
-		int colorPair;
-
-		if      ( isWhitePiece &&  isLightSquare) colorPair = ColorCombo::WhiteOnLight;
-		else if ( isWhitePiece && !isLightSquare) colorPair = ColorCombo::WhiteOnDark;
-		else if (!isWhitePiece &&  isLightSquare) colorPair = ColorCombo::BlackOnLight;
-		else if (!isWhitePiece && !isLightSquare) colorPair = ColorCombo::BlackOnDark;
-		
-		win.AddAttribute(COLOR_PAIR(colorPair));
-		win.AddString(buffe); 
-
-		switch(piece) {
-			case White::PAWN:		    win.AddString("\u265F"); break;
-			case White::KNIGHT:		    win.AddString("\u265E"); break;
-			case White::BISHOP:		    win.AddString("\u265D"); break;
-			case White::ROOK:		    win.AddString("\u265C"); break;
-			case White::QUEEN:		    win.AddString("\u265B"); break;
-			case White::KING:		    win.AddString("\u265A"); break;
-			case Black::PAWN:		    win.AddString("\u265F"); break;
-			case Black::KNIGHT:		    win.AddString("\u265E"); break;
-			case Black::BISHOP:		    win.AddString("\u265D"); break;
-			case Black::ROOK:		    win.AddString("\u265C"); break;
-			case Black::QUEEN:		    win.AddString("\u265B"); break;
-			case Black::KING:		    win.AddString("\u265A"); break;
-			default:					win.AddString(" ");      break;
-		}
-
-		win.AddString(buffer); 
-		win.RemoveAttribute(COLOR_PAIR(colorPair));
-	}
 	inline bool IsLightSquare(int row, int column) {
 		return (row + column) % 2;
 	}
+
 	void DisplayRowTo(Win* win, int row) {
 		for (int column = 0; column < squaresPerRow; column++) {
 			DisplayPieceTo(win, source[row * squaresPerRow + column], IsLightSquare(row, column));
@@ -108,15 +65,16 @@ protected:
 			DisplayPieceTo(win, source[row * squaresPerRow + column], IsLightSquare(row, column));
 		}
 	}
-private:
+
 	bool _isFlipped;
+	virtual void DisplayPieceTo(Window win, char piece, bool isLightSquare) = 0;
 };
 
 
 class ChoiceDisplayer : ChessDisplayer {
 	ChoiceDisplayer(const Tree& tree) : Displayer {}
 
-	virtual bool TryDisplayTo(Window& win) {
+	virtual bool tryDisplayTo(Window& win) {
 		win.Reset();
 		for (auto it = tree.begin(); it != tree.end(); it++) {
 			Logger::log("ChessView::DisplayHead received " + it->text);
@@ -130,7 +88,7 @@ private:
 
 template <typename T>
 class MoveHistoryDisplayer : Displayer {
-	virtual bool TryDisplayTo(Window& win) {
+	virtual bool tryDisplayTo(Window& win) {
 		win.Clear();
 		for (auto it = board.begin(); it != board.end(); it++) {
 			Logger::log("ChessView::DisplayHead received " + it->text);
@@ -143,7 +101,7 @@ private:
 };
 
 class CommandDisplayer : Displayer {
-	virtual bool TryDisplayTo(Window& win) {
+	virtual bool tryDisplayTo(Window& win) {
 	}
 private:
 	string error;
@@ -151,7 +109,7 @@ private:
 };
 
 class NullDisplayer : Displayer {
-	virtual bool TryDisplayTo(Window& win) {
+	virtual bool tryDisplayTo(Window& win) {
 		return true;
 	}
 };

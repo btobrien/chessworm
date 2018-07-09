@@ -16,7 +16,7 @@ ofstream& Logger::file() {
 void Logger::log(const string& message, int tag) {
 	if (!_file)
 		open();
-	*_file << ToString(tag) << " " << message << endl;
+	*_file << toString(tag) << " " << message << endl;
 }
 
 void Logger::open(string fileName) {
@@ -38,7 +38,7 @@ void Logger::close() {
 	_file = nullptr;
 }
 
-std::string Logger::ToString(int tag) {
+std::string Logger::toString(int tag) {
 	switch(tag) {
 		case INFO: return "[INFO]";
 		case WARN: return "[WARN]";
