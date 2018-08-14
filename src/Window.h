@@ -7,9 +7,9 @@ struct coordinate {
 struct frame : dimension, coordinate {};
 
 
-class Stream {
+class Window {
 public:
-	~Stream() {
+	~Window() {
 		delwin(win);
 	}
 
@@ -22,7 +22,8 @@ public:
 	void Write(char ch, int colorPair = 0);
 	// overload stream operator!!!
 	void EnableAttribute(int attr);
-	void DisableAttribute(int attr);
+	void EnableAttribute();
+	void DisableAttribute();
 	void Refresh();
 	frame frame();
 	Win* getWin();
@@ -31,9 +32,10 @@ protected:
 	Win* _win; //??
 private:
 	const frame _frame;
+	int currentAttribute;
 };
 
-class Window : public Stream {
+class MoveWindow : public Window {
 public:
 	coordinate coordinate() {
 		coordinate coord;
@@ -57,7 +59,7 @@ public:
 	}
 };
 
-class InputWindow : public Window {
+class InputWindow : public MoveWindow {
 public:
 	std::string GetEcho() {
 		string result;
@@ -80,19 +82,15 @@ public:
 	}
 
 private:
-	bool isDeleteChar(char input) {
+	inline bool isDeleteChar(char input) {
 		return input == KEY_BACKSPACE || input == KEY_DC || input == 127 || input == 8;
 	}
-	bool isEnterChar(char input) {
+	inline bool isEnterChar(char input) {
 		return input == '\n' || input == KEY_ENTER;
 	}
-	bool isEscChar(char input) {
+	inline bool isEscChar(char input) {
 		return input == 27;
 	}
-};
-
-};
-
 };
 
 class Display {
@@ -103,7 +101,8 @@ public:
 		if (!_disp)
 			return false;
 		_win.Clear();
-		_disp.TryDisplayTo(&_win); // exception safety?
+		if (!_disp.TryDisplayTo(_win))
+			return false;
 		_win.Refresh();
 		return true;
 	}
@@ -113,11 +112,11 @@ public:
 
 private:
 	Window _win;
-	const Displayer* _disp; // make shared ptr
+	const Displayer* _disp;
 };
 
-template <typename T>
-class Adjustable : public T {
-	void TrySetFrame(frame newFrame);
-};
+//template <typename T>
+//class Adjustable : public T {
+//	void TrySetFrame(frame newFrame);
+//};
 

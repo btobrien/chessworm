@@ -37,7 +37,7 @@ struct GameNode {
 	std::vector<GameNode*> variations;
     GameNode(GameNode* p, std::string m, const std::string& text, int& i, std::string pre);
     ~GameNode();
-	std::string ToString();
+	std::string ToString(); //delete
 
 //private:
     static void next(const std::string &text, int &i, char delim);
