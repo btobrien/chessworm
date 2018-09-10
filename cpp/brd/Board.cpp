@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <stdio.h>
@@ -10,15 +9,11 @@
 #include <vector>
 #include "Utils.cpp"
 #include "Log.h"
-#include <boost/ptr_container/ptr_vector.hpp>
 
 template <typename T>
 class Memorable {
 protected:
 	virtual bool TryUpdate(const std::string&) = 0;
-	// implement move semantics?
-	// template transition param as well
-	// make unique ptrs?
 	Memorable() : _state(new T()) {}
 	Memorable(const Memorable& rhs) : _state(new T(*(rhs._state))) {}
 	Memorable(T* state) : _state(state) {}

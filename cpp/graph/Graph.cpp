@@ -20,7 +20,7 @@ struct AnnotatedMove {
 	double eval; // TODO
 };
 
-struct Edge : AnnotatedMove, Commentable {
+struct Edge : AnnotatedMove {
     Edge(Node* childIn, Node* parentIn, const GameNode& input);
     ~Edge();
     Node* child;
@@ -36,7 +36,7 @@ private:
 	static int Intrigue(int glyph) { return glyph; } // TODO
 };
 
-struct Node : Commentable {
+struct Node {
     ~Node();
     void Connect(Node& child, const GameNode &input);
     void AddParent(Edge* parent);

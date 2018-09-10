@@ -1,0 +1,10 @@
+#!/bin/bash
+
+while read -a input; do
+	unset input[0]
+	echo "${input[@]}"
+done
+
+
+
+

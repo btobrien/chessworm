@@ -1,0 +1,10 @@
+#!/bin/bash
+
+while read input; do
+	clear
+	echo $input
+done
+
+
+
+

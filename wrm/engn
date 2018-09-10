@@ -1,0 +1,32 @@
+#!/bin/bash
+
+while true; do
+	if read -a cmd; then
+
+		#position=$(tail -1 <$hist_file)
+
+		if [ "$cmd" = 'exit' ]; then
+
+			exit
+		fi
+
+		if [ "$cmd" = 'move' ]; then
+			move=${cmd[1]}
+			echo "step position_after_$move" #$(brd $position <<<$move)"
+			continue
+		fi
+
+		if [ "$cmd" = 'mark' ]; then
+			name=${cmd[1]}
+			cp $line_file $mark_dir/$name
+			cp $index_file $mark_dir/$name
+			continue
+		fi
+		
+		echo "${cmd[@]}"
+	fi
+done
+
+
+
+

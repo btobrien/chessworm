@@ -1,0 +1,67 @@
+#!/bin/bash
+
+clear
+stty -echo
+tput civis
+
+graph=${1:-default}
+
+cd $(dirname $0)
+modl_fifo=.impl/wrm/ctrl/fifos/$$
+mkdir -p $(dirname $modl_fifo)
+mkfifo $modl_fifo
+trap "rm -f $modl_fifo; stty echo; tput cnorm" EXIT
+
+./modl $graph <$modl_fifo | ./view $menu_index_ptr &
+
+
+while read -n1 key; do
+
+	if [ "$key" == ':' ]; then
+		tput cup $(tput lines) 0
+		stty echo
+		tput cnorm
+		read -p':' -e line;
+		stty -echo
+		tput civis
+
+		if [ "line" == '' ]; then
+			continue
+		fi
+
+		if [ "$line" = 'q' ]; then
+			clear
+			exit
+		fi
+
+		if [ "$line" == 'vim' ]; then
+			vim ~/.vimrc
+			continue
+		fi
+
+		clear
+		echo "echo $line" >$modl_fifo
+		continue
+	fi
+
+	if [ "$key" == '/' ]; then
+		tput cup $(tput lines) 0
+		stty echo
+		tput cnorm
+		read -p'/' -e move;
+		stty -echo
+		tput civis
+
+		if [ "$move" == '' ]; then
+			continue
+		fi
+
+		clear
+		echo "move $move" >$modl_fifo
+		continue
+	fi
+
+	echo "echo $key" >$modl_fifo
+
+done
+																																					
