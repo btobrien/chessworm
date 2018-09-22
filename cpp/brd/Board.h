@@ -15,9 +15,11 @@ public:
 		try { Move move(moveStr); }
 		catch { return false; }
 
-		auto prevState = copyState();
+		auto prevState = new BoardState(state);
 		if (!TryUpdateState(move)) {
-			delete SwapState(prevState);
+			delete state;
+			state = prevState;
+			prevState = nullptr;
 			return false;
 		}
 		delete prevState;
