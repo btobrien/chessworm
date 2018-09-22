@@ -6,7 +6,6 @@ while true; do
 		#position=$(tail -1 <$hist_file)
 
 		if [ "$cmd" = 'exit' ]; then
-
 			exit
 		fi
 
@@ -23,6 +22,7 @@ while true; do
 			continue
 		fi
 		
+		echo echo $is_flipped
 		echo "${cmd[@]}"
 	fi
 done

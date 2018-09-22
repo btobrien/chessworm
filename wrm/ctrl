@@ -10,10 +10,10 @@ cd $(dirname $0)
 modl_fifo=.impl/wrm/ctrl/fifos/$$
 mkdir -p $(dirname $modl_fifo)
 mkfifo $modl_fifo
-trap "rm -f $modl_fifo; stty echo; tput cnorm" EXIT
 
-./modl $graph <$modl_fifo | ./view $menu_index_ptr &
+./modl $graph <$modl_fifo | ./view $is_flipped_stream $menu_index_stream &
 
+trap "echo exit >$modl_fifo; rm -f $modl_fifo; stty echo; tput cnorm" EXIT
 
 while read -n1 key; do
 
@@ -59,6 +59,10 @@ while read -n1 key; do
 		clear
 		echo "move $move" >$modl_fifo
 		continue
+	fi
+
+	if [ "$key" == 'f' ]; then
+		export is_flipped=true
 	fi
 
 	echo "echo $key" >$modl_fifo

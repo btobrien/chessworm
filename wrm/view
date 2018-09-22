@@ -1,8 +1,9 @@
 #!/bin/bash
-
+is_flipped=false
 while read input; do
 	clear
 	echo $input
+	echo $is_flipped
 done
 
 
