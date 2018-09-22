@@ -1,0 +1,35 @@
+print  #-
+add a
+add b
+add c
+add d
+print  #d
+prev
+print  #c
+prev
+print  #b
+next
+print  #c
+prev
+print  #b
+prev
+print  #a
+prev
+print  #-
+prev
+print  #-
+next
+print  #a
+next 
+print  #b
+next
+print  #c
+prev
+print  #b
+next
+print  #c
+next
+print  #d
+next
+print  #d
+

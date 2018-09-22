@@ -1,0 +1,15 @@
+add a
+add b
+add c
+add d
+first
+print     #-
+last
+print     #d
+set 2
+print     #b
+slide -1
+print     #a
+slide 2
+print     #c
+

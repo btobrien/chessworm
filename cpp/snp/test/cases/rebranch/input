@@ -1,0 +1,18 @@
+add a
+add b
+add c
+add d
+add e
+prev
+prev
+prev
+add x
+add y
+add z
+snap
+next
+print  #c
+rebranch
+print  #y
+next
+print  #z
