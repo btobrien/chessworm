@@ -1,5 +1,8 @@
+
+#include "brd/Board.cpp"
 #include "AbstractDisplay.h"
 #include "BoardDisplay.h"
+
 using std::string;
 using std::cin;
 
