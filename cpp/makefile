@@ -20,4 +20,4 @@ pieces.o : chess/include/pieces.cpp chess/include/pieces.h
 	g++ -c chess/include/pieces.cpp -I/Users/btobrien/dev/chess_worm/cpp
 
 clean :
-	rm board.o move.o squares.o pieces.o
+	rm *.o
