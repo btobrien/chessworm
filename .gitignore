@@ -1,6 +1,4 @@
 .*
-ncurses-6.0/
-ChessBoard
-Chess
+*.o
 *.dSYM/
 
