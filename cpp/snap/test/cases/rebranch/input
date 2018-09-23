@@ -13,6 +13,8 @@ snap
 next
 print  #c
 rebranch
+print  #x
+next
 print  #y
 next
 print  #z

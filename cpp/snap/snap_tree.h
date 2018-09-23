@@ -78,7 +78,6 @@ public:
 		delete future;
 		future = new_future;
 		snap_future = nullptr;
-		next();
 		return true;
 	}
 

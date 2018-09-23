@@ -1,21 +1,8 @@
-#include "snap_tree.h"
-#include <iostream>
 #include <string>
+#include "snap_tree.h"
+#include "include/read.h"
 
 using namespace std;
-
-string getword(string& str) {
-	int i = str.find(' ');
-	if (i == string::npos) {
-		string wrd = str;
-		str = "";
-		return wrd;
-	}
-	string wrd = str.substr(0, i);
-	while(i < str.length() && str[i] == ' ') { i++; }
-	str = str.substr(i);
-	return wrd;
-}
 
 int main(int argc, char* argv[]) {
 
