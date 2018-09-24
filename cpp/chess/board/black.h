@@ -7,23 +7,11 @@
 #include "white.h"
 
 
-class Black : public BoardState {
+class Black : public BoardState, public Chess::Black {
 public:
-	static const char PAWN = Chess::PAWN + SHIFT;
-	static const char KNIGHT = Chess::KNIGHT + SHIFT;
-	static const char BISHOP = Chess::BISHOP + SHIFT;
-	static const char ROOK = Chess::ROOK + SHIFT;
-	static const char QUEEN = Chess::QUEEN + SHIFT;
-	static const char KING = Chess::KING + SHIFT;
 
-	static inline bool isMyPiece(char p) {
-		switch (p) { case PAWN: case KNIGHT: case BISHOP: case ROOK: case QUEEN: case KING: return true; }
-		return false;
-	}
-	static inline bool isOppPiece(char p) { return p && !isMyPiece(p); }
-	static inline char myPiece(char p) { return p + SHIFT; }
-	static inline char oppPiece(char p) { return p; }
-	static inline char whichPiece(char p) { return p - SHIFT; }
+	static inline bool isOppPiece(char p) { return Chess::White::isPiece(p); }
+	static inline char oppPiece(char p) { return Chess::White::piece(p); }
 
 	static const int PAWN_DIRECTION = DOWN;
 
@@ -44,7 +32,7 @@ public:
 	bool TryCastleShort() {
 		if (!_flags.blackCastleShort || _[f8] || _[g8]) 
 			return false;
-		if (isThreatening<White>(e8) || isThreatening<White>(f8) || isThreatening<White>(g8)) 
+		if (isThreatened(e8) || isThreatened(f8) || isThreatened(g8)) 
 			return false;
 		_[f8] = Black::ROOK;
 		_[g8] = Black::KING;
@@ -58,7 +46,7 @@ public:
 	bool TryCastleLong() {
 		if (!_flags.blackCastleLong || _[b8] || _[c8] || _[d8]) 
 			return false;
-		if (isThreatening<White>(e8) || isThreatening<White>(d8) || isThreatening<White>(c8)) 
+		if (isThreatened(e8) || isThreatened(d8) || isThreatened(c8)) 
 			return false;
 		_[d8] = Black::ROOK;
 		_[c8] = Black::KING;
