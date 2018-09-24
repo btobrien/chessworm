@@ -1,5 +1,6 @@
 #pragma once
 
+#include "chess/include/castle_flags.h"
 #include <string>
 
 class Move;
@@ -11,19 +12,14 @@ public:
 	Board(const Board&);
 	~Board();
 
-	bool TryUpdate(const std::string& moveStr);
+	bool TryMove(const std::string&);
 
-    bool whiteToMove() const;
-	int clock() const;
-	bool whiteCastleShort() const;
-	bool whiteCastleLong()  const;
-	bool blackCastleShort() const;
-	bool blackCastleLong()  const;
-	int enPassant() const;
-	std::string key() const;
 	char operator[](int i) const;
+	int clock() const;
+	CastleFlags flags() const;
+	int enPassant() const;
 private:
-	bool TryUpdateState(Move move);
+	bool TryUpdateState(Move);
 	BoardState* state;
 };
 
