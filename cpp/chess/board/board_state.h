@@ -36,7 +36,7 @@ public:
 		_clock++;
 
 		int newSquare = move.newSquare();
-		if (color::isMyPiece(_[newSquare])) {
+		if (color::isPiece(_[newSquare])) {
 			cerr << "ERROR: cannot capture own piece" << endl;
 			return false;
 		}
@@ -62,7 +62,7 @@ public:
 		_[oldSquare] = Chess::nullpiece;
 
 		if (move.promotion())
-			_[newSquare] = color::myPiece(move.promotion());
+			_[newSquare] = color::piece(move.promotion());
 
 		//if (move.checkMate() && !isMated<color>()) WARN
 		//if (move.check() && !isChecked<color>()) WARN
@@ -91,11 +91,10 @@ private:
 
 	friend class White;
 	friend class Black;
-	static const int SHIFT = ('a' - 'A');
 
 	template<typename color>
 	bool isEnPassantCapture(int oldSquare, int newSquare) const {
-		return _[oldSquare] == color::myPiece(Chess::PAWN) && newSquare == _enPassant;
+		return _[oldSquare] == color::piece(Chess::PAWN) && newSquare == _enPassant;
 	}
 
 	template<typename color>
@@ -113,19 +112,19 @@ private:
 
 	template<typename color>
 	bool isThreateningFromSide(int square) const { 
-		if (isFirst<UP, color::ROOK, color::QUEEN>(square)) return true;
-		if (isFirst<RIGHT, color::ROOK, color::QUEEN>(square)) return true;
-		if (isFirst<DOWN, color::ROOK, color::QUEEN>(square)) return true;
-		if (isFirst<LEFT, color::ROOK, color::QUEEN>(square)) return true;
+		if (isUnblocked<UP, color::ROOK, color::QUEEN>(square)) return true;
+		if (isUnblocked<RIGHT, color::ROOK, color::QUEEN>(square)) return true;
+		if (isUnblocked<DOWN, color::ROOK, color::QUEEN>(square)) return true;
+		if (isUnblocked<LEFT, color::ROOK, color::QUEEN>(square)) return true;
 		return false;
 	}
 
 	template<typename color>
 	bool isThreateningFromDiag(int square) const { 
-		if (isFirst<UP_RIGHT, color::BISHOP, color::QUEEN>(square)) return true;
-		if (isFirst<DOWN_RIGHT, color::BISHOP, color::QUEEN>(square)) return true;
-		if (isFirst<DOWN_LEFT, color::BISHOP, color::QUEEN>(square)) return true;
-		if (isFirst<UP_LEFT, color::BISHOP, color::QUEEN>(square)) return true;
+		if (isUnblocked<UP_RIGHT, color::BISHOP, color::QUEEN>(square)) return true;
+		if (isUnblocked<DOWN_RIGHT, color::BISHOP, color::QUEEN>(square)) return true;
+		if (isUnblocked<DOWN_LEFT, color::BISHOP, color::QUEEN>(square)) return true;
+		if (isUnblocked<UP_LEFT, color::BISHOP, color::QUEEN>(square)) return true;
 		return false;
 	}
 
@@ -139,7 +138,7 @@ private:
 	}
 
 	template <int direction, char piece0, char piece1>
-	bool isFirst(int square) const {
+	bool isUnblocked(int square) const {
 		for (int i = square + direction; isSquare(i); i += direction) {
 			if (_[i])
 				return (_[i] == piece0 || _[i] == piece1);
