@@ -28,4 +28,6 @@ private:
 	char _promotion;
 	bool _check;
 	bool _mate;
+
+	bool isBigPiece(char);
 };

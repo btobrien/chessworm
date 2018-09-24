@@ -77,7 +77,7 @@ Move::Move(std::string move) {
 		return;
 	}	
 
-	if (isPiece(move[0])) {
+	if (isBigPiece(move[0])) {
 		_piece = move[0];
 		frontIndex = 1;
 	}
@@ -90,7 +90,7 @@ Move::Move(std::string move) {
 	if (move[backIndex - 1] == '=') {
 		if (_piece != PAWN)
 			throw std::invalid_argument("invalid");
-		if (move[backIndex] == KING || !isPiece(move[backIndex]))
+		if (move[backIndex] == KING || !isBigPiece(move[backIndex]))
 			throw std::invalid_argument("invalid");
 		_promotion = move[backIndex];
 		backIndex -= 2;
@@ -135,3 +135,5 @@ Move::Move(std::string move) {
 	if (backIndex >= frontIndex)
 		throw std::invalid_argument("invalid");
 }
+
+bool Move::isBigPiece(char p) { return p != PAWN && isPiece(p); }
