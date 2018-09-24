@@ -8,7 +8,6 @@
 
 class White  : public BoardState {
 public:
-	static const int SHIFT = ('a' - 'A');
 	static const char PAWN = Chess::PAWN;
 	static const char KNIGHT = Chess::KNIGHT;
 	static const char BISHOP = Chess::BISHOP;
