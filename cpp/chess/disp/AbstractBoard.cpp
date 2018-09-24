@@ -11,9 +11,7 @@ void main(int argc, char* argv) {
 	bool is_flipped = (argc > 1 && argv[1] == "-f");
 
 	string fen;
-	while (getline(std::cin, fen)) {
-		Board brd(fen);
-		DisplayBoard(brd, is_flipped);
-	};
+	getline(cin, fen);
+	DisplayBoard(brd, is_flipped);
 }
 
