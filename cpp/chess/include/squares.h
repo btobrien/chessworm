@@ -3,7 +3,9 @@
 
 #include <string>
 
+const int BOARD_WIDTH = 8;
 const int NUM_SQUARES = 64;
+
 enum { a1, b1, c1, d1, e1, f1, g1, h1,
 	   a2, b2, c2, d2, e2, f2, g2, h2,
 	   a3, b3, c3, d3, e3, f3, g3, h3,
@@ -17,19 +19,19 @@ bool isSquare(int square);
 char file(int square);
 char rank(int square);
 int toSquare(char file, char rank);
-std::string toString(int square);
+namespace squares { std::string to_string(int square); }
 bool isFile(char);
 bool isRank(char);
 
-int lineDirection(int oldSquare, int newSquare);
+int lineDirection(int old_square, int new_square);
 
 const int UP  = 8;
 const int RIGHT  = 1;
 const int DOWN = -8;
 const int LEFT  = -1;
 
-const int UP_UP  = 16;
-const int DOWN_DOWN = -16;
+const int UP_UP  = UP + UP;
+const int DOWN_DOWN = DOWN + DOWN;
 
 const int UP_RIGHT  = UP + RIGHT;
 const int DOWN_RIGHT = DOWN + RIGHT;
