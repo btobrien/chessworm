@@ -9,7 +9,6 @@
 
 class Black : public BoardState {
 public:
-	static const int SHIFT = ('a' - 'A');
 	static const char PAWN = Chess::PAWN + SHIFT;
 	static const char KNIGHT = Chess::KNIGHT + SHIFT;
 	static const char BISHOP = Chess::BISHOP + SHIFT;
@@ -80,8 +79,8 @@ public:
 		_enPassant = DOWN + oldSquare;
 	}
 
-	void SetCastlingRights(int toSquare, int newSquare) {
-		switch (toSquare) {
+	void SetCastlingRights(int oldSqaure, int newSquare) {
+		switch (oldSqaure) {
 			case e8: 
 				_flags.blackCastleShort = false;
 				_flags.blackCastleLong = false;
