@@ -9,7 +9,7 @@ class Move {
 public:
 	Move(std::string);
 	bool tryMatch(char piece, int oldSquare) const;
-	char newSquare() const;
+	int newSquare() const;
 	inline bool castleShort() const { return _castleShort; }
 	inline bool castleLong() const { return _castleLong; }
 	inline bool check() const { return _check; }

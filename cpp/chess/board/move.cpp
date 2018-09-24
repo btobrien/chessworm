@@ -1,9 +1,11 @@
 
-#include <ctgmath>
 #include "move.h"
+#include <ctgmath>
+#include <stdexcept>
+
 using namespace Chess;
 
-char Move::newSquare() const { return toSquare(_newFile, _newRank); }
+int Move::newSquare() const { return toSquare(_newFile, _newRank); }
 
 bool Move::tryMatch(char piece, int oldSquare) const {
 	if (_piece && piece != _piece)
@@ -45,11 +47,14 @@ bool Move::tryMatch(char piece, int oldSquare) const {
 
 // TODO: break this up into more functions?
 Move::Move(std::string move) {
+
+	memset(this, 0, sizeof(Move));
+
 	int frontIndex = 0;
 	int backIndex = move.length() - 1; 
 
 	if (backIndex <= frontIndex)
-		throw;
+		throw std::invalid_argument("invalid");
 
 	if (move[backIndex] == '#') {
 		_check = true;
@@ -80,35 +85,35 @@ Move::Move(std::string move) {
 		_oldFile = move[0];
 		_piece = PAWN;
 	}
-	else throw;
+	else throw std::invalid_argument("invalid");
 
 	if (move[backIndex - 1] == '=') {
 		if (_piece != PAWN)
-			throw;
+			throw std::invalid_argument("invalid");
 		if (move[backIndex] == KING || !isPiece(move[backIndex]))
-			throw;
+			throw std::invalid_argument("invalid");
 		_promotion = move[backIndex];
 		backIndex -= 2;
 	}
 
 	if (backIndex < frontIndex)
-		throw;
+		throw std::invalid_argument("invalid");
 
 	_newRank = move[backIndex--];
 	if (!isRank(_newRank))
-		throw;
+		throw std::invalid_argument("invalid");
 
 	if (_piece == PAWN) {
 		if ((_promotion != 0) != (_newRank == '1' || _newRank == '8'))
-			throw;
+			throw std::invalid_argument("invalid");
 	}
 
 	if (backIndex < frontIndex)
-		throw;
+		throw std::invalid_argument("invalid");
 
 	_newFile = move[backIndex--];
 	if (!isFile(_newFile))
-		throw;
+		throw std::invalid_argument("invalid");
 
 	if (backIndex < frontIndex)
 		return;
@@ -128,5 +133,5 @@ Move::Move(std::string move) {
 		_oldFile = move[backIndex--];
 
 	if (backIndex >= frontIndex)
-		throw;
+		throw std::invalid_argument("invalid");
 }
