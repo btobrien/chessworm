@@ -1,10 +1,15 @@
 
 #pragma once
 
-#include <string>
 #include "chess/include/squares.h"
 #include "chess/include/pieces.h"
+#include "chess/include/castle_flags.h"
 #include "move.h"
+#include <string>
+
+#include <iostream>
+using std::cerr;
+using std::endl;
 
 class White;
 class Black;
@@ -13,11 +18,7 @@ class BoardState {
 
 public:
 	BoardState() : _clock(0),
-				   _enPassant(nullsquare),
-				   _whiteCastleShort(true),
-				   _whiteCastleLong(true),
-				   _blackCastleShort(true),
-				   _blackCastleLong(true)
+				   _enPassant(nullsquare)
 	{
 		// static initialization? 
 		std::string init =  "RNBQKBNRPPPPPPPP" + std::string(NUM_SQUARES / 2, 0) +  "pppppppprnbqkbnr";
@@ -26,10 +27,7 @@ public:
 
 	BoardState(const BoardState& other) : _clock(other._clock),
 										  _enPassant(other._enPassant),
-										  _whiteCastleShort(other._whiteCastleShort),
-										  _whiteCastleLong(other._whiteCastleLong),
-										  _blackCastleShort(other._blackCastleShort),
-										  _blackCastleLong(other._blackCastleLong)
+										  _flags(other._flags)
 	{ memcpy(_, other._, NUM_SQUARES); }	  
 
 
@@ -38,7 +36,10 @@ public:
 		_clock++;
 
 		int newSquare = move.newSquare();
-		if (color::isMyPiece(_[newSquare])) return false;
+		if (color::isMyPiece(_[newSquare])) {
+			cerr << "ERROR: cannot capture own piece" << endl;
+			return false;
+		}
 
 		if (move.castleShort())
 			return static_cast<color*>(this)->TryCastleShort();
@@ -46,11 +47,16 @@ public:
 			return static_cast<color*>(this)->TryCastleLong();
 		
 		int oldSquare = tryFindOldSquare<color>(move);
-		if (!isSquare(oldSquare)) return false;
+		if (!isSquare(oldSquare)) {
+			cerr << "ERROR: cannot locate piece" << endl;
+			return false;
+		}
 
 		if (isEnPassantCapture<color>(oldSquare, newSquare))
 			_[_enPassant - color::PAWN_DIRECTION] = Chess::nullpiece;
-		else if (move.takes() && !_[newSquare]) return false;
+		else if (move.takes() && !_[newSquare]) {
+			cerr << "WARN: capture square is empty" << endl;
+		}
 
 		_[newSquare] = _[oldSquare];
 		_[oldSquare] = Chess::nullpiece;
@@ -58,8 +64,8 @@ public:
 		if (move.promotion())
 			_[newSquare] = color::myPiece(move.promotion());
 
-		//if (move.checkMate() && !isMated<color>()) return false;
-		//if (move.check() && !isChecked<color>()) return false;
+		//if (move.checkMate() && !isMated<color>()) WARN
+		//if (move.check() && !isChecked<color>()) WARN
 
 		static_cast<color*>(this)->SetEnPassant(oldSquare, newSquare);
 		static_cast<color*>(this)->SetCastlingRights(oldSquare, newSquare);
@@ -70,10 +76,7 @@ public:
 	inline char operator[](int i) const { return _[i]; } 
 	inline int clock() const { return _clock; }
 	inline int enPassant() const { return _enPassant; }
-	inline bool whiteCastleShort() const { return _whiteCastleShort; }
-	inline bool whiteCastleLong()  const { return _whiteCastleLong; }
-	inline bool blackCastleShort() const { return _blackCastleShort; }
-	inline bool blackCastleLong()  const { return _blackCastleLong; }
+	inline CastleFlags flags() const { return _flags; }
 
 	template<typename color>
 	bool isChecked() const {
@@ -84,13 +87,11 @@ private:
     char _[NUM_SQUARES];
 	int  _clock;
     int  _enPassant;
-	bool _whiteCastleShort;
-	bool _whiteCastleLong;
-	bool _blackCastleShort;
-	bool _blackCastleLong;
+	CastleFlags _flags;
 
 	friend class White;
 	friend class Black;
+	static const int SHIFT = ('a' - 'A');
 
 	template<typename color>
 	bool isEnPassantCapture(int oldSquare, int newSquare) const {
@@ -156,7 +157,7 @@ private:
 		int direction = lineDirection(oldSquare, newSquare);
 		if (!direction)
 			return false;
-		for (int i = oldSquare + direction; i != (newSquare - direction); i += direction) {
+		for (int i = oldSquare + direction; i != newSquare; i += direction) {
 			if (_[i]) return true;
 		}
 		return false;
@@ -172,18 +173,13 @@ private:
 
 	template<typename color>
 	bool isChecked(int oldSquare, int newSquare) {
-
 		char capturingPiece = _[oldSquare];
 		char capturedPiece = _[newSquare];	
-
 		_[oldSquare] = Chess::nullpiece;
 		_[newSquare] = capturingPiece;
-		
 		bool result = isChecked<color>();
-
 		_[newSquare] = capturedPiece;
 		_[oldSquare] = capturingPiece;
-
 		return result;
 	}
 
@@ -192,8 +188,10 @@ private:
 		int oldSquare = nullsquare;
 		for (int i = 0; i < NUM_SQUARES; i++) {
 			if (isLegalMove<color>(move, i)) {
-				if (isSquare(oldSquare))
+				if (isSquare(oldSquare)) {
+					cerr << "ERROR: ambigous move" << endl;
 					return nullsquare;
+				}
 				oldSquare = i;
 			}
 		}
@@ -202,7 +200,7 @@ private:
 
 	template<typename color>
 	bool isLegalMove(Move& move, int oldSquare) {
-		char piece = color::myPiece(_[oldSquare]);
+		char piece = color::whichPiece(_[oldSquare]);
 		if (!move.tryMatch(piece, oldSquare))
 			return false;
 		int newSquare = move.newSquare();
@@ -213,7 +211,7 @@ private:
 
 	template<typename color>
 	bool isRightPawnDirection(int oldSquare, int newSquare) const {
-		bool isMovingUp = (rank(oldSquare) - rank(newSquare)) > 0;
+		bool isMovingUp = (rank(newSquare) - rank(oldSquare)) > 0;
 		bool shouldMoveUp = (color::PAWN_DIRECTION > 0);
 		return isMovingUp == shouldMoveUp;
 	}

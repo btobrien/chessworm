@@ -43,7 +43,7 @@ public:
 	}
 
 	bool TryCastleShort() {
-		if (!_blackCastleShort || _[f8] || _[g8]) 
+		if (!_flags.blackCastleShort || _[f8] || _[g8]) 
 			return false;
 		if (isThreatening<White>(e8) || isThreatening<White>(f8) || isThreatening<White>(g8)) 
 			return false;
@@ -51,13 +51,13 @@ public:
 		_[g8] = Black::KING;
 		_[h8] = Chess::nullpiece;
 		_[e8] = Chess::nullpiece;
-		_blackCastleShort = false;
-		_blackCastleLong = false;
+		_flags.blackCastleShort = false;
+		_flags.blackCastleLong = false;
 		return true;
 	}
 
 	bool TryCastleLong() {
-		if (!_blackCastleLong || _[b8] || _[c8] || _[d8]) 
+		if (!_flags.blackCastleLong || _[b8] || _[c8] || _[d8]) 
 			return false;
 		if (isThreatening<White>(e8) || isThreatening<White>(d8) || isThreatening<White>(c8)) 
 			return false;
@@ -65,38 +65,40 @@ public:
 		_[c8] = Black::KING;
 		_[a8] = Chess::nullpiece;
 		_[e8] = Chess::nullpiece;
-		_blackCastleShort = false;
-		_blackCastleLong = false;
+		_flags.blackCastleShort = false;
+		_flags.blackCastleLong = false;
 		return true;
 	}
 
-	void SetEnPassant(int fromSquare, int toSquare) {
-		if (_[toSquare] == Black::PAWN && rank(fromSquare) == '7' && toSquare == (DOWN_DOWN + fromSquare)) {
-			_enPassant = DOWN + fromSquare;
-			return;
-		}
+	void SetEnPassant(int oldSquare, int newSquare) {
 		_enPassant = nullsquare;
+		if (_[newSquare] != PAWN || rank(oldSquare) != '7' || newSquare != (DOWN_DOWN + oldSquare))
+			return;
+		char oppPawn = oppPiece(Chess::PAWN);
+		if (_[LEFT + newSquare] != oppPawn && _[RIGHT + newSquare] != oppPawn)
+			return;
+		_enPassant = DOWN + oldSquare;
 	}
 
-	void SetCastlingRights(int fromSquare, int toSquare) {
-		switch (fromSquare) {
+	void SetCastlingRights(int toSquare, int newSquare) {
+		switch (toSquare) {
 			case e8: 
-				_blackCastleShort = false;
-				_blackCastleLong = false;
+				_flags.blackCastleShort = false;
+				_flags.blackCastleLong = false;
 				break;      
 			case a8: 
-				_blackCastleLong = false;
+				_flags.blackCastleLong = false;
 				break;      
 			case h8: 
-				_blackCastleShort = false;
+				_flags.blackCastleShort = false;
 				break;      
 		}
-		switch (toSquare) {
+		switch (newSquare) {
 			case a1: 
-				_whiteCastleLong = false;
+				_flags.whiteCastleLong = false;
 				break;      
 			case h1: 
-				_whiteCastleShort = false;
+				_flags.whiteCastleShort = false;
 				break;      
 		}
 	}
