@@ -2,16 +2,10 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
 
-std::string getword(std::string& str) {
-	int i = str.find(' ');
-	if (i == std::string::npos) {
-		std::string wrd = str;
-		str = "";
-		return wrd;
-	}
-	std::string wrd = str.substr(0, i);
-	while(i < str.length() && str[i] == ' ') { i++; }
-	str = str.substr(i);
+std::string getword(std::stringstream& ss) {
+	std::string wrd;
+	ss >> wrd;
 	return wrd;
 }
