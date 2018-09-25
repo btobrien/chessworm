@@ -3,18 +3,12 @@
 #include "squares.h"
 #include "pieces.h"
 #include "castle_flags.h"
-#include "include/read.h"
 #include <string>
 #include <sstream>
 #include <cctype>
 
 namespace fen {
 
-bool whiteToMove(int clock) {
-	return clock % 2 == 0;
-}
-
-//use string stream;
 template<typename T>
 std::string to_string(const T& squares) {
 	std::stringstream fen;
@@ -44,7 +38,7 @@ std::string to_string(const T& squares) {
 	return result;
 }
 
-std::string to_string(const CastleFlags flags) {
+inline std::string to_string(const CastleFlags flags) {
 	std::stringstream fen;
     if (!flags.whiteCastleShort &&
 		!flags.whiteCastleLong &&
@@ -71,7 +65,7 @@ std::string to_string(const T& squares, const CastleFlags flags, int clock, int 
 	std::stringstream fen;
 	fen << to_string(squares);
     fen << ' ';
-	fen << (whiteToMove(clock) ? 'w' : 'b');
+	fen << (clock % 2 == 0 ? 'w' : 'b');
     fen << ' ';
 	fen << to_string(flags);
     fen << ' ';
@@ -79,9 +73,7 @@ std::string to_string(const T& squares, const CastleFlags flags, int clock, int 
     return fen.str();
 }
 
-#include <iostream>
-
-std::string board(const std::string& fen) {
+inline std::string board(const std::string& fen) {
 	std::stringstream brd;
 	int i = 0;
 	for (int row = 0; row < BOARD_WIDTH; row++) {
@@ -102,13 +94,37 @@ std::string board(const std::string& fen) {
 	return brd.str();
 }
 
-int full_clock(int clock) {
-	return (clock + 1) / 2;
+inline int clock(const std::string& fen) {
+	std::stringstream stream(fen);
+	std::string trash;
+	int clock;
+	stream >> trash >> trash >> clock;
+	return clock;
 }
 
-std::string prefix(int clock) { 
-	std::string dot = whiteToMove(clock) ? ". " : "...";
-	return std::to_string(full_clock(clock)) + dot; 
+inline CastleFlags flags(const std::string& fen) {
+	std::stringstream stream(fen);
+	std::string flag_str;
+	stream >> flag_str >> flag_str;
+	CastleFlags flags;
+
+	if (flag_str.find('K') == std::string::npos)
+		flags.whiteCastleShort = false;
+	if (flag_str.find('Q') == std::string::npos)
+		flags.whiteCastleLong = false;
+	if (flag_str.find('k') == std::string::npos)
+		flags.blackCastleShort = false;
+	if (flag_str.find('q') == std::string::npos)
+		flags.blackCastleLong = false;
+			
+	return flags;
+}
+
+inline int en_passant(const std::string& fen) {
+	std::stringstream stream(fen);
+	std::string square;
+	stream >> square >> square >> square >> square;
+	return square != "-" ? toSquare(square) : -1;
 }
 
 }
