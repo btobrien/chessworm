@@ -1,8 +1,8 @@
 #pragma once
 
-#include "chess/include/squares.h"
 #include <iostream>
 
+const int BOARD_WIDTH = 8;
 
 void DisplaySquare(char piece, bool isLightSquare = false);
 
@@ -31,3 +31,12 @@ void DisplayFen(const std::string& fen) {
 }
 
 void DiplayFenFlipped(const std::string& fen);  //TODO
+
+int fullClock(int clock) {
+	return (clock + 1) / 2;
+}
+
+std::string prefix(int clock) { 
+	std::string dot = (clock % 2 == 0) ? ". " : "...";
+	return std::to_string(fullClock(clock)) + dot; 
+}
