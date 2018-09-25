@@ -11,7 +11,7 @@ while true; do
 
 		if [ "$cmd" = 'move' ]; then
 			move=${cmd[1]}
-			echo "step position_after_$move" #$(brd $position <<<$move)"
+			brd $position <<<$move
 			continue
 		fi
 
