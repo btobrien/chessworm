@@ -17,14 +17,15 @@ int main(int argc, char* argv[]) {
 	string move;
 	while (getline(cin, move)) {
 		stringstream ss(move);
-		ss >> move;
-		if (move.empty())
-			continue;
-		if (brd.TryMove(move))
-			cout << fen::to_string(brd) << endl;
-		else {
-			cerr << "ERROR: move=" << move << " failed" << endl;
-			return 1;
+		while(getline(ss, move, '/')) {
+			if (move.empty())
+				continue;
+			if (brd.TryMove(move))
+				cout << fen::to_string(brd) << endl;
+			else {
+				cerr << "ERROR: move=" << move << " failed" << endl;
+				return 1;
+			}
 		}
 	}
 }
