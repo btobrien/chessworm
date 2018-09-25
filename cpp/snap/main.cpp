@@ -1,8 +1,12 @@
-#include <string>
 #include "snap_tree.h"
 #include "include/read.h"
 
-using namespace std;
+using std::string;
+using std::stringstream;
+using std::cin;
+using std::cout;
+using std::cerr;
+using std::endl;
 
 int main(int argc, char* argv[]) {
 
@@ -14,18 +18,19 @@ int main(int argc, char* argv[]) {
 
 	string line;
 	while(getline(cin, line)) {
-		string cmd = getword(line);
+		stringstream ss(line);
+		string cmd = getword(ss);
 
 		if (cmd == "print")
 			cout << snap.get() << endl;
 		else if (cmd == "add")
-			snap.add(getword(line));
+			snap.add(getword(ss));
 		else if (cmd == "next")
 			snap.next();
 		else if (cmd == "prev")
 			snap.prev();
 		else if (cmd == "branch")
-			snap.branch(getword(line));
+			snap.branch(getword(ss));
 		else if (cmd == "snap")
 			snap.snap();
 		else if (cmd == "rebranch")
@@ -35,9 +40,9 @@ int main(int argc, char* argv[]) {
 		else if (cmd == "last")
 			set_last(snap);
 		else if (cmd == "set")
-			set(snap, stoi(getword(line)));
+			set(snap, stoi(getword(ss)));
 		else if (cmd == "slide")
-			slide(snap, stoi(getword(line)));
+			slide(snap, stoi(getword(ss)));
 		else if (cmd == "all") {
 			int depth = snap.depth();
 			set_first(snap);
