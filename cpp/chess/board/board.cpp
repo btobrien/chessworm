@@ -14,7 +14,7 @@ Board::Board(const Board& other) : state(new BoardState(*(other.state))) {}
 Board::Board(const std::string& fen) {
 	state = fen.empty() ?
 		new BoardState() :
-		new BoardState(fen::board(fen), fen::flags(fen), fen::clock(fen), fen::en_passant(fen)); 
+		new BoardState(fen::board(fen), fen::flags(fen), fen::blackToMove(fen), fen::en_passant(fen)); 
 }
 
 Board::~Board() { delete state; }

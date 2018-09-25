@@ -22,7 +22,7 @@ public:
 				   _flags()
 	{
 		// static initialization? 
-		std::string init =  "RNBQKBNRPPPPPPPP" + std::string(NUM_SQUARES/2, 0) +  "pppppppprnbqkbnr";
+		std::string init =  "RNBQKBNRPPPPPPPP" + std::string(NUM_SQUARES/2, Chess::nullpiece) +  "pppppppprnbqkbnr";
 		memcpy(_, init.data(), NUM_SQUARES);
 	}	  
 

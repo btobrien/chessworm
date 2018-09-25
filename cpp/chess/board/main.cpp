@@ -1,10 +1,11 @@
 
 #include "chess/include/board.h"
-#include "include/read.h"
 #include <iostream>
 #include <string>
+#include <sstream>
 
 using std::string;
+using std::stringstream;
 using std::cin;
 using std::cout;
 using std::cerr;
@@ -15,7 +16,8 @@ int main(int argc, char* argv[]) {
 	Board brd(init);
 	string move;
 	while (getline(cin, move)) {
-		move = getword(move);
+		stringstream ss(move);
+		ss >> move;
 		if (move.empty())
 			continue;
 		if (brd.TryMove(move))
