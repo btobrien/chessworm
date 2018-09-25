@@ -6,6 +6,8 @@
 #include <string>
 #include <sstream>
 #include <cctype>
+#include <algorithm>
+#include <iostream>
 
 namespace fen {
 
@@ -74,38 +76,44 @@ std::string to_string(const T& squares, const CastleFlags flags, int clock, int 
 }
 
 inline std::string board(const std::string& fen) {
-	std::stringstream brd;
+	std::stringstream rows[8];
 	int i = 0;
 	for (int row = 0; row < BOARD_WIDTH; row++) {
 		char c;
 		c = fen[i++];
 		while(c != '/' && c != ' ') {
 			if (!isdigit(c)) {
-				brd << c;
+				rows[row] << c;
 			}
 			else {
 				int empties = c - '0';
 				while (empties-- > 0 )
-					brd << ' ';
+					rows[row] << ' ';
 			}
 			c = fen[i++];
 		}
 	}
-	return brd.str();
+	std::stringstream brd;
+	for (int row = BOARD_WIDTH - 1; row >= 0; row--) {
+		brd << rows[row].str();
+	}
+	std::string result = brd.str();
+	std::replace(result.begin(), result.end(), ' ', Chess::nullpiece);
+	return result;
 }
 
-inline int clock(const std::string& fen) {
-	std::stringstream stream(fen);
+inline bool blackToMove(const std::string& fen) {
+	std::stringstream ss(fen);
 	std::string trash;
-	int clock;
-	stream >> trash >> trash >> clock;
-	return clock;
+	char flag;
+	ss >> trash >> flag;
+	return flag == 'b';
 }
 
 inline CastleFlags flags(const std::string& fen) {
-	std::stringstream stream(fen);
+	std::stringstream ss(fen);
 	std::string flag_str;
-	stream >> flag_str >> flag_str;
+	ss >> flag_str >> flag_str >> flag_str;
 	CastleFlags flags;
 
 	if (flag_str.find('K') == std::string::npos)
@@ -121,9 +129,9 @@ inline CastleFlags flags(const std::string& fen) {
 }
 
 inline int en_passant(const std::string& fen) {
-	std::stringstream stream(fen);
+	std::stringstream ss(fen);
 	std::string square;
-	stream >> square >> square >> square >> square;
+	ss >> square >> square >> square >> square;
 	return square != "-" ? toSquare(square) : -1;
 }
 
