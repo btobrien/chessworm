@@ -1,15 +1,18 @@
 #pragma once
 
-#include "chess/include/castle_flags.h"
+#include "castle_flags.h"
+#include "fen.h"
 #include <string>
 
 class Move;
 class BoardState;
 
+
 class Board {
 public:
 	Board();
 	Board(const Board&);
+	Board(const std::string& fen);
 	~Board();
 
 	bool TryMove(const std::string&);
@@ -23,3 +26,8 @@ private:
 	BoardState* state;
 };
 
+namespace fen {
+	inline std::string to_string(Board brd) {
+		return to_string(brd, brd.flags(), brd.clock(), brd.enPassant());
+	}
+}
