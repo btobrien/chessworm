@@ -18,10 +18,11 @@ class BoardState {
 
 public:
 	BoardState() : _clock(0),
-				   _enPassant(nullsquare)
+				   _enPassant(nullsquare),
+				   _flags()
 	{
 		// static initialization? 
-		std::string init =  "RNBQKBNRPPPPPPPP" + std::string(NUM_SQUARES / 2, 0) +  "pppppppprnbqkbnr";
+		std::string init =  "RNBQKBNRPPPPPPPP" + std::string(NUM_SQUARES/2, 0) +  "pppppppprnbqkbnr";
 		memcpy(_, init.data(), NUM_SQUARES);
 	}	  
 
@@ -29,6 +30,13 @@ public:
 										  _enPassant(other._enPassant),
 										  _flags(other._flags)
 	{ memcpy(_, other._, NUM_SQUARES); }	  
+
+	BoardState(const std::string& squares, CastleFlags flags, int clock, int en_passant) : _clock(clock),
+																						  _enPassant(en_passant),
+																						  _flags(flags)
+	{ memcpy(_, squares.data(), NUM_SQUARES); }	  
+
+	// TODO assignment operator ...?
 
 
 	template <typename color>
@@ -78,11 +86,6 @@ public:
 	inline int enPassant() const { return _enPassant; }
 	inline CastleFlags flags() const { return _flags; }
 
-	template<typename color>
-	bool isChecked() const {
-		return static_cast<const color*>(this)->isThreatened(findKing<color>());
-	}
-
 private:
     char _[NUM_SQUARES];
 	int  _clock;
@@ -91,6 +94,11 @@ private:
 
 	friend class White;
 	friend class Black;
+
+	template<typename color>
+	bool isChecked() const {
+		return static_cast<const color*>(this)->isThreatened(findKing<color>());
+	}
 
 	template<typename color>
 	bool isEnPassantCapture(int oldSquare, int newSquare) const {
@@ -159,6 +167,8 @@ private:
 		for (int i = oldSquare + direction; i != newSquare; i += direction) {
 			if (_[i]) return true;
 		}
+		if (_[oldSquare] == Chess::PAWN && _[newSquare])
+			return true;
 		return false;
 	}
 
