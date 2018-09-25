@@ -1,11 +1,14 @@
 
-all : brd snp
+all : brd snp disp
 
 brd : chess/board/main.cpp board.o move.o squares.o pieces.o castle_flags.o
 	g++ -o ~/bin/brd chess/board/main.cpp board.o move.o squares.o pieces.o castle_flags.o -I/Users/btobrien/dev/chess_worm/cpp
 
 snp : snap/main.cpp snap/snap_tree.h include/read.h
 	g++ -o ~/bin/snp snap/main.cpp -I/Users/btobrien/dev/chess_worm/cpp
+
+disp : chess/disp/main.cpp chess/disp/brd_disp.h chess/disp/abstract.cpp squares.o pieces.o 
+	g++ -o ~/bin/disp chess/disp/main.cpp chess/disp/abstract.cpp squares.o pieces.o -I/Users/btobrien/dev/chess_worm/cpp
 
 board.o : chess/board/board.cpp chess/include/board.h chess/board/board_state.h chess/board/move.h chess/include/squares.h chess/include/pieces.h chess/include/fen.h
 	g++ -c chess/board/board.cpp -I/Users/btobrien/dev/chess_worm/cpp

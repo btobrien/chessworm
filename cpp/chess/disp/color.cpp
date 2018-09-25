@@ -1,4 +1,6 @@
 
+namespace Color {
+
 void DisplaySquare(char inPiece, bool isLightSquare) {
 	std:string piece;
 	bool isWhitePiece = White::IsMyPiece(piece);
@@ -31,4 +33,6 @@ void DisplaySquare(char inPiece, bool isLightSquare) {
 
 	cout << ' ' << piece << ' ';
 	//win.DisableAttribute(A_BOLD);
+}
+
 }
