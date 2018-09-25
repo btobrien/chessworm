@@ -47,3 +47,5 @@ public:
 };
 
 }
+
+#include "pieces.cpp"

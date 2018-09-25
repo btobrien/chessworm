@@ -19,6 +19,7 @@ bool isSquare(int square);
 char file(int square);
 char rank(int square);
 int toSquare(char file, char rank);
+int toSquare(std::string);
 namespace squares { std::string to_string(int square); }
 bool isFile(char);
 bool isRank(char);
@@ -46,3 +47,5 @@ const int DOWN_DOWN_LEFT = DOWN + DOWN + LEFT;
 const int DOWN_LEFT_LEFT = DOWN + LEFT + LEFT;
 const int UP_LEFT_LEFT = UP + LEFT + LEFT;
 const int UP_UP_LEFT = UP + UP + LEFT;
+
+#include "squares.cpp"

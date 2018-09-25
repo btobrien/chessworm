@@ -2,14 +2,12 @@
 #pragma once
 
 #include <string>
-#include "chess/include/squares.h"
-#include "chess/include/pieces.h"
 
 class Move {
 public:
 	Move(std::string);
 	bool tryMatch(char piece, int oldSquare) const;
-	int newSquare() const;
+	inline int newSquare() const { return toSquare(_newFile, _newRank); }
 	inline bool castleShort() const { return _castleShort; }
 	inline bool castleLong() const { return _castleLong; }
 	inline bool check() const { return _check; }
@@ -31,3 +29,5 @@ private:
 
 	bool isBigPiece(char);
 };
+
+#include "move.cpp"

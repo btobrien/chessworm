@@ -1,29 +1,17 @@
 
 all : brd snp disp
 
-brd : chess/board/main.cpp board.o move.o squares.o pieces.o castle_flags.o
-	g++ -o ~/bin/brd chess/board/main.cpp board.o move.o squares.o pieces.o castle_flags.o -I/Users/btobrien/dev/chess_worm/cpp
+brd : chess/board/main.cpp board.o
+	g++ -o ~/bin/brd chess/board/main.cpp board.o -I/Users/btobrien/dev/chess_worm/cpp
 
 snp : snap/main.cpp snap/snap_tree.h include/read.h
 	g++ -o ~/bin/snp snap/main.cpp -I/Users/btobrien/dev/chess_worm/cpp
 
-disp : chess/disp/main.cpp chess/disp/brd_disp.h chess/disp/abstract.cpp squares.o pieces.o 
-	g++ -o ~/bin/disp chess/disp/main.cpp chess/disp/abstract.cpp squares.o pieces.o -I/Users/btobrien/dev/chess_worm/cpp
+disp : chess/disp/main.cpp chess/disp/brd_disp.h chess/disp/abstract.cpp chess/include/pieces.h
+	g++ -o ~/bin/disp chess/disp/main.cpp chess/disp/abstract.cpp -I/Users/btobrien/dev/chess_worm/cpp
 
-board.o : chess/board/board.cpp chess/include/board.h chess/board/board_state.h chess/board/move.h chess/include/squares.h chess/include/pieces.h chess/include/fen.h
+board.o : chess/board/board.cpp chess/include/board.h chess/board/board_state.h chess/board/white.h chess/board/black.h chess/board/move.h chess/include/squares.h chess/include/pieces.h chess/include/fen.h chess/include/castle_flags.h
 	g++ -c chess/board/board.cpp -I/Users/btobrien/dev/chess_worm/cpp
 
-move.o : chess/board/move.cpp chess/board/move.h chess/include/squares.h chess/include/pieces.h
-	g++ -c chess/board/move.cpp -I/Users/btobrien/dev/chess_worm/cpp
-
-squares.o : chess/include/squares.cpp chess/include/squares.h
-	g++ -c chess/include/squares.cpp -I/Users/btobrien/dev/chess_worm/cpp
-
-pieces.o : chess/include/pieces.cpp chess/include/pieces.h
-	g++ -c chess/include/pieces.cpp -I/Users/btobrien/dev/chess_worm/cpp
-
-castle_flags.o : chess/include/castle_flags.cpp chess/include/castle_flags.h
-	g++ -c chess/include/castle_flags.cpp -I/Users/btobrien/dev/chess_worm/cpp
-
 clean :
-	rm *.o
+	rm board.o

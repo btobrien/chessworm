@@ -1,12 +1,13 @@
 
 #include "squares.h"
 
-bool isSquare(int square) { return (0 <= square && square < NUM_SQUARES); }
-char file(int square) { return (square % 8) + 'a'; }
-char rank(int square) { return (square / 8) + '1'; }
-int toSquare(char file, char rank) { return (rank - '1') * 8 + file - 'a'; }
+inline bool isSquare(int square) { return (0 <= square && square < NUM_SQUARES); }
+inline char file(int square) { return (square % 8) + 'a'; }
+inline char rank(int square) { return (square / 8) + '1'; }
+inline int toSquare(char file, char rank) { return (rank - '1') * 8 + file - 'a'; }
+inline int toSquare(std::string str) { return toSquare(str[0], str[1]); }
 
-std::string squares::to_string(int square) {
+inline std::string squares::to_string(int square) {
 	if (!isSquare(square))
 		return "-";
 	std::string result("--");
@@ -15,15 +16,15 @@ std::string squares::to_string(int square) {
 	return result;
 }
 
-bool isFile(char f) {
+inline bool isFile(char f) {
 	return (f >= 'a' && f <= 'h');
 }
 
-bool isRank(char r) {
+inline bool isRank(char r) {
 	return (r >= '1' && r <= '8');
 }
 
-int lineDirection(int old_square, int new_square) { 
+inline int lineDirection(int old_square, int new_square) { 
 	int dir = 0;
 	if (file(old_square) == file(new_square))
 		dir = UP;

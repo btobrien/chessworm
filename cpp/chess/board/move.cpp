@@ -1,13 +1,11 @@
 
 #include "move.h"
+#include "chess/include/squares.h"
+#include "chess/include/pieces.h"
 #include <ctgmath>
 #include <stdexcept>
 
-using namespace Chess;
-
-int Move::newSquare() const { return toSquare(_newFile, _newRank); }
-
-bool Move::tryMatch(char piece, int oldSquare) const {
+inline bool Move::tryMatch(char piece, int oldSquare) const {
 	if (_piece && piece != _piece)
 		return false;
 	int oldFile = file(oldSquare);
@@ -25,7 +23,7 @@ bool Move::tryMatch(char piece, int oldSquare) const {
 	int manhattanDiff = std::abs(fileDist - rankDist);
 
 	switch (piece) {
-		case PAWN:
+		case Chess::PAWN:
 			if (!rankDist)
 				return false;
 			if (!manhattanDiff)
@@ -35,18 +33,18 @@ bool Move::tryMatch(char piece, int oldSquare) const {
 			if (rankDist > 2)
 				return false;
 			return oldRank == '2' || oldRank == '7' || rankDist == 1;
-		case KNIGHT: return manhattanDist == 3 && manhattanDiff == 1;
-		case BISHOP: return !manhattanDiff;
-		case ROOK:   return !rankDist || !fileDist;
-		case QUEEN:  return !manhattanDiff || !rankDist || !fileDist;
-		case KING:   return (manhattanDiff && manhattanDist == 1) || (!manhattanDiff && manhattanDist == 2);
+		case Chess::KNIGHT: return manhattanDist == 3 && manhattanDiff == 1;
+		case Chess::BISHOP: return !manhattanDiff;
+		case Chess::ROOK:   return !rankDist || !fileDist;
+		case Chess::QUEEN:  return !manhattanDiff || !rankDist || !fileDist;
+		case Chess::KING:   return (manhattanDiff && manhattanDist == 1) || (!manhattanDiff && manhattanDist == 2);
 	}
 	return false;
 }
 
 
 // TODO: break this up into more functions?
-Move::Move(std::string move) {
+inline Move::Move(std::string move) {
 
 	memset(this, 0, sizeof(Move));
 
@@ -66,14 +64,14 @@ Move::Move(std::string move) {
 		backIndex--;
 	}
 
-	if (isCastleLong(move)) {
+	if (Chess::isCastleLong(move)) {
 		_castleLong = true;
-		_piece = KING;
+		_piece = Chess::KING;
 		return;
 	}	
-	if (isCastleShort(move)) {
+	if (Chess::isCastleShort(move)) {
 		_castleShort = true;
-		_piece = KING;
+		_piece = Chess::KING;
 		return;
 	}	
 
@@ -83,14 +81,14 @@ Move::Move(std::string move) {
 	}
 	else if (isFile(move[0])) {
 		_oldFile = move[0];
-		_piece = PAWN;
+		_piece = Chess::PAWN;
 	}
 	else throw std::invalid_argument("invalid");
 
 	if (move[backIndex - 1] == '=') {
-		if (_piece != PAWN)
+		if (_piece != Chess::PAWN)
 			throw std::invalid_argument("invalid");
-		if (move[backIndex] == KING || !isBigPiece(move[backIndex]))
+		if (move[backIndex] == Chess::KING || !isBigPiece(move[backIndex]))
 			throw std::invalid_argument("invalid");
 		_promotion = move[backIndex];
 		backIndex -= 2;
@@ -103,7 +101,7 @@ Move::Move(std::string move) {
 	if (!isRank(_newRank))
 		throw std::invalid_argument("invalid");
 
-	if (_piece == PAWN) {
+	if (_piece == Chess::PAWN) {
 		if ((_promotion != 0) != (_newRank == '1' || _newRank == '8'))
 			throw std::invalid_argument("invalid");
 	}
@@ -136,4 +134,4 @@ Move::Move(std::string move) {
 		throw std::invalid_argument("invalid");
 }
 
-bool Move::isBigPiece(char p) { return p != PAWN && isPiece(p); }
+inline bool Move::isBigPiece(char p) { return p != Chess::PAWN && Chess::isPiece(p); }
