@@ -3,27 +3,15 @@
 while true; do
 	if read -a cmd; then
 
-		#position=$(tail -1 <$hist_file)
-
 		if [ "$cmd" = 'exit' ]; then
 			exit
 		fi
 
 		if [ "$cmd" = 'move' ]; then
-			move=${cmd[1]}
-			brd $position <<<$move
-			continue
+			position=${cmd[1]}
+			move=${cmd[2]}
+			~/bin/brd "$(tr _ ' ' <<<$position)" <<<"$move" | tr ' ' _
 		fi
-
-		if [ "$cmd" = 'mark' ]; then
-			name=${cmd[1]}
-			cp $line_file $mark_dir/$name
-			cp $index_file $mark_dir/$name
-			continue
-		fi
-		
-		echo echo $is_flipped
-		echo "${cmd[@]}"
 	fi
 done
 

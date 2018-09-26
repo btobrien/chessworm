@@ -11,7 +11,11 @@ modl_fifo=.impl/wrm/ctrl/fifos/$$
 mkdir -p $(dirname $modl_fifo)
 mkfifo $modl_fifo
 
-./modl $graph <$modl_fifo | ./view $is_flipped_stream $menu_index_stream &
+hist_file=$HOME/.impl/wrm/state/$graph/hist.txt
+mkdir -p $(dirname $hist_file)
+echo '-'>$hist_file
+
+./modl $graph <$modl_fifo  | tee -a $hist_file | ./view &
 
 trap "echo exit >$modl_fifo; rm -f $modl_fifo; stty echo; tput cnorm" EXIT
 
@@ -19,8 +23,8 @@ while read -n1 key; do
 
 	if [ "$key" == ':' ]; then
 		tput cup $(tput lines) 0
-		stty echo
 		tput cnorm
+		stty echo
 		read -p':' -e line;
 		stty -echo
 		tput civis
@@ -46,26 +50,28 @@ while read -n1 key; do
 
 	if [ "$key" == '/' ]; then
 		tput cup $(tput lines) 0
-		stty echo
-		tput cnorm
-		read -p'/' -e move;
-		stty -echo
-		tput civis
+		printf '/'
+		move=''
+		while true; do
+			read -n1 key
+			if [ "$key" == '' ]; then
+				break
+			fi
+			printf $key
+			move=$move$key
+		done
 
 		if [ "$move" == '' ]; then
 			continue
 		fi
 
-		clear
-		echo "move $move" >$modl_fifo
+		echo move "$(tail -1 <$hist_file)" $move >$modl_fifo
 		continue
 	fi
 
 	if [ "$key" == 'f' ]; then
-		export is_flipped=true
+		echo "flip"
 	fi
-
-	echo "echo $key" >$modl_fifo
 
 done
 																																					

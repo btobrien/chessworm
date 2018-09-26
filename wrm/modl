@@ -1,21 +1,4 @@
 #!/bin/bash
 
-graph=${1:-default}
-
-export hist_file=$HOME/.impl/wrm/state/$graph/hist.txt
-export line_file=$HOME/.impl/wrm/state/$graph/line.txt
-export index_file=$HOME/.impl/wrm/state/$graph/index.txt
-export mark_dir=$HOME/.impl/wrm/marks/$graph
-
-mkdir -p $(dirname $hist_file)
-mkdir -p $(dirname $line_file)
-mkdir -p $(dirname $index_file)
-mkdir -p $mark_dir
-
-echo >$hist_file
-echo >$line_file
-echo '0' >$index_file
-
 cd $(dirname $0)
-
-./engn | ./wrm $line_file $index_file | tee -a $hist_file
+./engn #| snp
