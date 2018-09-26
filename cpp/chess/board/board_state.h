@@ -167,8 +167,6 @@ private:
 		for (int i = oldSquare + direction; i != newSquare; i += direction) {
 			if (_[i]) return true;
 		}
-		if (_[oldSquare] == Chess::PAWN && _[newSquare])
-			return true;
 		return false;
 	}
 
@@ -214,6 +212,8 @@ private:
 			return false;
 		int newSquare = move.newSquare();
 		if (piece == Chess::PAWN && !isRightPawnDirection<color>(oldSquare, newSquare))
+			return false;
+		if (piece == Chess::PAWN && _[newSquare])
 			return false;
 		return !isBlocked(oldSquare, newSquare) && !isChecked<color>(oldSquare, newSquare);
 	}
