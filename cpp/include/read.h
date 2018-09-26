@@ -9,3 +9,9 @@ std::string getword(std::stringstream& ss) {
 	ss >> wrd;
 	return wrd;
 }
+
+bool try_getword(std::stringstream& ss, std::string& outString) {
+	outString = getword(ss);
+	return !outString.empty();
+}
+
