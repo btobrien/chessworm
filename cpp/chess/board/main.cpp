@@ -13,6 +13,8 @@ using std::endl;
 
 int main(int argc, char* argv[]) {
 	string init = (argc > 1) ? string(argv[1]) : "";
+	if (init == "-")
+		init = "";
 	Board brd(init);
 	string move;
 	while (getline(cin, move)) {

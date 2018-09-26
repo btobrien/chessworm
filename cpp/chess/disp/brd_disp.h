@@ -6,13 +6,17 @@ const int BOARD_WIDTH = 8;
 
 void DisplaySquare(char piece, bool isLightSquare = false);
 
+inline bool isRowDelim(char c) {
+	return (c == '/' || c == ' ' || c == '_');
+}
+
 void DisplayFen(const std::string& fen) {
 	int i = 0;
 	bool isLight = true;
 	for (int row = 0; row < BOARD_WIDTH; row++) {
 		char c;
 		c = fen[i++];
-		while(c != '/' && c != ' ') {
+		while(!isRowDelim(c)) {
 			if (!isdigit(c)) {
 				DisplaySquare(c);
 				isLight = !isLight;
@@ -29,8 +33,6 @@ void DisplayFen(const std::string& fen) {
 		std::cout << '\n';
 	}
 }
-
-void DiplayFenFlipped(const std::string& fen);  //TODO
 
 int fullClock(int clock) {
 	return (clock + 1) / 2;
