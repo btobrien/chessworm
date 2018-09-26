@@ -4,18 +4,10 @@ add c
 add d
 prev
 prev
-print  #b
 add e
-print  #e
 prev
-print  #b
 next
-print  #e
 add f
 add g
-print  #g
 snap
-print  #b
 next
-print  #c
-

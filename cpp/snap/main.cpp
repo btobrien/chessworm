@@ -20,21 +20,20 @@ int main(int argc, char* argv[]) {
 	while(getline(cin, line)) {
 		stringstream ss(line);
 		string cmd = getword(ss);
+		bool success = true;
 
-		if (cmd == "print")
-			cout << snap.get() << endl;
-		else if (cmd == "add")
+		if (cmd == "add")
 			snap.add(getword(ss));
 		else if (cmd == "next")
-			snap.next();
+			success = snap.next();
 		else if (cmd == "prev")
-			snap.prev();
+			success = snap.prev();
 		else if (cmd == "branch")
 			snap.branch(getword(ss));
 		else if (cmd == "snap")
-			snap.snap();
+			success = snap.snap();
 		else if (cmd == "rebranch")
-			snap.rebranch();
+			success = snap.rebranch();
 		else if (cmd == "first")
 			set_first(snap);
 		else if (cmd == "last")
@@ -43,14 +42,10 @@ int main(int argc, char* argv[]) {
 			set(snap, stoi(getword(ss)));
 		else if (cmd == "slide")
 			slide(snap, stoi(getword(ss)));
-		else if (cmd == "all") {
-			int depth = snap.depth();
-			set_first(snap);
-			do {
-				cout << snap.get() << " ";
-			} while (snap.next());
-			cout << endl;
-			set(snap, depth);
-		}
+
+		if (!success)
+			cerr << "\a";
+		else
+			cout << snap.get() << endl;
 	}
 }

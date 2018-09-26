@@ -3,18 +3,14 @@ add b
 add c
 add d
 add e
-prev
-prev
-prev
+prev  #d
+prev  #c
+prev  #b
 add x
 add y
 add z
-snap
-next
-print  #c
-rebranch
-print  #x
-next
-print  #y
-next
-print  #z
+snap  #b
+next  #c
+rebranch  #x
+next  #y
+next  #z

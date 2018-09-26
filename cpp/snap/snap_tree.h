@@ -45,6 +45,10 @@ public:
 	}
 
 	void branch(T val) {
+		if (!future->empty() && val == future->top()) {
+			next();
+			return;
+		}
 		branch_points.push(depth());
 		past.push(present);
 		present = val;
