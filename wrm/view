@@ -1,8 +1,5 @@
 #!/bin/bash
 while read input; do
-	#tput cup 0 0
-	#printf '\n\n\n\n\n\n\n\n\n\n\n\n\n\n'
 	clear
 	disp <<<"$input"
-	#tput cup $(tput lines) 0
 done

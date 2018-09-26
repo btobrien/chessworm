@@ -13,12 +13,12 @@ mkfifo $modl_fifo
 
 hist_file=$HOME/.impl/wrm/state/$graph/hist.txt
 mkdir -p $(dirname $hist_file)
-echo '-'>$hist_file
 
 ./modl $graph <$modl_fifo  | tee -a $hist_file | ./view &
 
 trap "echo exit >$modl_fifo; rm -f $modl_fifo; stty echo; tput cnorm" EXIT
 
+echo '-'>$modl_fifo
 while read -n1 key; do
 
 	if [ "$key" == ':' ]; then
@@ -29,9 +29,7 @@ while read -n1 key; do
 		stty -echo
 		tput civis
 
-		if [ "line" == '' ]; then
-			continue
-		fi
+		[ "line" == '' ] && continue
 
 		if [ "$line" = 'q' ]; then
 			clear
@@ -44,7 +42,6 @@ while read -n1 key; do
 		fi
 
 		clear
-		echo "echo $line" >$modl_fifo
 		continue
 	fi
 
@@ -53,9 +50,18 @@ while read -n1 key; do
 		printf '/'
 		move=''
 		while true; do
-			read -n1 key
-			if [ "$key" == '' ]; then
+			read -n1 -r key
+			[ "$key" == '' ] && break
+			if [ "$key" == '`' ]; then
+				echo print >$modl_fifo
+				move=''
 				break
+			fi
+			if [ "$key" == 'H' ]; then
+				[ "$move" == '' ] && continue
+				printf '\b \b'
+				move=$(sed 's/.$//'<<<$move)
+				continue
 			fi
 			printf $key
 			move=$move$key
@@ -69,9 +75,25 @@ while read -n1 key; do
 		continue
 	fi
 
-	if [ "$key" == 'f' ]; then
-		echo "flip"
+	if [ "$key" == 'k' ]; then
+		echo prev >$modl_fifo
+	elif [ "$key" == 'j' ]; then
+		echo next >$modl_fifo
+	elif [ "$key" == 'g' ]; then
+		read -n1 key
+		if [ "$key" == 'g' ]; then
+			echo first >$modl_fifo
+		fi
+	elif [ "$key" == 'G' ]; then
+		echo last >$modl_fifo
+	elif [ "$key" == 'o' ]; then
+		echo snap >$modl_fifo
+	elif [ "$key" == 'i' ]; then
+		echo rebranch >$modl_fifo
+	elif [ "$key" == 'f' ]; then
+		echo flip >$modl_fifo
 	fi
+
 
 done
 																																					

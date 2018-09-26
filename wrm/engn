@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -o pipefail
+
 while true; do
 	if read -a cmd; then
 
@@ -10,8 +12,15 @@ while true; do
 		if [ "$cmd" = 'move' ]; then
 			position=${cmd[1]}
 			move=${cmd[2]}
-			~/bin/brd "$(tr _ ' ' <<<$position)" <<<"$move" | tr ' ' _
+			if ! ~/bin/brd 2>/dev/null "$(tr _ ' ' <<<$position)" <<<"$move" | tr ' ' _ | ./add; then
+				printf "\a" >&2
+				echo print
+			fi
+			continue
 		fi
+
+		echo ${cmd[@]}
+
 	fi
 done
 
