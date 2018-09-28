@@ -1,0 +1,54 @@
+#!/bin/bash
+
+config="$HOME/.config/brd"
+mkdir -p $config
+
+touch "$config/id"
+touch "$config/host"
+touch "$config/display"
+
+id=$(cat $config/id)
+host=$(cat $config/host)
+display=$(cat $config/display)
+display=${display:-cat}
+
+if ! which ncat >/dev/null; then
+	echo 'ERROR: please install ncat first' >&2
+	exit 1
+fi
+
+cmd=${1:-position}; shift
+
+# local command
+if [ "$cmd" == 'set' ]; then
+	pair=$1; shift
+	key=$(cut -d= -f1 <<<$pair)
+	val=$(cut -d= -f2 <<<$pair)
+	echo $val >$config/$key
+	exit
+fi
+
+if [ "$host" == '' ]; then
+	echo "ERROR: missing hostname -- $0 set host=[hostname]" >&2
+	exit 1
+elif [ "$id" == '' ]; then
+	echo "ERROR: missing brd id -- $0 set id=[id]" >&2
+	exit 1
+fi
+
+# remote command
+
+args=$@
+
+if [ "$cmd" == 'move' ]; then
+	position=$(ncat $host $id <<< "move $args")
+	if grep 'ERROR' <<< $position >/dev/null; then
+		echo "ERROR: move=$args failed"
+		exit 1
+	fi
+	$display <<< $position
+elif [ "$cmd" == 'position' ]; then
+	ncat $host $id <<< 'position' | $display
+else
+	ncat $host $id <<< "$cmd $args"
+fi
