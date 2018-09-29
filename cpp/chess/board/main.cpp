@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
 			if (move.empty())
 				continue;
 			if (brd.TryMove(move))
-				cout << fen::to_string(brd) << endl;
+				cout << fen::to_string(brd) << ' ' << move << endl;
 			else {
 				cerr << "ERROR: move=" << move << " failed" << endl;
 				return 1;

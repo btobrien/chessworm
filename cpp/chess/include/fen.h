@@ -72,6 +72,8 @@ std::string to_string(const T& squares, const CastleFlags flags, int clock, int 
 	fen << to_string(flags);
     fen << ' ';
 	fen << squares::to_string(en_passant);
+    fen << ' ';
+	fen << (clock / 2) + 1;
     return fen.str();
 }
 
