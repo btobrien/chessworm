@@ -1,17 +1,17 @@
 #pragma once
 
-#include <iostream>
 #include <string>
-#include <sstream>
 
-std::string getword(std::stringstream& ss) {
+template<typename S>
+std::string getword(S& stream) {
 	std::string wrd;
-	ss >> wrd;
+	stream >> wrd;
 	return wrd;
 }
 
-bool try_getword(std::stringstream& ss, std::string& outString) {
-	outString = getword(ss);
+template<typename S>
+bool try_getword(S& stream, std::string& outString) {
+	outString = getword(stream);
 	return !outString.empty();
 }
 
