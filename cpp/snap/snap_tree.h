@@ -1,122 +1,107 @@
-
 #pragma once
-#include <stack>
+#include "snap_tree_impl.h"
+
+namespace Snap {
 
 template <typename T>
-class snap_tree {
+class tree : public tree_impl<T> {
 public:
-	snap_tree(T init) : present(init), future(new std::stack<T>) {}
+	tree(T init) : tree_impl<T>(init) {}
 
-	~snap_tree() {
-		delete future;
-		while(!futures.empty()) {
-			delete futures.top();
-			futures.pop();
+	bool split(T val) {
+		if (!this->prev())
+			return false;
+		this->add(val);
+		return true;
+	}
+
+	void set_to(int index) {
+		while (this->depth() < index && this->next()) {}
+		while (this->depth() > index && this->prev()) {}
+	}
+
+	bool chop_branch() {
+		if (this->snap()) {
+			this->branch();
+			this->chop();
+			this->next();
+			return true;
+		}
+		return false;
+	}
+
+	bool demote() {
+		int d = this->depth();
+		bool result = this->branch() && this->promote() && this->branch();
+		this->set_to(d);
+		return result;
+	}
+
+	void set_start() {
+		while (this->prev()) {}
+	}
+
+	void set_end() {
+		while (this->next()) {}
+	}
+
+	void slide(int dist) {
+		set_to(this->depth() + dist);
+	}
+
+	void snap_main() {
+		while (this->snap()) {}
+	}
+
+	void branch_all() {
+		while (this->branch()) {}
+	}
+
+	void branch_to(int index) {
+		while (this->line() < index && this->branch()) {}
+		while (this->line() > index && this->snap()) {}
+	}
+
+	void promote_main() {
+		while (this->promote()) {}
+	}
+
+	void demote_last() {
+		while (this->branch() && this->promote()) {}
+	}
+
+	void promote_to(int index) {
+		while (this->line() > index && this->promote()) {}
+		while (this->line() > index && this->demote()) {}
+	}
+
+	std::string show() {
+		int d = this->depth();
+		int l = this->line();
+		this->snap_main();
+		set_start();
+		std::string result = this->show_sub();
+		branch_to(l);
+		set_to(d);
+		return result;
+	}
+
+	template<typename S>
+	void load(S& stream) {
+		std::string wrd;
+		while (stream >> wrd) {
+			if (wrd == "(") {
+				stream >> wrd;
+				this->prev();
+				this->add(wrd);
+			}
+			else if (wrd == ")")
+				this->snap();
+			else
+				this->add(wrd);
 		}
 	}
 
-	inline T get() const { return present; }			
-
-	void add(T val) {
-		if (!future->empty()) {
-			branch(val);
-			return;
-		}
-		past.push(present);
-		present = val;
-	}			
-
-	bool prev() { 
-		if (past.empty())
-			return false;
-		future->push(present);
-		present = past.top();
-		past.pop();
-		return true;
-	}
-
-	bool next() { 
-		if (future->empty())
-			return false;
-		past.push(present);
-		present = future->top();
-		future->pop();
-		return true;
-	}
-
-	void branch(T val) {
-		if (!future->empty() && val == future->top()) {
-			next();
-			return;
-		}
-		branch_points.push(depth());
-		past.push(present);
-		present = val;
-		futures.push(future);
-		future = new std::stack<T>;
-		delete snap_future;
-		snap_future = nullptr;
-	}
-
-	bool snap() {
-		if (branch_points.empty())
-			return false;
-		set(*this, branch_points.top());
-		branch_points.pop();
-		snap_future = future;
-		snap_point = depth();
-		future = futures.top();
-		futures.pop();
-		return true;
-	}
-
-	// TODO: make multi level
-	bool rebranch() {
-		if (!snap_future)
-			return false;
-		set(*this, snap_point);
-		std::stack<T>* new_future = snap_future;
-		snap_future = nullptr;
-		branch(new_future->top());
-		new_future->pop();
-		delete future;
-		future = new_future;
-		snap_future = nullptr;
-		return true;
-	}
-
-	inline int depth() const { return past.size(); }
-	inline int togo() const { return future->size(); }
-
-private:
-	std::stack<T> past;
-	T present;
-	std::stack<T>* future;
-	std::stack<std::stack<T>*> futures;
-	std::stack<int> branch_points;
-	std::stack<T>* snap_future;
-	int snap_point;
 };
 
-
-template <typename T>
-inline void set_first(snap_tree<T>& st) {
-	while (st.prev()) {}
 }
-
-template <typename T>
-inline void set_last(snap_tree<T>& st) {
-	while (st.next()) {}
-}
-
-template <typename T>
-inline void set(snap_tree<T>& st, int index) {
-	while (st.depth() < index && st.next()) {}
-	while (st.depth() > index && st.prev()) {}
-}
-
-template <typename T>
-inline void slide(snap_tree<T>& st, int dist) {
-	set(st, st.depth() + dist);
-}
-

@@ -9,8 +9,8 @@ prev  #b
 add x
 add y
 add z
-snap  #b
-next  #c
-rebranch  #x
-next  #y
-next  #z
+snap   #c
+next   #d
+branch #x
+next   #y
+next   #z
