@@ -11,41 +11,68 @@ modl_fifo=.impl/wrm/ctrl/fifos/$$
 mkdir -p $(dirname $modl_fifo)
 mkfifo $modl_fifo
 
-hist_file=$HOME/.impl/wrm/state/$graph/hist.txt
-mkdir -p $(dirname $hist_file)
+hist=$HOME/.impl/wrm/state/$graph/hist.txt
+flip=$HOME/.impl/wrm/state/$graph/flip
+mkdir -p $(dirname $hist)
 
-./modl $graph <$modl_fifo  | tee -a $hist_file | ./view &
+./modl $graph <$modl_fifo | tee $hist | ./view $flip &
 
 trap "echo exit >$modl_fifo; rm -f $modl_fifo; stty echo; tput cnorm" EXIT
 
-echo '-'>$modl_fifo
+echo print >$modl_fifo
 while read -n1 key; do
 
 	if [ "$key" == ':' ]; then
 		tput cup $(tput lines) 0
-		tput cnorm
-		stty echo
-		read -p':' -e line;
-		stty -echo
-		tput civis
+		printf ':'
+		line=''
+		while true; do
+			read -n1 -r key
+			[ "$key" == '' ] && break
+			if [ "$key" == '`' ]; then
+				echo print >$modl_fifo
+				line=''
+				break
+			fi
+			if [ "$key" == 'H' ]; then
+				[ "$line" == '' ] && continue
+				printf '\b \b'
+				line=$(sed 's/.$//'<<<$line)
+				continue
+			fi
+			printf $key
+			line=$line$key
+		done
 
-		[ "line" == '' ] && continue
+		[ "$line" == '' ] && continue
 
-		if [ "$line" = 'q' ]; then
+		if [ "$line" = 'f' ]; then
+			if [ -f $flip ]; then
+				rm -r $flip
+			else
+				touch $flip
+			fi
+			echo print >$modl_fifo
+			continue
+		elif [ "$line" = 'q' ]; then
 			clear
 			exit
+		elif [ "$line" = 'c' ]; then
+			echo clear >$modl_fifo
 		fi
-
-		if [ "$line" == 'vim' ]; then
-			vim ~/.vimrc
-			continue
-		fi
-
-		clear
+		echo print >$modl_fifo
 		continue
 	fi
 
-	if [ "$key" == '/' ]; then
+	if [ "$key" == 'c' ]; then
+		read -n1 key
+		if [ "$key" == 'c' ]; then
+			echo chop >$modl_fifo
+			key='n'
+		fi
+	fi
+
+	if [ "$key" == 'n' ]; then
 		tput cup $(tput lines) 0
 		printf '/'
 		move=''
@@ -67,31 +94,53 @@ while read -n1 key; do
 			move=$move$key
 		done
 
-		if [ "$move" == '' ]; then
-			continue
-		fi
+		[ "$move" == '' ] && continue
 
-		echo move "$(tail -1 <$hist_file)" $move >$modl_fifo
+		echo move "$(tail -1 <$hist | cut -d':' -f1)" $move >$modl_fifo
 		continue
 	fi
 
-	if [ "$key" == 'k' ]; then
+
+	if [ "$key" == 'g' ]; then
+		read -n1 key
+		if [ "$key" == 'g' ]; then
+			echo start >$modl_fifo
+		fi
+
+	elif [ "$key" == 'd' ]; then
+		read -n1 key
+		if [ "$key" == 'd' ]; then
+			echo chop >$modl_fifo
+		elif [ "$key" == 'o' ]; then
+			echo chop_branch >$modl_fifo
+		fi
+
+	elif [ "$key" == 'k' ]; then
 		echo prev >$modl_fifo
 	elif [ "$key" == 'j' ]; then
 		echo next >$modl_fifo
-	elif [ "$key" == 'g' ]; then
-		read -n1 key
-		if [ "$key" == 'g' ]; then
-			echo first >$modl_fifo
-		fi
 	elif [ "$key" == 'G' ]; then
-		echo last >$modl_fifo
+		echo end >$modl_fifo
 	elif [ "$key" == 'o' ]; then
 		echo snap >$modl_fifo
+	elif [ "$key" == 'O' ]; then
+		echo snap_main >$modl_fifo
 	elif [ "$key" == 'i' ]; then
-		echo rebranch >$modl_fifo
-	elif [ "$key" == 'f' ]; then
-		echo flip >$modl_fifo
+		echo branch >$modl_fifo
+	elif [ "$key" == 'I' ]; then
+		echo branch_all >$modl_fifo
+	elif [ "$key" == 'u' ]; then
+		echo promote >$modl_fifo
+	elif [ "$key" == 'U' ]; then
+		echo promote_main >$modl_fifo
+	elif [ "$key" == 'p' ]; then
+		echo demote >$modl_fifo
+	elif [ "$key" == 'P' ]; then
+		echo demote_last >$modl_fifo
+	elif [ "$key" == 'z' ]; then
+		printf '\a'
+	elif [ "$key" == 'L' ]; then
+		echo print >$modl_fifo
 	fi
 
 

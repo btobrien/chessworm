@@ -1,5 +1,14 @@
 #!/bin/bash
+
+flip_file=$1
 while read input; do
+	pos=$(cut -d':' -f1 <<<$input)
 	clear
-	disp <<<"$input"
+	echo
+	if [ -f "$flip_file" ]; then
+		disp <<<"$input" | ./flip | ./cntr
+	else
+		disp <<<"$input" | ./cntr
+	fi
 done
+

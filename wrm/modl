@@ -1,4 +1,4 @@
 #!/bin/bash
 
 cd $(dirname $0)
-./engn | snp
+./engn $graph | snp
