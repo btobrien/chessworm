@@ -140,6 +140,7 @@ while read -n1 key; do
 	elif [ "$key" == 'z' ]; then
 		printf '\a'
 	elif [ "$key" == 'L' ]; then
+		clear
 		echo print >$modl_fifo
 	fi
 

@@ -3,12 +3,18 @@
 flip_file=$1
 while read input; do
 	pos=$(cut -d':' -f1 <<<$input)
-	clear
-	echo
+	tput cup 0 0
+	printf '\n'
 	if [ -f "$flip_file" ]; then
 		disp <<<"$input" | ./flip | ./cntr
 	else
 		disp <<<"$input" | ./cntr
 	fi
+	printf '\n'
+	cut -d':' -f2 <<<$input | ./strip | ./cntr
+	tput cup $(tput lines) 0
+	cols=$(tput cols)
+	pad=%"$cols"s
+	printf "$pad"
 done
 
