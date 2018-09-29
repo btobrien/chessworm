@@ -22,5 +22,4 @@ void DisplaySquare(char p, bool isLightSquare) {
 		case ' ':                   std::cout << "\u00B7"; break;
 		default:					std::cout << "X"; break;
 	}
-	std::cout << ' ';
 }
