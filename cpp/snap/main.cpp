@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
 			tree.load(ss);
 
 		if (success) {
-			cout << tree.get() << "  : ";
+			cout << tree.get() << " :";
 			cout << tree.show() << std::endl;
 		}
 	}

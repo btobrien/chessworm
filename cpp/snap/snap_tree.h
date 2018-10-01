@@ -83,7 +83,7 @@ public:
 		std::string result = this->show_sub();
 		branch_to(l);
 		set_to(d);
-		return result;
+		return result.substr(result.find('-') + 1);
 	}
 
 	template<typename S>
