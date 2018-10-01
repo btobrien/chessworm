@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export GREP_COLORS='ms=01;32'
+
 flip_file=$1
 while read input; do
 	pos=$(cut -d':' -f1 <<<$input)
@@ -11,7 +13,7 @@ while read input; do
 		disp <<<"$input" | ./cntr
 	fi
 	printf '\n'
-	cut -d':' -f2 <<<$input | ./strip | ./cntr
+	cut -d':' -f2 <<<$input | ./strip | ./cntr | grep --color -E $(./strip <<<$pos)
 	tput cup $(tput lines) 0
 	cols=$(tput cols)
 	pad=%"$cols"s

@@ -4,21 +4,24 @@ clear
 stty -echo
 tput civis
 
-graph=${1:-default}
+tree=${1:-$HOME/.impl/wrm/default}
+touch $tree
+tree_string=$(cut -d':' -f2 <$tree)
 
 cd $(dirname $0)
 modl_fifo=.impl/wrm/ctrl/fifos/$$
 mkdir -p $(dirname $modl_fifo)
 mkfifo $modl_fifo
 
-hist=$HOME/.impl/wrm/state/$graph/hist.txt
-flip=$HOME/.impl/wrm/state/$graph/flip
+hist=$HOME/.impl/wrm/state/$$/hist.txt
+flip=$HOME/.impl/wrm/state/flip
 mkdir -p $(dirname $hist)
 
-./modl $graph <$modl_fifo | tee $hist | ./view $flip &
+./modl $tree <$modl_fifo | tee $hist | ./view $flip &
 
 trap "echo exit >$modl_fifo; rm -f $modl_fifo; stty echo; tput cnorm" EXIT
 
+echo "load $tree_string" >$modl_fifo
 echo print >$modl_fifo
 while read -n1 key; do
 
@@ -57,8 +60,10 @@ while read -n1 key; do
 		elif [ "$line" = 'q' ]; then
 			clear
 			exit
-		elif [ "$line" = 'c' ]; then
-			echo clear >$modl_fifo
+		elif [ "$line" = 'w' ]; then
+			cd - >/dev/null
+			tail -1 $hist >$tree
+			cd - >/dev/null
 		fi
 		echo print >$modl_fifo
 		continue
