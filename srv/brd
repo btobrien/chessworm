@@ -12,12 +12,7 @@ host=$(cat $config/host)
 display=$(cat $config/display)
 display=${display:-cat}
 
-if ! which ncat >/dev/null; then
-	echo 'ERROR: please install ncat first' >&2
-	exit 1
-fi
-
-cmd=${1:-position}; shift
+cmd=${1:-get}; shift
 
 # local command
 if [ "$cmd" == 'set' ]; then
@@ -36,19 +31,24 @@ elif [ "$id" == '' ]; then
 	exit 1
 fi
 
-# remote command
-
-args=$@
-
-if [ "$cmd" == 'move' ]; then
-	position=$(ncat $host $id <<< "move $args")
-	if grep 'ERROR' <<< $position >/dev/null; then
-		echo "ERROR: move=$args failed"
+# remote commands
+if [ "$cmd" == 'get' ]; then
+	nc $host $id | tail -n1 | $display
+elif [ "$cmd" == 'move' ]; then
+	move="$@"
+	if [ "$move" == '' ]; then
+		echo 'ERROR: no move provided' >&2
 		exit 1
 	fi
-	$display <<< $position
-elif [ "$cmd" == 'position' ]; then
-	ncat $host $id <<< 'position' | $display
+	nc $host 1234 <<<"$id $move"
+	nc $host $id | tail -n1 | $display
+elif [ "$cmd" == 'who' ]; then
+	nc $host $id | tail -n1 | grep >/dev/null 'w' && echo 'white' || echo 'black'
+elif [ "$cmd" == 'tail' ]; then
+	nc $host $id | tail -n2 | head -n1
+elif [ "$cmd" == 'cat' ]; then
+	nc $host $id | sed '$ d'
 else
-	ncat $host $id <<< "$cmd $args"
+	echo 'ERROR: command not recognized' >&2
+	exit 1
 fi

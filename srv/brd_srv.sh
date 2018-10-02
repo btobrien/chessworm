@@ -1,9 +1,17 @@
 #!/bin/bash
 
-id=$1
-read cmd; 
+sleep 5
+set -o pipefail
 
-if ! ./srv_cmd.sh $id $cmd; then
-	echo 'ERROR'
+read -d' ' id 
+game="$id".chs
+
+read line
+move=$(cut -d'/' -f1 <<<$line)
+if cat $game <(echo $move) | fen >/dev/null; then
+	echo $line >>$game
+	exit
+else
+	echo "ERROR: move=$move failed" >&2
 	exit 1
 fi
