@@ -28,7 +28,5 @@ def DisplayFen(fen):
 
 if  __name__ == "__main__":
 	import sys
-	print
 	for line in sys.stdin:
 		DisplayFen(line)
-	print
