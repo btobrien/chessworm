@@ -5,12 +5,15 @@ mkdir -p $config
 
 touch "$config/id"
 touch "$config/host"
+touch "$config/port"
+touch "$config/nc"
 touch "$config/display"
 
 id=$(cat $config/id)
 host=$(cat $config/host)
-display=$(cat $config/display)
-display=${display:-cat}
+port=$(cat $config/port); port=${port:-1234}
+nc=$(cat $config/nc); nc=${nc:-nc}
+display=$(cat $config/display); display=${display:-cat}
 
 cmd=${1:-get}; shift
 
@@ -26,6 +29,9 @@ fi
 if [ "$host" == '' ]; then
 	echo "ERROR: missing hostname -- $0 set host=[hostname]" >&2
 	exit 1
+elif [ "$port" == '' ]; then
+	echo "ERROR: missing port -- $0 set port=[port]" >&2
+	exit 1
 elif [ "$id" == '' ]; then
 	echo "ERROR: missing brd id -- $0 set id=[id]" >&2
 	exit 1
@@ -33,21 +39,27 @@ fi
 
 # remote commands
 if [ "$cmd" == 'get' ]; then
-	nc $host $id | tail -n1 | $display
+	$nc $host $id | tail -n1 | $display
 elif [ "$cmd" == 'move' ]; then
 	move="$@"
 	if [ "$move" == '' ]; then
 		echo 'ERROR: no move provided' >&2
 		exit 1
 	fi
-	nc $host 1234 <<<"$id $move"
-	nc $host $id | tail -n1 | $display
+	clock=$($nc $host $id 2>/dev/null | wc -l)
+	$nc $host $port <<<"$id $move"
+	move_recv=$($nc $host $id 2>/dev/null | head -n$clock | tail -1)
+	if [ "$move_recv" != "$move" ]; then
+		echo "ERROR: move=$move failed" >&2
+		exit 1
+	fi
+	$nc $host $id | tail -n1 | $display
 elif [ "$cmd" == 'who' ]; then
-	nc $host $id | tail -n1 | grep >/dev/null 'w' && echo 'white' || echo 'black'
+	$nc $host $id | tail -n1 | grep >/dev/null 'w' && echo 'white' || echo 'black'
 elif [ "$cmd" == 'tail' ]; then
-	nc $host $id | tail -n2 | head -n1
+	$nc $host $id | tail -n2 | head -n1
 elif [ "$cmd" == 'cat' ]; then
-	nc $host $id | sed '$ d'
+	$nc $host $id | sed '$ d'
 else
 	echo 'ERROR: command not recognized' >&2
 	exit 1

@@ -1,10 +1,12 @@
 #!/bin/bash
 
-sleep 5
-set -o pipefail
-
 read -d' ' id 
-game="$id".chs
+
+config="$HOME/.config/brdsrv"
+mkdir -p $config
+game=$config/$id
+
+set -o pipefail
 
 read line
 move=$(cut -d'/' -f1 <<<$line)
