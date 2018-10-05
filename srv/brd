@@ -3,19 +3,13 @@
 config="$HOME/.config/brd"
 mkdir -p $config
 
-touch "$config/id"
-touch "$config/host"
-touch "$config/port"
-touch "$config/nc"
-touch "$config/display"
+touch "$config/id";       id=$(cat $config/id)
+touch "$config/host";     host=$(cat $config/host)
+touch "$config/port";     port=$(cat $config/port);        port=${port:-1234}
+touch "$config/nc";       nc=$(cat $config/nc);            nc=${nc:-nc}
+touch "$config/display";  display=$(cat $config/display);  display=${display:-cat}
 
-id=$(cat $config/id)
-host=$(cat $config/host)
-port=$(cat $config/port); port=${port:-1234}
-nc=$(cat $config/nc); nc=${nc:-nc}
-display=$(cat $config/display); display=${display:-cat}
-
-cmd=${1:-get}; shift
+cmd=$1; shift
 
 # local command
 if [ "$cmd" == 'set' ]; then
@@ -38,8 +32,8 @@ elif [ "$id" == '' ]; then
 fi
 
 # remote commands
-if [ "$cmd" == 'get' ]; then
-	$nc $host $id | tail -n1 | $display
+if [ "$cmd" == '' ]; then
+	$nc $host $id | tail -n1 | bash <(echo $display)
 elif [ "$cmd" == 'move' ]; then
 	move="$@"
 	if [ "$move" == '' ]; then
@@ -53,7 +47,7 @@ elif [ "$cmd" == 'move' ]; then
 		echo "ERROR: move=$move failed" >&2
 		exit 1
 	fi
-	$nc $host $id | tail -n1 | $display
+	$nc $host $id | tail -n1 | bash <(echo $display)
 elif [ "$cmd" == 'who' ]; then
 	$nc $host $id | tail -n1 | grep >/dev/null 'w' && echo 'white' || echo 'black'
 elif [ "$cmd" == 'tail' ]; then
