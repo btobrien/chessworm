@@ -12,7 +12,7 @@ while true; do
 		if [ "$cmd" = 'move' ]; then
 			position=${cmd[1]}
 			move=${cmd[2]}
-			if ! ~/bin/brd 2>/dev/null "$(tr _ ' ' <<<$position)" <<<"$move" | tr ' ' _ | ./add; then
+			if ! ~/bin/brd 2>/dev/null "$(tr _ ' ' <<<$position)" <<<"$move" | tr ' ' _ | add; then
 				printf "\a" >&2
 				echo print
 			fi
