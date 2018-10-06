@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import sys
 
 BOARD_LENGTH = 8
 
@@ -13,6 +14,7 @@ def DisplaySquare(piece):
 def DisplayFen(fen):
 	i = 0
 	for row in range(BOARD_LENGTH):
+		sys.stdout.write(' ')
 		char = fen[i]
 		i += 1
 		while(not isRowDelim(char)):
@@ -23,10 +25,10 @@ def DisplayFen(fen):
 					DisplaySquare(' ')
 			char = fen[i]
 			i +=1
+		sys.stdout.write(' ')
 		print	
 
 
 if  __name__ == "__main__":
-	import sys
 	for line in sys.stdin:
 		DisplayFen(line)

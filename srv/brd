@@ -13,7 +13,7 @@ cmd=$1; shift
 
 # local command
 if [ "$cmd" == 'set' ]; then
-	pair=$1; shift
+	pair=$@; shift
 	key=$(cut -d= -f1 <<<$pair)
 	val=$(cut -d= -f2 <<<$pair)
 	echo $val >$config/$key
