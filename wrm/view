@@ -8,12 +8,12 @@ while read input; do
 	tput cup 0 0
 	printf '\n'
 	if [ -f "$flip_file" ]; then
-		disp <<<"$input" | ./flip | ./cntr
+		disp <<<"$input" | flip | border | cntr
 	else
-		disp <<<"$input" | ./cntr
+		disp <<<"$input" | border | cntr
 	fi
 	printf '\n'
-	cut -d':' -f2 <<<$input | ./strip | ./cntr | grep --color -E $(./strip <<<$pos)
+	cut -d':' -f2 <<<$input | ./strip | cntr | grep --color -E $(./strip <<<$pos)
 	tput cup $(tput lines) 0
 	cols=$(tput cols)
 	pad=%"$cols"s
