@@ -1,8 +1,8 @@
 
-all : brd snp disps
+all : fens snp disps
 
-brd : chess/board/main.cpp board.o
-	g++ -o ~/bin/brd chess/board/main.cpp board.o -I/Users/btobrien/dev/chess_worm/cpp
+fens : chess/board/main.cpp board.o
+	g++ -o ~/bin/fens chess/board/main.cpp board.o -I/Users/btobrien/dev/chess_worm/cpp
 
 snp : snap/main.cpp snap/snap_tree.h include/read.h
 	g++ -o ~/bin/snp snap/main.cpp -I/Users/btobrien/dev/chess_worm/cpp
