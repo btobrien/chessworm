@@ -1,5 +1,3 @@
-#!/bin/bash
-
 clear
 stty -echo
 tput civis
@@ -24,7 +22,7 @@ mkdir -p $(dirname $hist)
 
 trap "echo exit >$modl_fifo; rm -f $modl_fifo; stty echo; tput cnorm" EXIT
 
-echo "load $tree_string" >$modl_fifo
+echo "read $tree_string" >$modl_fifo
 echo print >$modl_fifo
 while read -n1 key; do
 
@@ -124,6 +122,10 @@ while read -n1 key; do
 		read -n1 key
 		if [ "$key" == 'g' ]; then
 			echo start >$modl_fifo
+		elif [ "$key" == 'o' ]; then
+			echo snap_first >$modl_fifo
+		elif [ "$key" == 'i' ]; then
+			echo branch_last >$modl_fifo
 		fi
 
 	elif [ "$key" == 'd' ]; then
@@ -143,15 +145,15 @@ while read -n1 key; do
 	elif [ "$key" == 'o' ]; then
 		echo snap >$modl_fifo
 	elif [ "$key" == 'O' ]; then
-		echo snap_main >$modl_fifo
+		echo snap_oldest >$modl_fifo
 	elif [ "$key" == 'i' ]; then
 		echo branch >$modl_fifo
 	elif [ "$key" == 'I' ]; then
-		echo branch_all >$modl_fifo
+		echo branch_youngest >$modl_fifo
 	elif [ "$key" == 'u' ]; then
 		echo promote >$modl_fifo
 	elif [ "$key" == 'U' ]; then
-		echo promote_main >$modl_fifo
+		echo promote_first >$modl_fifo
 	elif [ "$key" == 'p' ]; then
 		echo demote >$modl_fifo
 	elif [ "$key" == 'P' ]; then

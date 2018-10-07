@@ -1,24 +1,21 @@
 #!/bin/bash
 
-export GREP_COLORS='ms=01;32'
-
 flip_file=$1
 disp_lock=$2
 
 while read input; do
 	while ! mkdir $disp_lock 2>/dev/null; do
-		sleep 0.1
+		sleep 0.2
 	done
-	pos=$(cut -d':' -f1 <<<$input)
 	tput cup 0 0
 	printf '\n'
 	if [ -f "$flip_file" ]; then
-		disp <<<"$input" | flip | border | cntr
+		disp <<<"$input" | flip | border | center
 	else
-		disp <<<"$input" | border | cntr
+		disp <<<"$input" | border | center
 	fi
 	printf '\n'
-	cut -d':' -f2 <<<$input | ./strip | cntr | grep --color -E $(./strip <<<$pos)
+	cut -d':' -f2 <<<$input | ./strip | tr '/' '\n' | tee ~/txt/test.txt | tree | center
 	tput cup $(tput lines) 0
 	cols=$(tput cols)
 	pad=%"$cols"s
