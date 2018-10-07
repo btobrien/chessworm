@@ -1,11 +1,19 @@
 
-all : fens snp disps
+all : fens snp disps triis
 
 fens : chess/board/main.cpp board.o
 	g++ -o ~/bin/fens chess/board/main.cpp board.o -I/Users/btobrien/dev/chess_worm/cpp
 
 snp : snap/main.cpp snap/snap_tree.h include/read.h
 	g++ -o ~/bin/snp snap/main.cpp -I/Users/btobrien/dev/chess_worm/cpp
+
+trees : tree trii
+
+tree : snap/disp/main.cpp snap/disp/tree.cpp
+	g++ -std=c++11 -o ~/bin/tree snap/disp/main.cpp snap/disp/tree.cpp
+
+trii : snap/disp/main.cpp snap/disp/trii.cpp
+	g++ -std=c++11 -o ~/bin/trii snap/disp/main.cpp snap/disp/trii.cpp
 
 disps : shapes shapes2 pieces
 
