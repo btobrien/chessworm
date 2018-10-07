@@ -16,8 +16,7 @@ public:
 	}
 
 	void set_to(int index) {
-		while (this->depth() < index && this->next()) {}
-		while (this->depth() > index && this->prev()) {}
+		Snap::set_to(*this, index);
 	}
 
 	bool chop_branch() {
@@ -49,25 +48,24 @@ public:
 		set_to(this->depth() + dist);
 	}
 
-	void snap_main() {
+	void snap_first() {
 		while (this->snap()) {}
 	}
 
-	void branch_all() {
+	void branch_last() {
 		while (this->branch()) {}
 	}
 
 	void branch_to(int index) {
-		while (this->line() < index && this->branch()) {}
-		while (this->line() > index && this->snap()) {}
+		Snap::branch_to(*this, index);
 	}
 
-	void promote_main() {
+	void promote_first() {
 		while (this->promote()) {}
 	}
 
 	void demote_last() {
-		while (this->branch() && this->promote()) {}
+		while (demote()) {}
 	}
 
 	void promote_to(int index) {
@@ -75,19 +73,8 @@ public:
 		while (this->line() > index && this->demote()) {}
 	}
 
-	std::string show() {
-		int d = this->depth();
-		int l = this->line();
-		this->snap_main();
-		set_start();
-		std::string result = this->show_sub();
-		branch_to(l);
-		set_to(d);
-		return result.substr(result.find('-') + 1);
-	}
-
 	template<typename S>
-	void load(S& stream) {
+	void read(S& stream) {
 		std::string wrd;
 		while (stream >> wrd) {
 			if (wrd == "(") {
@@ -97,9 +84,26 @@ public:
 			}
 			else if (wrd == ")")
 				this->snap();
+			else if (wrd == "/")
+				set_start();
 			else
 				this->add(wrd);
 		}
+	}
+
+	template<typename S>
+	void show(S& stream) {
+		int d = this->depth();
+		int l = this->line();
+		this->snap_first();
+		do {
+			set_start();
+			while (this->next())
+				stream << this->get() << " ";
+			stream << "/ ";
+		} while (this->branch());
+		branch_to(l);
+		set_to(d);
 	}
 
 };

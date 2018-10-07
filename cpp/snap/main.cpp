@@ -13,13 +13,16 @@ using std::fstream;
 
 int main(int argc, char* argv[]) {
 
-	std::string init = "-";
+	Snap::tree<string> tree("-");
 
 	if (argc > 1) {
-		init = argv[1];
+		stringstream ss(argv[1]);
+		tree.read(ss);
 	}
-		
-	Snap::tree<string> tree(init);
+
+	cout << tree.get() << " : ";
+	tree.show(cout);
+	cout << std::endl;
 
 	string line;
 	while(getline(cin, line)) {
@@ -53,24 +56,25 @@ int main(int argc, char* argv[]) {
 			tree.set_to(stoi(getword(ss)));
 		else if (cmd == "slide")
 			tree.slide(stoi(getword(ss)));
-		else if (cmd == "snap_main")
-			tree.snap_main();
-		else if (cmd == "branch_all")
-			tree.branch_all();
+		else if (cmd == "snap_first")
+			tree.snap_first();
+		else if (cmd == "branch_last")
+			tree.branch_last();
 		else if (cmd == "branch_to")
 			tree.branch_to(stoi(getword(ss)));
-		else if (cmd == "promote_main")
-			tree.promote_main();
+		else if (cmd == "promote_first")
+			tree.promote_first();
 		else if (cmd == "demote_last")
 			tree.demote_last();
 		else if (cmd == "promote_to")
 			tree.promote_to(stoi(getword(ss)));
-		else if (cmd == "load")
-			tree.load(ss);
+		else if (cmd == "read")
+			tree.read(ss);
 
 		if (success) {
-			cout << tree.get() << " :";
-			cout << tree.show() << std::endl;
+			cout << tree.get() << " : ";
+			tree.show(cout);
+			cout << std::endl;
 		}
 	}
 }
