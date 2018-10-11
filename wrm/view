@@ -19,7 +19,7 @@ while read input; do
 	line=$(cut -d':' -f3 <<<$input)
 	depth=$(cut -d':' -f4 <<<$input)
 	cut -d':' -f2 <<<$input | ./strip | tr '/' '\n' | sed '$ d' >$tmp
-	tree_width=$(gwc -L <./tmp | cut -d' ' -f1)
+	tree_width=$(gwc -L <$tmp)
 	tree $line $depth  <$tmp | center $tree_width
 	tput cup $(tput lines) 0
 	cols=$(tput cols)
