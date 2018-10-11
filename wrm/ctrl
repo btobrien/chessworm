@@ -54,19 +54,25 @@ while read -n1 key; do
 
 		if [ "$line" = 'f' ]; then
 			if [ -f $flip ]; then
-				rm -r $flip
+				rm $flip
 			else
 				touch $flip
 			fi
 			echo print >$modl_fifo
 			continue
+		elif [ "$line" = 'w' ]; then
+			cd - >/dev/null  # ok, ow
+			tail -1 $hist >$tree
+			cd - >/dev/null
+		elif [ "$line" = 'wq' ]; then
+			cd - >/dev/null  # ok, ow
+			tail -1 $hist >$tree
+			cd - >/dev/null
+			clear
+			exit
 		elif [ "$line" = 'q' ]; then
 			clear
 			exit
-		elif [ "$line" = 'w' ]; then
-			cd - >/dev/null
-			tail -1 $hist >$tree
-			cd - >/dev/null
 		fi
 		echo print >$modl_fifo
 		continue
