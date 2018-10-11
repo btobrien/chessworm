@@ -74,19 +74,19 @@ public:
 	}
 
 	bool promote() {
+		// TODO: fix or rm...
 		if (line() == 0)
 			return false;
-		branches.push(snaps.top());
-		snaps.pop();
 		branch_points.push(snap_points.top());
 		snap_points.pop();
+		branches.push(snaps.top());
+		snaps.pop();
 		return true;
 	}
 
 	bool chop() {
-		if (!depth())
+		if (!prev())
 			return false;
-		prev();
 		delete future;
 		while (!snap_points.empty() && snap_points.top() > depth()) {
 			snap_points.pop();

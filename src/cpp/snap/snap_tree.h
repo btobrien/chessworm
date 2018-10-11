@@ -29,13 +29,6 @@ public:
 		return false;
 	}
 
-	bool demote() {
-		int d = this->depth();
-		bool result = this->branch() && this->promote() && this->branch();
-		this->set_to(d);
-		return result;
-	}
-
 	void set_start() {
 		while (this->prev()) {}
 	}
@@ -62,15 +55,6 @@ public:
 
 	void promote_first() {
 		while (this->promote()) {}
-	}
-
-	void demote_last() {
-		while (demote()) {}
-	}
-
-	void promote_to(int index) {
-		while (this->line() > index && this->promote()) {}
-		while (this->line() > index && this->demote()) {}
 	}
 
 	template<typename S>

@@ -44,8 +44,6 @@ int main(int argc, char* argv[]) {
 			success = tree.promote();
 		else if (cmd == "chop")
 			success = tree.chop();
-		else if (cmd == "demote")
-			success = tree.demote();
 		else if (cmd == "chop_branch")
 			success = tree.chop_branch();
 		else if (cmd == "start")
@@ -64,17 +62,15 @@ int main(int argc, char* argv[]) {
 			tree.branch_to(stoi(getword(ss)));
 		else if (cmd == "promote_first")
 			tree.promote_first();
-		else if (cmd == "demote_last")
-			tree.demote_last();
-		else if (cmd == "promote_to")
-			tree.promote_to(stoi(getword(ss)));
 		else if (cmd == "read")
 			tree.read(ss);
 
 		if (success) {
 			cout << tree.get() << " : ";
 			tree.show(cout);
-			cout << std::endl;
+			cout << " : ";
+			cout << tree.line() << " : ";
+			cout << tree.depth() << std::endl;
 		}
 	}
 }
