@@ -67,6 +67,8 @@ std::string to_string(const T& squares, const CastleFlags flags, int clock, int 
 	std::stringstream fen;
 	fen << to_string(squares);
     fen << ' ';
+	fen << '0'; //ignore half-move clock
+    fen << ' ';
 	fen << (clock % 2 == 0 ? 'w' : 'b');
     fen << ' ';
 	fen << to_string(flags);
