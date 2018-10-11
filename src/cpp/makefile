@@ -8,13 +8,8 @@ fens : chess/board/main.cpp board.o
 snp : snap/main.cpp snap/snap_tree.h include/read.h
 	g++ $(cflags) -o ~/bin/snp snap/main.cpp -I`pwd`
 
-trees : tree trii
-
-tree : snap/disp/main.cpp snap/disp/tree.cpp
-	g++ $(cflags) -o ~/bin/tree snap/disp/main.cpp snap/disp/tree.cpp
-
-trii : snap/disp/main.cpp snap/disp/trii.cpp
-	g++ $(cflags) -o ~/bin/trii snap/disp/main.cpp snap/disp/trii.cpp
+splay : splay/main.cpp splay/splay.cpp
+	g++ $(cflags) -o ~/bin/splay splay/main.cpp splay/splay.cpp
 
 disps : shapes shapes2 pieces
 

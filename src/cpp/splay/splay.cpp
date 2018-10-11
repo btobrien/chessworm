@@ -2,7 +2,7 @@
 #include <string>
 #include <iostream>
 
-void print_line(const std::string& str) {
+void print_line(const std::string& str, bool isTop) {
 	bool isDone = false;
 	for (auto& c : str) {
 		if (isDone) {
@@ -17,7 +17,10 @@ void print_line(const std::string& str) {
 				std::cout << "\u251C";
 				break;
 			case '\\':
-				std::cout << "\u2514";
+				if (isTop)
+					std::cout << "\u250C";
+				else
+					std::cout << "\u2514";
 				break;
 			case '_':
 				std::cout << "\u2500";
