@@ -2,6 +2,7 @@
 
 flip_file=$1
 disp_lock=$2
+tmp=~/.impl/wrm/$$.tmp
 
 while read input; do
 	while ! mkdir $disp_lock 2>/dev/null; do
@@ -15,7 +16,11 @@ while read input; do
 		disp <<<"$input" | border | center
 	fi
 	printf '\n'
-	cut -d':' -f2 <<<$input | ./strip | tr '/' '\n' | tee ~/txt/test.txt | tree | center
+	line=$(cut -d':' -f3 <<<$input)
+	depth=$(cut -d':' -f4 <<<$input)
+	cut -d':' -f2 <<<$input | ./strip | tr '/' '\n' | sed '$ d' >$tmp
+	tree_width=$(gwc -L <./tmp | cut -d' ' -f1)
+	tree $line $depth  <$tmp | center $tree_width
 	tput cup $(tput lines) 0
 	cols=$(tput cols)
 	pad=%"$cols"s
