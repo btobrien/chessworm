@@ -17,7 +17,6 @@ int main(int argc, char* argv[]) {
 		init = "";
 	Board brd(init);
 	string move;
-	cout << fen::to_string(brd) << ' ' << '-' << endl;
 	while (getline(cin, move)) {
 		stringstream ss(move);
 		while(getline(ss, move, '/')) {
