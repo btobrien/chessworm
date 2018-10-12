@@ -95,6 +95,7 @@ int main(int argc, char* argv[]) {
 			cout << "\033[0m";
 		cout << c;
 	}
+	cout << "\033[0m";
 	cout << endl;
 	for (auto& s : bottom)
 		print_line(s, false);
