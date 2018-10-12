@@ -25,7 +25,7 @@ mkdir -p $(dirname $hist)
 trap "echo exit >$modl_fifo; rm -f $modl_fifo; stty echo; tput cnorm" EXIT
 
 echo "read $tree_string" >$modl_fifo
-echo print >$modl_fifo
+
 while read -n1 key; do
 
 	if [ "$key" == ':' ]; then
