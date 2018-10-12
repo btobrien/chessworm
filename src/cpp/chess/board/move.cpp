@@ -4,6 +4,7 @@
 #include "chess/include/pieces.h"
 #include <ctgmath>
 #include <stdexcept>
+#include <cstring>
 
 inline bool Move::tryMatch(char piece, int oldSquare) const {
 	if (_piece && piece != _piece)
