@@ -1,77 +1,56 @@
 #!/bin/bash
 
-clear
-stty -echo
-tput civis
+tput smcup
+stty -echo; tput civis
 
-tree=${1:-$HOME/.impl/wrm/default}
-touch $tree
+config=~/.config/wrm
+mkdir -p $config
+tree=${1:-$config/default}
+tree=$(realpath $tree)
+mkdir -p $(dirname $tree); touch $tree
 tree_string=$(cut -d':' -f2 <$tree)
 
+tmp=$config/tmp/$$
+mkdir -p $tmp
+modl_fifo=$tmp/modl.fifo; mkfifo $modl_fifo
+disp_lock=$tmp/disp.lock; rm -r $disp_lock 2>/dev/null
+hist=$tmp/hist.txt
+flip=$tmp/flip.bool
+
 cd $(dirname $0)
-modl_fifo=.impl/wrm/ctrl/fifos/$$
-mkdir -p $(dirname $modl_fifo)
-mkfifo $modl_fifo
-disp_lock=.impl/wrm/ctrl/locks/$$
-mkdir -p $(dirname $disp_lock)
-rm -r $disp_lock 2>/dev/null
+./modl <$modl_fifo | tee $hist | ./view $flip $disp_lock &
 
-hist=$HOME/.impl/wrm/state/$$/hist.txt
-flip=$HOME/.impl/wrm/state/flip
-mkdir -p $(dirname $hist)
-
-./modl $tree <$modl_fifo | tee $hist | ./view $flip $disp_lock &
-
-trap "echo exit >$modl_fifo; rm -f $modl_fifo; stty echo; tput cnorm" EXIT
+trap "echo exit >$modl_fifo; rm -r $tmp; tput rmcup; stty echo; tput cnorm" EXIT #rmcup on background interupt too
 
 echo "read $tree_string" >$modl_fifo
 
 while read -n1 key; do
 
 	if [ "$key" == ':' ]; then
-		tput cup $(tput lines) 0
-		printf ':'
-		line=''
-		while true; do
-			read -n1 -r key
-			[ "$key" == '' ] && break
-			if [ "$key" == '`' ]; then
-				echo print >$modl_fifo
-				line=''
-				break
-			fi
-			if [ "$key" == 'H' ]; then
-				[ "$line" == '' ] && continue
-				printf '\b \b'
-				line=$(sed 's/.$//'<<<$line)
-				continue
-			fi
-			printf $key
-			line=$line$key
+		while ! mkdir $disp_lock 2>/dev/null; do
+			sleep 0.1
 		done
-
-		[ "$line" == '' ] && continue
-
+		tput cup $(tput lines) 0; tput cuu1
+		tput cnorm; stty echo 
+		read -p':' -e line
+		tput civis
+		tput cuu1; tput el
+		stty -echo
+		rm -r $disp_lock
 		if [ "$line" = 'f' ]; then
 			if [ -f $flip ]; then
 				rm $flip
 			else
 				touch $flip
 			fi
-			echo print >$modl_fifo
-			continue
+		elif [ "$(cut -d' ' -f1 <<<$line)" = 'board' ]; then
+			cp ~/bin/$(cut -d' ' -f2 <<<$line) ~/bin/board   # have specific board disp dir
 		elif [ "$line" = 'w' ]; then
-			cd - >/dev/null  # ok, ow
 			tail -1 $hist >$tree
-			cd - >/dev/null
 		elif [ "$line" = 'wq' ]; then
-			cd - >/dev/null  # ok, ow
 			tail -1 $hist >$tree
-			cd - >/dev/null
-			clear
 			exit
 		elif [ "$line" = 'q' ]; then
-			clear
 			exit
 		fi
 		echo print >$modl_fifo
@@ -85,9 +64,7 @@ while read -n1 key; do
 			key='n'
 			sleep 0.1
 		fi
-	fi
-
-	if [ "$key" == 'N' ]; then
+	elif [ "$key" == 'N' ]; then
 		echo prev >$modl_fifo
 		key='n'
 		sleep 0.1
@@ -95,38 +72,21 @@ while read -n1 key; do
 
 	if [ "$key" == 'n' ]; then
 		while ! mkdir $disp_lock 2>/dev/null; do
-			sleep 0.1
+			sleep 0.1  #flock??
 		done
-		tput cup $(tput lines) 0
-		printf '/'
-		move=''
-		while true; do
-			read -n1 -r key
-			[ "$key" == '' ] && break
-			if [ "$key" == '`' ]; then
-				echo print >$modl_fifo
-				move=''
-				break
-			fi
-			if [ "$key" == 'H' ]; then
-				[ "$move" == '' ] && continue
-				printf '\b \b'
-				move=$(sed 's/.$//'<<<$move)
-				continue
-			fi
-			printf $key
-			move=$move$key
-		done
+		clock=$(tail -1 <$hist | cut -d':' -f4 | sed 's/ //')'. '
+		tput cup $(tput lines) 0; tput cuu1
+		tput cnorm; stty echo 
+		read -p"$clock" -e move
+		tput civis
+		tput cuu1; tput el
+		stty -echo
 		rm -r $disp_lock
 
 		[ "$move" == '' ] && continue
-
 		echo move "$(tail -1 <$hist | cut -d':' -f1)" $move >$modl_fifo
-		continue
-	fi
 
-
-	if [ "$key" == 'g' ]; then
+	elif [ "$key" == 'g' ]; then
 		read -n1 key
 		if [ "$key" == 'g' ]; then
 			echo start >$modl_fifo
@@ -135,7 +95,6 @@ while read -n1 key; do
 		elif [ "$key" == 'i' ]; then
 			echo branch_last >$modl_fifo
 		fi
-
 	elif [ "$key" == 'd' ]; then
 		read -n1 key
 		if [ "$key" == 'd' ]; then
@@ -143,7 +102,6 @@ while read -n1 key; do
 		elif [ "$key" == 'o' ]; then
 			echo chop_branch >$modl_fifo
 		fi
-
 	elif [ "$key" == 'k' ]; then
 		echo prev >$modl_fifo
 	elif [ "$key" == 'j' ]; then
@@ -153,26 +111,19 @@ while read -n1 key; do
 	elif [ "$key" == 'o' ]; then
 		echo snap >$modl_fifo
 	elif [ "$key" == 'O' ]; then
-		echo snap_oldest >$modl_fifo
+		echo snap_first >$modl_fifo
 	elif [ "$key" == 'i' ]; then
 		echo branch >$modl_fifo
 	elif [ "$key" == 'I' ]; then
-		echo branch_youngest >$modl_fifo
+		echo branch_last >$modl_fifo
 	elif [ "$key" == 'u' ]; then
 		echo promote >$modl_fifo
 	elif [ "$key" == 'U' ]; then
 		echo promote_first >$modl_fifo
-	elif [ "$key" == 'p' ]; then
-		echo demote >$modl_fifo
-	elif [ "$key" == 'P' ]; then
-		echo demote_last >$modl_fifo
 	elif [ "$key" == 'z' ]; then
 		printf '\a'
 	elif [ "$key" == 'L' ]; then
 		clear
 		echo print >$modl_fifo
 	fi
-
-
 done
-																																					

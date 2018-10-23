@@ -2,7 +2,13 @@
 
 flip_file=$1
 disp_lock=$2
-tmp=~/.impl/wrm/$$.tmp
+tmp=~/.config/wrm/tmp/$$
+mkdir -p $tmp
+tree=$tmp/tree
+tmptree=$tmp/tmptree
+touch $tree
+touch $tmptree
+trap "rm -r $tmp" EXIT
 
 while read input; do
 	while ! mkdir $disp_lock 2>/dev/null; do
@@ -11,22 +17,21 @@ while read input; do
 	tput cup 0 0
 	printf '\n'
 	if [ -f "$flip_file" ]; then
-		disp <<<"$input" | flip | border | center
+		board <<<"$input" | flip | border | center
 	else
-		disp <<<"$input" | border | center
+		board <<<"$input" | border | center
 	fi
 	printf '\n'
 	line=$(cut -d':' -f3 <<<$input)
 	depth=$(cut -d':' -f4 <<<$input)
-	cut -d':' -f2 <<<$input | ./strip | tr '/' '\n' | sed '$ d' >$tmp
-	tree_width=$(gwc -L <$tmp)
-	termcols=$(tput cols)
+	cut -d':' -f2 <<<$input | ./strip | tr '/' '\n' | sed '$ d' >$tmptree
+	if ! diff $tree $tmptree >/dev/null; then
+		cp $tmptree $tree
+		tput ed
+	fi
+	tree_width=$(gwc -L <$tree) # not portable
+	splay $line $depth  <$tree | center $tree_width
 	tput ed
-	tree $line $depth  <$tmp | center $tree_width -p
-	tput cup $(tput lines) 0
-	cols=$(tput cols)
-	pad=%"$cols"s
-	printf "$pad"
-	rm -r $disp_lock
+	rm -r $disp_lock &2>/dev/null
 done
 
