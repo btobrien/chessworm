@@ -4,7 +4,7 @@
 #include "board_state.h"
 #include "white.h"
 #include "black.h"
-
+#include <cstring>
 #include <iostream>
 using std::cerr;
 using std::endl;
