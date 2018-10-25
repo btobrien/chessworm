@@ -1,6 +1,6 @@
 cflags = -std=c++11
 
-all : fens snp disps splay
+all : fens snp disps splay border
 
 fens : chess/board/main.cpp board.o
 	g++ $(cflags) -o ~/bin/fens chess/board/main.cpp board.o -I`pwd`
