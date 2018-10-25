@@ -6,7 +6,9 @@ stty -echo; tput civis
 config=~/.config/wrm
 mkdir -p $config
 tree=${1:-$config/default}
+graph=${2:-$config/def_graph}
 tree=$(realpath $tree)
+graph=$(realpath $graph)
 mkdir -p $(dirname $tree); touch $tree
 tree_string=$(cut -d':' -f2 <$tree)
 
@@ -18,7 +20,7 @@ hist=$tmp/hist.txt
 flip=$tmp/flip.bool
 
 cd $(dirname $0)
-./modl <$modl_fifo | tee $hist | ./view $flip $disp_lock &
+./modl <$modl_fifo | tee $hist | ./view $graph $flip $disp_lock &
 
 trap "echo exit >$modl_fifo; rm -r $tmp; tput rmcup; stty echo; tput cnorm" EXIT #rmcup on background interupt too
 
@@ -52,7 +54,11 @@ while read -n1 key; do
 			exit
 		elif [ "$line" = 'q' ]; then
 			exit
+		elif [ "$line" == 'e' ]; then
+			vim $graph/$(tail -1 <$hist | cut -d':' -f1 | sed 's/\///g' | sed 's/_//' | cut -d'_' -f1)  # please dry
+			clear; stty -echo; tput civis
 		fi
+
 		echo print >$modl_fifo
 		continue
 	fi
