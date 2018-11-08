@@ -28,17 +28,17 @@ while read input; do
 		board <<<"$input" | border | center
 	fi
 	printf '\n'
-	line=$(cut -d':' -f3 <<<$input)
-	depth=$(cut -d':' -f4 <<<$input)
-	cut -d':' -f2 <<<$input | ./strip | tr '/' '\n' | sed '$ d' >$tmptree
+	line=$(cut -d' ' -f2 <<<$input)
+	depth=$(cut -d' ' -f3 <<<$input)
+	cut -d' ' -f4 <<<$input | tr , '\n' | cut -d'_' -f7 | tr '\n' ' ' | sed 's/\] /\]/g' | tr ']' '\n' >$tmptree
 	if ! diff $tree $tmptree >/dev/null; then
 		cp $tmptree $tree
 		tput ed
 	fi
 	tree_width=$(gwc -L <$tree) # not portable
 	splay $line $depth  <$tree | center $tree_width
-	echo;echo
-	key=$(cut -d':' -f1 <<<$input | sed 's/\///g' | sed 's/_//' | cut -d'_' -f1)
+	echo
+	key=$(cut -d' ' -f1 <<<$input | sed 's/\///g' | sed 's/_//' | cut -d'_' -f1)
 	tput ed
 	if [ -f $graph/$key ]; then
 		cat $graph/$key | center

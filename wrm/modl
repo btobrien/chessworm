@@ -1,4 +1,6 @@
 #!/bin/bash
 
+tree=$1
+
 cd $(dirname $0)
-./engn | snp
+./engn | tri $tree

@@ -9,7 +9,7 @@ tree=${1:-$config/default}
 graph=${2:-$config/def_graph}
 tree=$(realpath $tree)
 graph=$(realpath $graph)
-mkdir -p $(dirname $tree); touch $tree
+mkdir -p $(dirname $tree); touch $tree #should mkdir if never saved?
 tree_string=$(cut -d':' -f2 <$tree)
 
 tmp=$config/tmp/$$
@@ -17,14 +17,14 @@ mkdir -p $tmp
 modl_fifo=$tmp/modl.fifo; mkfifo $modl_fifo
 disp_lock=$tmp/disp.lock; rm -r $disp_lock 2>/dev/null
 hist=$tmp/hist.txt
+hist=~/hist.txt
 flip=$tmp/flip.bool
 
 cd $(dirname $0)
-./modl <$modl_fifo | tee $hist | ./view $graph $flip $disp_lock &
+./modl $tree <$modl_fifo | tee $hist | ./view $graph $flip $disp_lock &
+echo 'print' >$modl_fifo
 
 trap "echo exit >$modl_fifo; rm -r $tmp; tput rmcup; stty echo; tput cnorm" EXIT #rmcup on background interupt too
-
-echo "read $tree_string" >$modl_fifo
 
 while read -n1 key; do
 
@@ -48,14 +48,14 @@ while read -n1 key; do
 		elif [ "$(cut -d' ' -f1 <<<$line)" = 'board' ]; then
 			cp ~/bin/$(cut -d' ' -f2 <<<$line) ~/bin/board   # have specific board disp dir
 		elif [ "$line" = 'w' ]; then
-			tail -1 $hist >$tree
+			tail -1 $hist | cut -d' ' -f4 | sed 's/\],/\]/g' | tr , ' ' | tr ']' '\n' >$tree
 		elif [ "$line" = 'wq' ]; then
-			tail -1 $hist >$tree
+			tail -1 $hist | cut -d' ' -f4 | sed 's/\],/\]/g' | tr , ' ' | tr ']' '\n' >$tree
 			exit
 		elif [ "$line" = 'q' ]; then
 			exit
 		elif [ "$line" == 'e' ]; then
-			vim $graph/$(tail -1 <$hist | cut -d':' -f1 | sed 's/\///g' | sed 's/_//' | cut -d'_' -f1)  # please dry
+			vim $graph/$(tail -1 <$hist | cut -d' ' -f1 | sed 's/\///g' | sed 's/_//' | cut -d'_' -f1)  # please dry
 			clear; stty -echo; tput civis
 		fi
 
@@ -67,20 +67,20 @@ while read -n1 key; do
 		read -n1 key
 		if [ "$key" == 'c' ]; then
 			echo chop >$modl_fifo
-			key='n'
+			key='m'
 			sleep 0.1
 		fi
-	elif [ "$key" == 'N' ]; then
+	elif [ "$key" == 'M' ]; then
 		echo prev >$modl_fifo
-		key='n'
+		key='m'
 		sleep 0.1
 	fi
 
-	if [ "$key" == 'n' ]; then
+	if [ "$key" == 'm' ]; then
 		while ! mkdir $disp_lock 2>/dev/null; do
 			sleep 0.1  #flock??
 		done
-		clock=$(tail -1 <$hist | cut -d':' -f4 | sed 's/ //')'. '
+		clock=$(tail -1 <$hist | cut -d' ' -f3 | sed 's/ //')'. '
 		tput cup $(tput lines) 0; tput cuu1
 		tput cnorm; stty echo 
 		read -p"$clock" -e move
@@ -90,45 +90,53 @@ while read -n1 key; do
 		rm -r $disp_lock
 
 		[ "$move" == '' ] && continue
-		echo move "$(tail -1 <$hist | cut -d':' -f1)" $move >$modl_fifo
+		echo move "$(tail -1 <$hist | cut -d' ' -f1)" $move >$modl_fifo
 
 	elif [ "$key" == 'g' ]; then
 		read -n1 key
 		if [ "$key" == 'g' ]; then
-			echo start >$modl_fifo
-		elif [ "$key" == 'o' ]; then
-			echo snap_first >$modl_fifo
-		elif [ "$key" == 'i' ]; then
-			echo branch_last >$modl_fifo
+			echo root >$modl_fifo
+		elif [ "$key" == 'h' ]; then
+			echo bottom >$modl_fifo
+		elif [ "$key" == 'l' ]; then
+			echo top >$modl_fifo
 		fi
 	elif [ "$key" == 'd' ]; then
 		read -n1 key
 		if [ "$key" == 'd' ]; then
 			echo chop >$modl_fifo
-		elif [ "$key" == 'o' ]; then
+		elif [ "$key" == 'k' ]; then
 			echo chop_branch >$modl_fifo
 		fi
-	elif [ "$key" == 'k' ]; then
-		echo prev >$modl_fifo
 	elif [ "$key" == 'j' ]; then
 		echo next >$modl_fifo
-	elif [ "$key" == 'G' ]; then
-		echo end >$modl_fifo
-	elif [ "$key" == 'o' ]; then
-		echo snap >$modl_fifo
-	elif [ "$key" == 'O' ]; then
-		echo snap_first >$modl_fifo
-	elif [ "$key" == 'i' ]; then
+	elif [ "$key" == 'k' ]; then
+		echo prev >$modl_fifo
+	elif [ "$key" == 'J' ]; then
 		echo branch >$modl_fifo
-	elif [ "$key" == 'I' ]; then
-		echo branch_last >$modl_fifo
+	elif [ "$key" == 'K' ]; then
+		echo snap >$modl_fifo
+	elif [ "$key" == 'G' ]; then
+		echo leaf >$modl_fifo
+	elif [ "$key" == 'h' ]; then
+		echo fall >$modl_fifo
+	elif [ "$key" == 'H' ]; then
+		echo rotateDown >$modl_fifo
+	elif [ "$key" == 'l' ]; then
+		echo climb >$modl_fifo
+	elif [ "$key" == 'L' ]; then
+		echo rotateUp >$modl_fifo
 	elif [ "$key" == 'u' ]; then
 		echo promote >$modl_fifo
 	elif [ "$key" == 'U' ]; then
 		echo promote_first >$modl_fifo
-	elif [ "$key" == 'z' ]; then
+	elif [ "$key" == 'p' ]; then
+		echo demote >$modl_fifo
+	elif [ "$key" == 'P' ]; then
+		echo demote_last >$modl_fifo
+	elif [ "$key" == 'Z' ]; then
 		printf '\a'
-	elif [ "$key" == 'L' ]; then
+	elif [ "$key" == 'z' ]; then
 		clear
 		echo print >$modl_fifo
 	fi
