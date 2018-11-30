@@ -33,7 +33,7 @@ fi
 
 # remote commands
 if [ "$cmd" == '' ]; then
-	$nc $host $id </dev/null | tail -n1 | bash <(echo $display)
+	$nc $host $id | tail -n1 | bash <(echo $display)
 elif [ "$cmd" == 'move' ]; then
 	move="$@"
 	if [ "$move" == '' ]; then
@@ -47,13 +47,13 @@ elif [ "$cmd" == 'move' ]; then
 		echo "ERROR: move=$move failed" >&2
 		exit 1
 	fi
-	$nc $host $id </dev/null | tail -n1 | bash <(echo $display)
+	$nc $host $id | tail -n1 | bash <(echo $display)
 elif [ "$cmd" == 'who' ]; then
-	$nc $host $id </dev/null | tail -n1 | grep >/dev/null 'w' && echo 'white' || echo 'black'
+	$nc $host $id | tail -n1 | grep >/dev/null 'w' && echo 'white' || echo 'black'
 elif [ "$cmd" == 'tail' ]; then
-	$nc $host $id </dev/null | tail -n2 | head -n1
+	$nc $host $id | tail -n2 | head -n1
 elif [ "$cmd" == 'cat' ]; then
-	$nc $host $id </dev/null | sed '$ d'
+	$nc $host $id | sed '$ d'
 else
 	echo 'ERROR: command not recognized' >&2
 	exit 1
