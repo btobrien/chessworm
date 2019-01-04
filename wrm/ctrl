@@ -92,6 +92,22 @@ while read -n1 key; do
 		[ "$move" == '' ] && continue
 		echo move "$(tail -1 <$hist | cut -d' ' -f1)" $move >$modl_fifo
 
+	elif [ "$key" == 'j' ]; then
+		echo next >$modl_fifo
+	elif [ "$key" == 'k' ]; then
+		echo prev >$modl_fifo
+	elif [ "$key" == 'J' ]; then
+		echo branch >$modl_fifo
+	elif [ "$key" == 'K' ]; then
+		echo snap >$modl_fifo
+	elif [ "$key" == 'h' ]; then
+		echo fall >$modl_fifo
+	elif [ "$key" == 'H' ]; then
+		echo rotateDown >$modl_fifo
+	elif [ "$key" == 'l' ]; then
+		echo climb >$modl_fifo
+	elif [ "$key" == 'L' ]; then
+		echo rotateUp >$modl_fifo
 	elif [ "$key" == 'g' ]; then
 		read -n1 key
 		if [ "$key" == 'g' ]; then
@@ -108,24 +124,8 @@ while read -n1 key; do
 		elif [ "$key" == 'k' ]; then
 			echo chop_branch >$modl_fifo
 		fi
-	elif [ "$key" == 'j' ]; then
-		echo next >$modl_fifo
-	elif [ "$key" == 'k' ]; then
-		echo prev >$modl_fifo
-	elif [ "$key" == 'J' ]; then
-		echo branch >$modl_fifo
-	elif [ "$key" == 'K' ]; then
-		echo snap >$modl_fifo
 	elif [ "$key" == 'G' ]; then
 		echo leaf >$modl_fifo
-	elif [ "$key" == 'h' ]; then
-		echo fall >$modl_fifo
-	elif [ "$key" == 'H' ]; then
-		echo rotateDown >$modl_fifo
-	elif [ "$key" == 'l' ]; then
-		echo climb >$modl_fifo
-	elif [ "$key" == 'L' ]; then
-		echo rotateUp >$modl_fifo
 	elif [ "$key" == 'u' ]; then
 		echo promote >$modl_fifo
 	elif [ "$key" == 'U' ]; then
