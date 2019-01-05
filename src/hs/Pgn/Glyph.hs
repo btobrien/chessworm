@@ -1,12 +1,11 @@
 
 module Pgn.Glyph (glyphs, toInt, toString, strip) where
 
-import Control.Applicative
-import Utils.Maybe
-
 import Data.Maybe
 import Data.List
-import Utils.Infix
+import Control.Applicative
+
+import Utils.Control
 
 glyphs = [
     "",
