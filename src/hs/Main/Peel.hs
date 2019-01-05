@@ -1,8 +1,10 @@
-import Parser
-import PgnParser
-import Peel
+
 import Data.List
-import Glyph
+
+import Monad.Parser
+import Tree.Rose
+import Pgn.Parser
+import Pgn.Glyph as Glyph
 
 main = do
     inp <- getContents
@@ -10,9 +12,8 @@ main = do
         Nothing -> error "failed to parse pgn"
         Just ((gs,_),_) -> putStr . unlines . map showLine $ (concat . map peel) gs
 
-
 showLine :: [Move] -> String
 showLine = intercalate " " . map showNode
 
 showNode :: Move -> String
-showNode (Move _ x g _) = x ++ showGlyph g
+showNode (Move _ x g _) = x ++ Glyph.toString g

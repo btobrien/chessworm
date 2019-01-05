@@ -1,8 +1,10 @@
-import Parser
-import PgnParser
+
 import System.Environment
 import Control.Applicative
 import qualified Data.Map as Map
+
+import Monad.Parser
+import Pgn.Parser
 
 main = do
     inp <- getContents

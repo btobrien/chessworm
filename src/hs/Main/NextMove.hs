@@ -1,9 +1,11 @@
-import Peel
-import PgnParser
-import Parser
+
 import Data.List
 import System.Environment
 import System.Exit
+
+import Tree.Rose
+import Monad.Parser
+import Pgn.Parser
 
 main = do
     pgn <- getPgn

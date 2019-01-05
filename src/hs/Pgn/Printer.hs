@@ -1,24 +1,15 @@
 
-module PgnPrinter where
+module Pgn.Printer where
 
-import Parser
-import PgnParser
 import System.IO
 import Data.List
 import Control.Monad
 
-main = do
-    inp <- getContents
-    parseGames inp
+import Monad.Parser
+import Tree.Rose
+import Pgn.Parser
 
-parseGames inp = do
-    case parse game inp of
-        Nothing -> return ()
-        Just (g,[]) -> putGame g
-        Just (g,inp') -> putGame g >> parseGames inp' 
-
--- collapse space functions
-
+-- collapse space functions?
 
 showPrecomment "" = "" 
 showPrecomment p = "{" ++ p ++ "} "

@@ -1,5 +1,6 @@
 
-module Trefix where
+module Tree.Climb where
+
 import Data.List
 
 type Tree a = [[a]]
@@ -83,7 +84,7 @@ pair :: a -> b -> (a,b)
 pair a b = (a,b)
 
 result :: Eq a => Tree a -> [a] -> (Tree a, Location)
-result t ln = (t, Trefix.traverse t ln)
+result t ln = (t, Tree.Climb.traverse t ln)
 
 snap :: Eq a => Tree a -> Location -> Location
 snap t (h,d) = (h,d')

@@ -1,9 +1,10 @@
-import Trefix
 import Data.Char
 import System.IO
 import System.Environment
 import Data.List
 import Control.Monad
+
+import Tree.Climb
 
 type State = (Tree String, Location)
 

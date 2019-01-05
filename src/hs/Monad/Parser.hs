@@ -1,5 +1,5 @@
 
-module Parser where
+module Monad.Parser where
 
 import Control.Applicative
 import Data.Char
@@ -44,6 +44,8 @@ instance Applicative Parser where
         Just (g,out) -> parse (fmap g px) out)
 
 instance Monad Parser where
+--  return :: a -> Parser a
+    return v = P (\inp -> Just (v,inp))
 --  (>>=) :: Parser a -> (a -> Parser b) -> Parser b
     p >>= f = P (\inp -> case parse p inp of
         Nothing -> Nothing

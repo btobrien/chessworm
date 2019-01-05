@@ -1,21 +1,18 @@
-module PgnParser where
+module Pgn.Parser (
+    Result(..),
+    Move(..),
+    stripGlyph, nullmove, result,
+    MoveTree, trees,
+    Tag, tag,
+    Game, game) where
 
-import Parser
 import Control.Applicative
 import Data.Char
 import System.IO
-import Glyph
 
-data Tree b a = Node a [Tree b a] | Leaf b
-    deriving Show
-
-instance Functor (Tree b) where
-    fmap _ (Leaf x) = Leaf x
-    fmap f (Node x ns) = Node (f x) (map (fmap f) ns)
-
-mainleaf :: Tree b a -> b
-mainleaf (Leaf x) = x
-mainleaf (Node _ (t:_)) = mainleaf t
+import Monad.Parser
+import Pgn.Glyph
+import Tree.Rose
 
 data Result = White | Draw | Black | Unknown 
     deriving (Eq, Ord)

@@ -1,20 +1,21 @@
 
 all : tri peel unpeel pgntag nextmove
 
-tri : Trefix.hs Tri.hs
-	ghc -o ~/bin/tri Tri.hs
+tri : Main/Tri.hs Tree/Climb.hs
+	ghc -o ~/bin/tri Main/Tri.hs
 
-peel : Parser.hs PgnParser.hs Peel.hs MainPeel.hs
-	ghc -o ~/bin/peel MainPeel.hs
+peel : Main/Peel.hs Monad/Parser.hs Pgn/Parser.hs Tree/Rose.hs
+	ghc -o ~/bin/peel Main/Peel.hs
 
-unpeel : PgnParser.hs Unpeel.hs
-	ghc -o ~/bin/unpeel Unpeel.hs
+unpeel : Main/Unpeel.hs Pgn/Parser.hs 
+	ghc -o ~/bin/unpeel Main/Unpeel.hs
 
-pgntag : PgnParser.hs pgntag.hs
-	ghc -o ~/bin/pgntag pgntag.hs
+pgntag : Main/PgnTag.hs Pgn/Parser.hs 
+	ghc -o ~/bin/pgntag Main/PgnTag.hs
 
-nextmove : nextmove.hs
-	ghc -o ~/bin/nextmove NextMove.hs
+nextmove : Main/NextMove.hs
+	ghc -o ~/bin/nextmove Main/NextMove.hs
 
 clean :
-	rm *.hi *.o
+	find . -name '*.hi' -delete
+	find . -name '*.o' -delete
