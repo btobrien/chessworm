@@ -1,5 +1,5 @@
 
-all : tri peel unpeel pgntag nextmove
+all : tri peel unpeel pgntag nextmove mvprompt glyph
 
 tri : Main/Tri.hs Tree/Climb.hs
 	ghc -o ~/bin/tri Main/Tri.hs
@@ -15,6 +15,12 @@ pgntag : Main/PgnTag.hs Pgn/Parser.hs
 
 nextmove : Main/NextMove.hs
 	ghc -o ~/bin/nextmove Main/NextMove.hs
+
+mvprompt : Main/MovePrompt.hs
+	ghc -o ~/bin/mvprompt Main/MovePrompt.hs
+
+glyph : Main/Glyph.hs
+	ghc -o ~/bin/glyph Main/Glyph.hs
 
 clean :
 	find . -name '*.hi' -delete

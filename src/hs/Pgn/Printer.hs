@@ -5,7 +5,6 @@ import System.IO
 import Data.List
 import Control.Monad
 
-import Monad.Parser
 import Tree.Rose
 import Pgn.Parser
 

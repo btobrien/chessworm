@@ -8,12 +8,11 @@ import Tree.Climb
 
 type State = (Tree String, Location)
 
-main :: IO ()
 main = do 
     hSetBuffering stdout NoBuffering
     inp <- getContents
     tree <- getTree
-    mapM_ putState $ treeScan (tree,start) inp
+    mapM_ putState $ treeScan (tree,start) (lines inp)
 
 getTree :: IO (Tree String)
 getTree = do
@@ -26,9 +25,9 @@ getFileTree fname = do
     let ls = lines file
     return $ if null ls then nulltree else map words ls
 
-treeScan :: State -> String -> [State]
-treeScan s inp = scanl nextState s (lines inp)
-    where nextState s ln = readcmd ln s
+treeScan :: State -> [String] -> [State]
+treeScan init = scanl' nextState init
+    where nextState = flip readcmd
 
 putState :: State -> IO ()
 putState s@(t,(h,d)) = do 
@@ -52,24 +51,24 @@ readcmd [] = id
 readcmd str = readargs cmd args
     where ([cmd],args) = splitAt 1 (words str)
 
-move = uncurry . constTree
-
 readargs :: String -> [String] -> (State -> State)
 readargs "next" _ = move next
 readargs "prev" _ = move (\_ l -> prev l)
-readargs "fall" _ = move fall
-readargs "climb" _ = move climb
+readargs "slide" _ = move slide
+readargs "lift" _ = move lift
 readargs "leaf" _ = move leaf
 readargs "root" _ = move root
 readargs "bottom" _ = move bottom
 readargs "top" _ = move top
-readargs "branch" _ = move branch
-readargs "snap" _ = move snap
-readargs "rotateDown" _ = move rotateDown
-readargs "rotateUp" _ = move rotateUp
+readargs "fall" _ = move fall
+readargs "climb" _ = move climb
 readargs "add" (val:_) = uncurry (add val)
 readargs "chop" _ = uncurry chop
 readargs "promote" _ = uncurry promote
-readargs "demote" _ = uncurry demote
+readargs "rename" (val:_) = modify (rename val)
+readargs "snap" _ = move snap
+readargs "branch" _ = move branch
 readargs _ _ = id
 
+move = uncurry . constTree
+modify = uncurry . constLoc
