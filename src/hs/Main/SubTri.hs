@@ -1,3 +1,4 @@
+
 import Data.Char
 import System.IO
 import System.Environment
@@ -10,7 +11,7 @@ type State = (Tree String, Location)
 
 main = do 
     hSetBuffering stdout NoBuffering
-    inp <- getContents
+    inp <- getLine
     tree <- getTree
     mapM_ putState $ treeScan (tree,start) (lines inp)
 
@@ -45,31 +46,3 @@ showTree = intercalate "]," . map (intercalate ",")
 currentVal :: State -> String
 currentVal (_,(_,-1)) = "-"
 currentVal s = uncurry get $ s
-
-readcmd :: String -> (State -> State)
-readcmd [] = id
-readcmd str = readargs cmd args
-    where ([cmd],args) = splitAt 1 (words str)
-
-readargs :: String -> [String] -> (State -> State)
-readargs "next" _ = move next
-readargs "prev" _ = move (\_ l -> prev l)
-readargs "slide" _ = move slide
-readargs "lift" _ = move lift
-readargs "leaf" _ = move leaf
-readargs "root" _ = move root
-readargs "bottom" _ = move bottom
-readargs "top" _ = move top
-readargs "fall" _ = move fall
-readargs "climb" _ = move climb
-readargs "add" (val:_) = uncurry (add val)
-readargs "chop" _ = uncurry chop
-readargs "promote" _ = uncurry promote
-readargs "mainline" _ = uncurry mainline
-readargs "rename" (val:_) = modify (rename val)
-readargs "snap" _ = move snap
-readargs "branch" _ = move branch
-readargs _ _ = id
-
-move = uncurry . constTree
-modify = uncurry . constLoc

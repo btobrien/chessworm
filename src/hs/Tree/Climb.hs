@@ -76,40 +76,40 @@ result t ln = (t, Tree.Climb.traverse t ln)
 lift :: Eq a => Tree a -> Location -> Location
 lift t (h,d) = (h,d')
     where 
-        ln = t !! h
-        highs = highers t (h,d-1)
-        lows = lowers t (h,d-1)
-        a  = if null highs then [] else [ancestor ln (last highs) + 1]
-        a'  = if null lows then [] else [ancestor ln (head lows) + 1]
-        candidates = a ++ a'
-        d' = if null candidates then 0 else maximum candidates 
+    ln = t !! h
+    highs = highers t (h,d-1)
+    lows = lowers t (h,d-1)
+    a  = if null highs then [] else [ancestor ln (last highs) + 1]
+    a'  = if null lows then [] else [ancestor ln (head lows) + 1]
+    candidates = a ++ a'
+    d' = if null candidates then 0 else maximum candidates 
 
 slide :: Eq a => Tree a -> Location -> Location
 slide t (h,d) = (h,d')
     where 
-        ln = t !! h
-        sibs = siblings t (h,d)
-        a  = ancestor ln (head sibs) + 1
-        a' = ancestor ln (last sibs) + 1
-        d' = if length sibs == 1 then (length ln - 1) else min a a'
+    ln = t !! h
+    sibs = siblings t (h,d)
+    a  = ancestor ln (head sibs) + 1
+    a' = ancestor ln (last sibs) + 1
+    d' = if length sibs == 1 then (length ln - 1) else min a a'
 
 climb :: Eq a => Tree a -> Location -> Location
 climb t (h,d) = if (not.null) highs && areCousins then (h',d) else (h,d)
     where 
-        ln = t !! h
-        highs = highers t (h,d)
-        candidate  = last highs
-        areCousins = sharePathThrough (d-1) ln candidate
-        h' = height t (path d candidate)
+    ln = t !! h
+    highs = highers t (h,d)
+    candidate  = last highs
+    areCousins = sharePathThrough (d-1) ln candidate
+    h' = height t (path d candidate)
 
 fall :: Eq a => Tree a -> Location -> Location
 fall t (h,d) = if (not.null) lows && areCousins then (h',d) else (h,d)
     where 
-        ln = t !! h
-        lows = lowers t (h,d)
-        candidate  = head lows
-        areCousins = sharePathThrough (d-1) ln candidate
-        h' = height t (path d candidate)
+    ln = t !! h
+    lows = lowers t (h,d)
+    candidate  = head lows
+    areCousins = sharePathThrough (d-1) ln candidate
+    h' = height t (path d candidate)
 
 snap :: Eq a => Tree a -> Location -> Location
 snap _ (h,d) | h <= 0 || d <= 0 = (h,d)
@@ -125,57 +125,45 @@ add :: Eq a => a -> Tree a -> Location -> (Tree a, Location)
 add a t (h,d) | d' == length ln         = pair (append t h a) (h,d')
               | otherwise               = result t' ln'
     where
-        d' = d + 1
-        ln = t !! h
-        ln' = path d ln ++ [a]
-        sibs = siblings t (h,d)
-        t' = if any ((==a).(!!d')) sibs
-                then t
-                else highers t (h,d) ++ sibs ++ [ln'] ++ lowers t (h,d)
+    d' = d + 1
+    ln = t !! h
+    ln' = path d ln ++ [a]
+    sibs = siblings t (h,d)
+    t' = if any ((==a).(!!d')) sibs
+            then t
+            else highers t (h,d) ++ sibs ++ [ln'] ++ lowers t (h,d)
 
 chop :: Eq a => Tree a -> Location -> (Tree a, Location)
 chop t (h,d) = result t' ln'
     where
-        ln = t !! h
-        ln' = take d ln
-        onlyCousin = isOnlyCousin t (h,d)
-        t' = if (d==0 || not onlyCousin)
-                then filter (not.sharePathThrough d ln) t
-                else highers t (h,d) ++ [ln'] ++ lowers t (h,d)
+    ln = t !! h
+    ln' = take d ln
+    onlyCousin = isOnlyCousin t (h,d)
+    t' = if (d==0 || not onlyCousin)
+            then filter (not.sharePathThrough d ln) t
+            else highers t (h,d) ++ [ln'] ++ lowers t (h,d)
 
 
 promote :: Eq a => Tree a -> Location -> (Tree a, Location)
 promote t (h,d) | h == 0    = pair t (h,d)
                 | otherwise = result t' ln
     where 
-        ln = path d (t!!h)
-        a = ancestor (t!!h) (t!!(h-1))
-        loc = (h,a+1)
-        loc' = (h-1,a+1)
-        t' = highers t loc' ++ siblings t loc ++ siblings t loc' ++ lowers t loc
+    ln = path d (t!!h)
+    a = ancestor (t!!h) (t!!(h-1))
+    loc = (h,a+1)
+    loc' = (h-1,a+1)
+    t' = highers t loc' ++ siblings t loc ++ siblings t loc' ++ lowers t loc
 
 sub :: Eq a => Tree a -> Location -> (Tree a, Location)
-sub t (h,d) = pair t' (h',0)
+sub t (h,d) = pair t' (h',d - d0)
     where
+    (_,d0) = lift t (h,d)
     h' = h - length (highers t (h,d))
-    t' = map (drop d) (siblings t (h,d))
+    t' = map (drop d0) (siblings t (h,d))
 
 rename :: Eq a => a -> Tree a -> Location -> Tree a
 rename a t (h,d) = highers t (h,d) ++ sibs ++ lowers t (h,d)
     where sibs = map (replace d a) $ siblings t (h,d)
-
-{-|
-
-subclimb
-subfall
-subtop
-subbottom
-
-strip :: Eq a => Tree a -> Location -> (Tree a, Location)
-shearAbove :: Eq a => Tree a -> Location -> (Tree a, Location)
-shearBelow :: Eq a => Tree a -> Location -> (Tree a, Location)
-shave :: Eq a => Tree a -> Location -> (Tree a, Location)
--}
 
 root :: Tree a -> Location -> Location
 root _ (h,_) = (h,0)
@@ -189,4 +177,8 @@ top t = limit (snap t)
 
 bottom :: Eq a => Tree a -> Location -> Location
 bottom t = limit (branch t)
+
+mainline :: Eq a => Tree a -> Location -> (Tree a, Location)
+mainline t (0,d) = (t,(0,d))
+mainline t (h,d) = uncurry mainline $ promote t (h,d)
 

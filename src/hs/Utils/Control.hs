@@ -12,7 +12,7 @@ fromJustElse a ma = case ma of
     Just x -> x
 
 equal :: Eq a => (a,a) -> Bool
-equal (x,y) = (x == y)
+equal = uncurry (==)
 
 pair :: a -> b -> (a,b)
 pair a b = (a,b)

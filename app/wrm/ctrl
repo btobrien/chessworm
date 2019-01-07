@@ -132,7 +132,7 @@ while read -n1 key; do
 	elif [ "$key" == 'u' ]; then
 		echo promote >$modl_fifo
 	elif [ "$key" == 'U' ]; then
-		echo promote_first >$modl_fifo
+		echo mainline >$modl_fifo
 
 	elif [ "$key" == 'a' ]; then
 		clock=$(tail -1 <$hist | cut -d' ' -f3 | sed 's/ //')
