@@ -3,7 +3,7 @@ module Tree.Climb where
 
 import Data.List
 
-import Utils.Control
+import Utils (equal, pair, replace, limit)
 
 type Tree a = [[a]]
 type Height = Int

@@ -1,8 +1,9 @@
 
 import System.Environment
 import System.Exit
-import Pgn.Glyph
-import Utils.Control
+
+import Utils (trim)
+import Pgn.Glyph (strip, toInt)
 
 main = do
     args <- getArgs

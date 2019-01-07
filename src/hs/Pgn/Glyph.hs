@@ -5,7 +5,7 @@ import Data.Maybe
 import Data.List
 import Control.Applicative
 
-import Utils.Control
+import Utils (fromJustElse, (!!?))
 
 glyphs = [
     "",

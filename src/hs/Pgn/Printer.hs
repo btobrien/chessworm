@@ -34,7 +34,7 @@ putSubTree n m = do
     putStr $ showMove (showNum n) m 
     putStr " " 
     putSubTrees (n+1) m
-    putStr "\b\b) "
+    putStr "\b\b) "  -- backspaces??
 
 putSubTrees :: Int -> MoveTree -> IO ()
 putSubTrees _ (Leaf _) = return ()
@@ -54,14 +54,12 @@ putTag (n,v) = do
     putStr n 
     putStr " \"" 
     putStr v 
-    putStr "\"]"
-    putStr "\n"
+    putStrLn "\"]"
 
 putGame (trees,tags) = do
-    putStr "\n"
+    putStrLn ""
     mapM_ putTag tags 
-    putStr "\n" 
+    putStrLn "" 
     putTrees trees
-    putStr . show $ result (head trees)
-    putStr "\n"
+    putStrLn . show $ result (head trees)
 

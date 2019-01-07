@@ -1,4 +1,5 @@
 module Pgn.Parser (
+    parse,
     Result(..),
     Move(..),
     stripGlyph, nullmove, result,
@@ -13,6 +14,7 @@ import System.IO
 import Monad.Parser
 import Pgn.Glyph
 import Tree.Rose
+import Tree.Peel (mainleaf)
 
 data Result = White | Draw | Black | Unknown 
     deriving (Eq, Ord)
@@ -24,11 +26,16 @@ instance Show Result where
     show Unknown = "*"
 
 data Move = Move {
-        precomment :: String,
-        move :: String,
-        glyph :: Int,
-        comment :: String }
-    deriving (Show,Eq)
+    precomment :: String,
+    move :: String,
+    glyph :: Int,
+    comment :: String } deriving (Eq)
+
+instance Show Move where
+    show x = move x ++ toString (glyph x)
+
+instance Read Move where
+    readsPrec _  s = [(Move "" s 0 "","")]
 
 stripGlyph :: Move -> Move
 stripGlyph (Move p m 0 c) = let (m',g) = strip m in Move p m' g c 

@@ -26,7 +26,7 @@ getFileTree fname = do
     return $ if null ls then nulltree else map words ls
 
 treeScan :: State -> [String] -> [State]
-treeScan init = scanl' nextState init
+treeScan init = scanl nextState init
     where nextState = flip readcmd
 
 putState :: State -> IO ()
