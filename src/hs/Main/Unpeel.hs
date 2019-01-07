@@ -1,7 +1,7 @@
 
 import Data.List
-import Utils
 
+import Utils
 import Tree.Peel
 import Pgn.Printer
 

@@ -2,8 +2,8 @@
 import Data.List
 import System.Environment
 import System.Exit
-import Utils
 
+import Utils
 import Pgn.Parser (parse, game, move)
 import Tree.Peel (peel)
 
