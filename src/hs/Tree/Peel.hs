@@ -3,6 +3,7 @@
 module Tree.Peel (peel, pick, unpeel, mainleaf) where 
 
 import Data.List
+
 import Tree.Rose
 
 peel :: Tree b a -> [[a]]
