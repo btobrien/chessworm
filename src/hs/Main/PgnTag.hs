@@ -3,14 +3,12 @@ import System.Environment
 import Control.Applicative
 import qualified Data.Map as Map
 
-import Monad.Parser
 import Pgn.Parser
 
 main = do
     inp <- getContents
     tagname <- getTagname
-    let tags = parseTags inp
-    case Map.lookup tagname tags of
+    case Map.lookup tagname (parseTags inp) of
         Nothing -> error (notfound tagname)
         Just v -> putStrLn v
 
