@@ -9,7 +9,7 @@ import Tree.Climb
 
 type State = (Tree String, Location)
 
-main = do 
+    main = do 
     hSetBuffering stdout NoBuffering
     inp <- getLine
     tree <- getTree

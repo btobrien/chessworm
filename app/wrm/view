@@ -4,7 +4,9 @@ graph=$1
 graph=$(realpath $graph)
 mkdir -p $graph
 flip_file=$2
-disp_lock=$3
+showtree_file=$3
+showcomment_file=$4
+disp_lock=$5
 
 tmp=~/.config/wrm/tmp/$$
 mkdir -p $tmp
@@ -21,29 +23,32 @@ while read input; do
 		sleep 0.2
 	done
 	tput cup 0 0
-	printf '\n'
-	if [ -f "$flip_file" ]; then
-		board <<<"$input" | flip | border | center
-	else
-		board <<<"$input" | border | center
-	fi
-	printf '\n'
-	line=$(cut -d' ' -f2 <<<$input)
-	depth=$(cut -d' ' -f3 <<<$input)
-	cut -d' ' -f4 <<<$input | tr , '\n' | cut -d'_' -f7 | tr '\n' ' ' | sed 's/\] /\]/g' | tr ']' '\n' >$tmptree
-	if ! diff $tree $tmptree >/dev/null; then
-		cp $tmptree $tree
-		tput ed
-	fi
-	tree_width=$(gwc -L <$tree) # not portable
-	splay $line $depth  <$tree | center $tree_width
-	echo
-	key=$(cut -d' ' -f1 <<<$input | sed 's/\///g' | sed 's/_//' | cut -d'_' -f1)
-	tput ed
-	if [ -f $graph/$key ]; then
-		cat $graph/$key | center
-	fi
-
+	if [ -f "$showtree_file" ]; then
+        if [ -f "$flip_file" ]; then
+            board <<<"$input" | flip | border | center
+        else
+            board <<<"$input" | border | center
+        fi
+    else
+        printf '\n'; printf '\n'; printf '\n'; printf '\n'
+        line=$(cut -d' ' -f2 <<<$input)
+        depth=$(cut -d' ' -f3 <<<$input)
+        cut -d' ' -f4 <<<$input | tr , '\n' | cut -d'_' -f7 | tr '\n' ' ' | sed 's/\] /\]/g' | tr ']' '\n' >$tmptree
+        if ! diff $tree $tmptree >/dev/null; then
+            cp $tmptree $tree
+            tput ed
+        fi
+        tree_width=$(gwc -L <$tree) # not portable
+        splay $line $depth  <$tree | center $tree_width
+    fi
+    tput ed
+    key=$(cut -d' ' -f1 <<<$input | sed 's/\///g' | sed 's/_//' | cut -d'_' -f1)
+    if [ -f "$showcomment_file" ]; then
+        if [ -f $graph/$key ]; then
+            printf '\n'; printf '\n'
+            cat $graph/$key | center
+        fi
+    fi
 	rm -r $disp_lock &2>/dev/null
 done
 

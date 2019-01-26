@@ -19,9 +19,12 @@ disp_lock=$tmp/disp.lock; rm -r $disp_lock 2>/dev/null
 hist=$tmp/hist.txt
 hist=~/hist.txt
 flip=$tmp/flip.bool
+showtree=$tmp/showtree.bool
+touch $showtree
+showcomment=$tmp/showcomment.bool
 
 cd $(dirname $0)
-./modl $tree <$modl_fifo | tee $hist | ./view $graph $flip $disp_lock &
+./modl $tree <$modl_fifo | tee $hist | ./view $graph $flip $showtree $showcomment $disp_lock &
 echo 'print' >$modl_fifo
 
 trap "echo exit >$modl_fifo; rm -r $tmp; tput rmcup; stty echo; tput cnorm" EXIT #rmcup on background interupt too
@@ -51,8 +54,10 @@ while read -n1 key; do
 			tail -1 $hist | cut -d' ' -f4 | sed 's/\],/\]/g' | tr , ' ' | tr ']' '\n' >$tree
 		elif [ "$line" = 'wq' ]; then
 			tail -1 $hist | cut -d' ' -f4 | sed 's/\],/\]/g' | tr , ' ' | tr ']' '\n' >$tree
+            clear
 			exit
 		elif [ "$line" = 'q' ]; then
+            clear
 			exit
 		elif [ "$line" == 'e' ]; then
 			vim $graph/$(tail -1 <$hist | cut -d' ' -f1 | sed 's/\///g' | sed 's/_//' | cut -d'_' -f1)  # please dry
@@ -108,6 +113,22 @@ while read -n1 key; do
 		echo snap >$modl_fifo
 	elif [ "$key" == 'l' ]; then
 		echo climb >$modl_fifo
+    elif [ "$key" = 'f' ]; then
+        clear
+        if [ -f $showtree ]; then
+            rm $showtree
+        else
+            touch $showtree
+        fi
+		echo print >$modl_fifo
+    elif [ "$key" = 's' ]; then
+        clear
+        if [ -f $showcomment ]; then
+            rm $showcomment
+        else
+            touch $showcomment
+        fi
+		echo print >$modl_fifo
 	elif [ "$key" == 'g' ]; then
 		read -n1 key
 		if [ "$key" == 'g' ]; then

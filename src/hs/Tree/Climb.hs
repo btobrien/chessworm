@@ -173,10 +173,10 @@ leaf t (h,_) = (h,d)
     where d = (subtract 1) . length $ (t !! h)
 
 top :: Eq a => Tree a -> Location -> Location
-top t = limit (snap t)
+top t = limit (climb t)
 
 bottom :: Eq a => Tree a -> Location -> Location
-bottom t = limit (branch t)
+bottom t = limit (fall t)
 
 mainline :: Eq a => Tree a -> Location -> (Tree a, Location)
 mainline t (0,d) = (t,(0,d))
