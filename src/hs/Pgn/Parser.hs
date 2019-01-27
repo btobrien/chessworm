@@ -36,7 +36,7 @@ instance Show Move where
     show x = move x ++ toString (glyph x)
 
 instance Read Move where
-    readsPrec _  s = [(Move "" s 0 "","")]
+    readsPrec _ s = [(Move "" s 0 "","")]
 
 nullmove :: Move
 nullmove = read ""
