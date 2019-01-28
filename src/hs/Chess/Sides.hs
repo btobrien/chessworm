@@ -3,9 +3,17 @@ module Chess.Sides where
 
 import Data.Char
 
-data Name = White | Black 
+data Side = White | Black 
+    deriving Eq
 
-shade :: Name -> String -> String
+first :: Side
+first = White
+
+next :: Side -> Side
+next White = Black
+next Black = White
+
+shade :: Side -> String -> String
 shade White = id
-shade Black = map toUpper 
+shade Black = map toLower 
 

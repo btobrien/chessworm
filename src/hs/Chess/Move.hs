@@ -1,38 +1,15 @@
 
 module Chess.Move where
 
-import qualified Chess.Squares as Square
+import Chess.Squares (Square(..),Range,sqRange)
+import Chess.Pieces (Piece) 
 import qualified Chess.Pieces as Piece
 
-data Move = CastleShort | CastleLong | Move Piece.Name Square.Range Square.Location Piece.Name
+data Move = Move { 
+    piece :: Piece,
+    range :: Range,
+    target :: Square,
+    promotion :: Piece }
 
-parse :: String -> Maybe Move
-parse = undefined
-
-castleShort :: Move -> Bool
-castleShort CastleShort = True
-castleShort _ = False
-
-castleLong :: Move -> Bool
-castleLong CastleLong = True
-castleLong _ = False
-
-castle = (||) <?> castleShort <*> castleLong
-
-piece :: Move -> Piece.Name
-piece CastleShort = Piece.King
-piece CastleLong = Piece.King
-piece (Move p _ _ ) = p
-
-range :: Move -> Square.Range
-range CastleShort = Square.All
-range CastleLong = Square.All
-range (Move _ r _) = r 
-
-target :: Move -> Square.Location
-target CastleShort = Square.Null
-target CastleLong = Square.Null
-target (Move _ _ l) = l 
-
-promotion :: String -> Maybe Piece.Name
-promotion = undefined
+parse :: String -> [Move]
+parse = const [Move Piece.King (sqRange E1) E2 Piece.Null]

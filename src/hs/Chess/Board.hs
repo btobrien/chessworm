@@ -1,96 +1,80 @@
 
 module Chess.Board where
 
-import qualified Chess.Squares as Square
+import Chess.Squares
+import Chess.Pieces (Piece, pieces)
+import qualified Chess.Pieces as Piece
+import Chess.Sides (Side(..))
+import Chess.Move (Move(Move))
 import qualified Chess.Move as Move
-import qualified Chess.Sides as Side
-import qualified Chess.Castling as Castling
-import qualified Chess.Battle as Battle
+import Chess.Flags (Flags)
+import Chess.Battle
+import Utils (fromJustElse)
 
-type Move = Move.Move
+import Prelude hiding (flip)
+import Data.Maybe
 
-data Soldier = S {
-    side :: Side.Name,
-    piece :: Piece.Name,
-    location :: Square.Location }
+type Star = (Square,[Square]); moonsOf = snd
+type Constellation = (Piece,[Star]); starsOf = snd
+nameOf = fst;
 
-data Army = A {
-    king :: Soldier,
-    warriors :: [Soldier],
-    flags :: Castling.Flags }
-
-data Board = B {
-    good :: Army,
-    evil :: Army,
-    passant :: Square.Location }
-
-type Star = (Square.Location,[Square.Location])
-type Constellation = (Piece.Name,[Star])
-
-source = fst
-
-genConstellations :: Board -> [Constellation]
-genConstellations brd = do
-    n <- Piece.names
-    return $ pair n (stars n brd)
-
-genStars :: Piece.Name -> Board -> [Star]
-genStars n brd = do
-    soldier <- filter ((n==).piece) $ (soldiers.good) brd
-    return $ (location soldier, choices soldier brd)
-    
-genLandings :: Soldier -> Board -> [Square.Location]
-genLandings soldier brd = undefined
+type Field = Battle Flags
+newtype Board = Board Field deriving Show
+fieldOf (Board f) = f
 
 move :: String -> Board -> [Board]
-move inp brd = postMove $ do
+move inp brd = do
     m <- Move.parse inp
-    case m of
-        CastleShort -> tryCastleShort brd
-        CastleLong  -> tryCastleLong brd
-        _           -> tryMove m brd
+    field <- filter (not.check) $ tryMove m (fieldOf brd)
+    return $ Board (flip field)
 
-tryCastleShort :: Board -> [Board]
-tryCastleShort = undefined
+tryMove :: Move -> Field -> [Field]
+tryMove (Move name range target promotion) field = do
+    constellation <- filter nameMatch $ constellations field
+    star <- filter rangeMatch $ starsOf constellation
+    filter (==target) $ moonsOf star
+    let source = nameOf star
+    let soldier = Soldier (goodSide field) (max name promotion) target
+    return . (place soldier) . (pickup source) $ field
+        where 
+        nameMatch = (name==) . nameOf
+        rangeMatch = (range `contains`) . nameOf
 
-tryCastleLong :: Board -> [Board]
-tryCastleShort = undefined
+constellations :: Field -> [Constellation]
+constellations field = do
+    name <- pieces
+    return (name, (stars name field))
 
-tryMove :: Move -> Board -> [Board]
-tryMove (Move p range target promotion) brd = do
-    stars <- fmap snd $ filter ((p==).fst) (genConstellations brd)
-    (origin,landings) <- filter ((within range).source) stars
-    filter (==target) landings
-    let s = Soldier (who brd) (greaterOf p promotion) target
-    return $ replace origin s brd
+stars :: Piece -> Field -> [Star]
+stars name field = do
+    soldier <- filter pieceMatch $ (soldiers.good) field
+    return (location soldier, landings soldier field)
+        where pieceMatch = (name==) . piece
+    
+landings :: Soldier -> Field -> [Square]
+landings (Soldier White Piece.Pawn source) field = []
+landings (Soldier Black Piece.Pawn source) field = []
+landings (Soldier _ Piece.Null _) field = []
+landings (Soldier s name source) field = 
+    filter (not.(friendZone s field)) $ flights name source
 
-postMove :: [Board] -> [Board]
-postMove = (map flip) . (filter (not.check))
+flights :: Piece -> Square -> [Square]
+flights Piece.King source = bubble source
+flights Piece.Queen source = plus source ++ cross source
+flights Piece.Rook source = plus source
+flights Piece.Bishop source = cross source
+flights Piece.Knight source = ring source
 
-replace :: Square.Location -> Soldier -> Board -> Board
-replace = undefined
+friendZone :: Side -> Field -> Square -> Bool
+friendZone s f = fromJustElse False . (fmap isSame) . (who f)
+    where isSame = (s==) . side
 
-new :: Board
-new = B (newArmy Side.White) (newArmy Side.Black)
+check :: Field -> Bool
+check = const False
 
-newArmy :: Side.Name -> Army
-newArmy Side.White = A (S Side.White Piece.King Square.E1) []
-newArmy Side.Black = A (S Side.Black Piece.King Square.E8) []
-
-soldiers :: Army -> [Soldier]
-soldiers a = (king a) : (warriors a)
-
-flip :: Battle -> Battle
-flip b = B (evil b) (good b)
-
-new :: Board
-new = B Battle.new Castling.new Square.Null
-
-who :: Board -> Side.Name
-who = undefined
-
-check :: Board -> Bool
-check = undefined
-
-mate :: Board -> Bool
+mate :: Field -> Bool
 mate = undefined
+
+set :: (Flags,Flags) -> Side -> [Soldier] -> Board
+set f s = Board . (draft f s)
+
