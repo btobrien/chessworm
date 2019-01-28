@@ -2,13 +2,11 @@
 module Chess.Init where
 
 import Chess.Squares (Square(..))
-import qualified Chess.Squares as Square
-import Chess.Pieces (Piece)
 import qualified Chess.Pieces as Piece
+import  Chess.Soldier
 import Chess.Colors
-import Chess.Battle
-import Chess.Board
 import qualified Chess.Flags as Flags
+import Chess.Board
 
 new :: Board
 new = set Flags.newPair ([

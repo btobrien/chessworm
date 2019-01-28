@@ -2,18 +2,11 @@
 
 module Chess.Battle where
 
-import Chess.Squares (Square)
-import Chess.Pieces (Piece)
+import Chess.Squares
+import Chess.Soldier
 import Utils (fromJustElse)
 
 import Data.Maybe
-
-data Soldier = Soldier {
-    piece :: Piece,
-    location :: Square }
-
-instance Show Soldier where
-    show (Soldier p s) = "(" ++ show p ++ "," ++ show s ++ ")" 
 
 data Army a = Army {
     soldiers :: [Soldier],
@@ -35,11 +28,8 @@ occupy = undefined
 flip :: Battle a -> Battle a
 flip f = Battle (evil f) (good f)
 
-setFlag :: a -> Battle a -> Battle a
-setFlag = undefined
-
-getFlag :: Battle a -> a
-getFlag = undefined
+cleanFlag :: (a -> a) -> Battle a -> Battle a
+cleanFlag = undefined
 
 draft :: (a,a) -> ([Soldier],[Soldier]) -> Battle a
 draft (f,f') (g,e) = Battle (Army g f) (Army e f')
@@ -53,10 +43,10 @@ enemy battle square = any (on square) $
     soldiers (evil battle)
 
 vacant :: Battle a -> Square -> Bool
-vacant battle = isJust . (who battle)
+vacant battle = isJust . (battle `at`)
 
-who :: Battle a -> Square -> Maybe Soldier
-who (Battle g e) square = listToMaybe $
+at :: Battle a -> Square -> Maybe Soldier
+at (Battle g e) square = listToMaybe $
     filter (on square) (soldiers g) ++
     filter (on square) (soldiers e) 
 

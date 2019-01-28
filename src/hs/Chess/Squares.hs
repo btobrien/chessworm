@@ -21,17 +21,6 @@ data File = A | B | C | D | E | F | G | H
 data Rank = R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8
     deriving (Enum, Eq)
 
-data Range = All | L File | K Rank | Q Square | None
-
-sqRange :: Square -> Range
-sqRange = Q
-
-fRange :: File -> Range
-fRange = L
-
-rRange :: Rank -> Range
-rRange = K
-
 file :: Square -> File
 file = undefined
 
@@ -40,9 +29,6 @@ rank = undefined
 
 square :: (File,Rank) -> Square
 square = undefined
-
-contains :: Range -> Square -> Bool
-contains = const $ const True
 
 data Direction = Up
 
