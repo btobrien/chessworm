@@ -4,17 +4,16 @@ module Chess.Battle where
 
 import Chess.Squares (Square)
 import Chess.Pieces (Piece)
-import Chess.Sides (Side,shade)
+import Utils (fromJustElse)
 
 import Data.Maybe
 
 data Soldier = Soldier {
-    side :: Side,
     piece :: Piece,
     location :: Square }
 
 instance Show Soldier where
-    show (Soldier s p l) = "(" ++ shade s (show p) ++ "," ++ show l ++ ")" 
+    show (Soldier p s) = "(" ++ show p ++ "," ++ show s ++ ")" 
 
 data Army a = Army {
     soldiers :: [Soldier],
@@ -30,11 +29,11 @@ pickup loc f = undefined
 place :: Soldier -> Battle a -> Battle a
 place s f = undefined
 
+occupy :: Soldier -> Square -> Battle a -> Battle a
+occupy = undefined
+
 flip :: Battle a -> Battle a
 flip f = Battle (evil f) (good f)
-
-goodSide :: Battle a -> Side
-goodSide = side . head . soldiers . good
 
 setFlag :: a -> Battle a -> Battle a
 setFlag = undefined
@@ -42,11 +41,19 @@ setFlag = undefined
 getFlag :: Battle a -> a
 getFlag = undefined
 
-draft :: (a,a) -> Side -> [Soldier] -> Battle a
-draft (a,a') goodSide ss = Battle 
-    (Army (filter isGood ss) a)
-    (Army (filter (not.isGood) ss) a')
-        where isGood = (goodSide==) . side
+draft :: (a,a) -> ([Soldier],[Soldier]) -> Battle a
+draft (f,f') (g,e) = Battle (Army g f) (Army e f')
+
+friend :: Battle a -> Square -> Bool
+friend battle square = any (on square) $
+    soldiers (good battle)
+
+enemy :: Battle a -> Square -> Bool
+enemy battle square = any (on square) $
+    soldiers (evil battle)
+
+vacant :: Battle a -> Square -> Bool
+vacant battle = isJust . (who battle)
 
 who :: Battle a -> Square -> Maybe Soldier
 who (Battle g e) square = listToMaybe $

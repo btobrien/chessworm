@@ -4,12 +4,10 @@ module Chess.Board where
 import Chess.Squares
 import Chess.Pieces (Piece, pieces)
 import qualified Chess.Pieces as Piece
-import Chess.Sides (Side(..))
 import Chess.Move (Move(Move))
 import qualified Chess.Move as Move
 import Chess.Flags (Flags)
 import Chess.Battle
-import Utils (fromJustElse)
 
 import Prelude hiding (flip)
 import Data.Maybe
@@ -34,8 +32,8 @@ tryMove (Move name range target promotion) field = do
     star <- filter rangeMatch $ starsOf constellation
     filter (==target) $ moonsOf star
     let source = nameOf star
-    let soldier = Soldier (goodSide field) (max name promotion) target
-    return . (place soldier) . (pickup source) $ field
+    let soldier = Soldier (max name promotion) source
+    return $ (soldier `occupy` target) field
         where 
         nameMatch = (name==) . nameOf
         rangeMatch = (range `contains`) . nameOf
@@ -48,26 +46,21 @@ constellations field = do
 stars :: Piece -> Field -> [Star]
 stars name field = do
     soldier <- filter pieceMatch $ (soldiers.good) field
-    return (location soldier, landings soldier field)
+    return (location soldier, moons soldier field)
         where pieceMatch = (name==) . piece
     
-landings :: Soldier -> Field -> [Square]
-landings (Soldier White Piece.Pawn source) field = []
-landings (Soldier Black Piece.Pawn source) field = []
-landings (Soldier _ Piece.Null _) field = []
-landings (Soldier s name source) field = 
-    filter (not.(friendZone s field)) $ flights name source
+moons :: Soldier -> Field -> [Square]
+moons (Soldier Piece.Pawn source) field = []
+moons (Soldier Piece.Null _) _ = []
+moons (Soldier name source) field = 
+    filter (not.(friend field)) $ landings name source
 
-flights :: Piece -> Square -> [Square]
-flights Piece.King source = bubble source
-flights Piece.Queen source = plus source ++ cross source
-flights Piece.Rook source = plus source
-flights Piece.Bishop source = cross source
-flights Piece.Knight source = ring source
-
-friendZone :: Side -> Field -> Square -> Bool
-friendZone s f = fromJustElse False . (fmap isSame) . (who f)
-    where isSame = (s==) . side
+landings :: Piece -> Square -> [Square]
+landings Piece.King source = bubble source
+landings Piece.Queen source = plus source ++ cross source
+landings Piece.Rook source = plus source
+landings Piece.Bishop source = cross source
+landings Piece.Knight source = ring source
 
 check :: Field -> Bool
 check = const False
@@ -75,6 +68,6 @@ check = const False
 mate :: Field -> Bool
 mate = undefined
 
-set :: (Flags,Flags) -> Side -> [Soldier] -> Board
-set f s = Board . (draft f s)
+set :: (Flags,Flags) -> ([Soldier],[Soldier]) -> Board
+set f = Board . (draft f)
 
