@@ -4,11 +4,19 @@ module Utils where
 import Data.Char (isSpace)
 import Data.List
 
+ternary :: (a -> a -> a) -> (a -> a -> a -> a)
+ternary binary a b c = binary a (binary b c)
+
 (!!?) :: [a] -> Int -> Maybe a
 xs !!? n = if (n < 0 || n > length xs) then Nothing else Just (xs !! n)
 
 fromJustElse :: a -> Maybe a -> a
 fromJustElse a = maybe a id
+
+showJust :: Show a => Maybe a -> String
+showJust ma = case ma of
+    Nothing -> ""
+    Just a -> show a
 
 equal :: Eq a => (a,a) -> Bool
 equal = uncurry (==)
