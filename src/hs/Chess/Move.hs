@@ -1,10 +1,10 @@
 
 module Chess.Move where
 
-import Chess.Squares (Square(..))
+import Chess.Squares (Square)
 import Chess.Pieces (Piece) 
 import Chess.Soldier (Soldier)
-import qualified Chess.Pieces as Piece
+import Utils (ternary)
 
 import Prelude hiding (any)
 
@@ -13,23 +13,28 @@ data Move = Move {
     target :: Square,
     promotion :: Piece }
 
-data Criteria = Criteria { 
+data Set = Set { 
     soldierMatch :: (Soldier -> Bool),
     targetMatch :: (Square -> Bool),
     promotionMatch :: (Piece -> Bool) }
 
-parse :: String -> [Criteria]
+parse :: String -> [Set]
 parse = undefined
 
-matches :: Criteria -> Move -> Bool
-matches set  = do
-    a <- (soldierMatch set) . soldier
-    b <- (targetMatch set) . target
-    c <- (promotionMatch set) . promotion
-    return (a && b && c )
+matches :: Set -> Move -> Bool
+matches set  = ternary (&&)
+    <$> (soldierMatch set) . soldier
+    <*> (targetMatch set) . target
+    <*> (promotionMatch set) . promotion
 
-any :: Criteria
-any = Criteria (const True) (const True) (const True)
+any :: Set
+any = Set (const True) (const True) (const True)
 
-none :: Criteria
-none = Criteria (const False) (const False) (const False)
+none :: Set
+none = Set (const False) (const False) (const False)
+
+shortCastle :: Set
+shortCastle = undefined
+
+longCastle :: Set
+longCastle = undefined

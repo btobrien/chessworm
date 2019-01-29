@@ -16,23 +16,27 @@ data Battle a = Battle {
     good :: Army a,
     evil :: Army a } deriving Show
 
-pickup :: Square -> Battle a -> Battle a
-pickup loc f = undefined
+clear :: Square -> Battle a -> Battle a
+clear square (Battle g e) = 
+    Battle (discharge square g) (discharge square e)
+
+discharge :: Square -> Army a -> Army a
+discharge square (Army ss f) = Army (remove ss) f
+    where remove = filter (not . (on square))
 
 place :: Soldier -> Battle a -> Battle a
-place s f = undefined
-
-occupy :: Soldier -> Square -> Battle a -> Battle a
-occupy = undefined
+place s (Battle (Army ss f) e) =
+    Battle (Army (s:ss) f) e 
 
 flip :: Battle a -> Battle a
 flip f = Battle (evil f) (good f)
 
-cleanFlag :: (a -> a) -> Battle a -> Battle a
-cleanFlag = undefined
+setFlag :: (a -> a) -> Battle a -> Battle a
+setFlag setter (Battle (Army s f) e) = 
+    Battle (Army s (setter f)) e
 
 draft :: (a,a) -> ([Soldier],[Soldier]) -> Battle a
-draft (f,f') (g,e) = Battle (Army g f) (Army e f')
+draft (f,f') (a,a') = Battle (Army a f) (Army a' f')
 
 friend :: Battle a -> Square -> Bool
 friend battle square = any (on square) $

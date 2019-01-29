@@ -1,11 +1,11 @@
 
 module Chess.Pieces where
 
-data Piece = Null | Pawn | Knight | Bishop | Rook | Queen | King
+data Piece = Pawn | Knight | Bishop | Rook | Queen | King
     deriving (Enum, Eq, Ord)
 
 pieces :: [Piece]
-pieces = enumFrom . toEnum $ 1
+pieces = enumFrom . toEnum $ 0
 
 instance Show Piece where
     show King = "K"
@@ -14,10 +14,8 @@ instance Show Piece where
     show Bishop = "B"
     show Knight = "N"
     show Pawn = "P"
-    show Null = " "
 
 value :: Piece -> Int
-value Null = 0
 value Pawn = 1
 value Knight = 3
 value Bishop = 3

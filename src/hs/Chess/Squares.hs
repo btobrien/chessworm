@@ -1,7 +1,7 @@
 
 module Chess.Squares where
 
-data Square = Null |
+data Square =
     A8 | B8 | C8 | D8 | E8 | F8 | G8 | H8 |
     A7 | B7 | C7 | D7 | E7 | F7 | G7 | H7 |
     A6 | B6 | C6 | D6 | E6 | F6 | G6 | H6 |
@@ -54,7 +54,6 @@ bubble :: Square -> [Square]
 bubble = const []
 
 instance Show Square where
-    show Null = ""
     show A8 = "a8"
     show B8 = "b8"
     show C8 = "c8"
