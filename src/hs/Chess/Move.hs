@@ -7,6 +7,7 @@ import Chess.Soldier (Soldier)
 import Utils (ternary)
 
 import Prelude hiding (any)
+import Control.Applicative
 
 data Move = Move { 
     soldier :: Soldier,
