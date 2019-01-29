@@ -4,9 +4,6 @@ module Utils where
 import Data.Char (isSpace)
 import Data.List
 
-ternary :: (a -> a -> a) -> (a -> a -> a -> a)
-ternary binary a b c = binary a (binary b c)
-
 (!!?) :: [a] -> Int -> Maybe a
 xs !!? n = if (n < 0 || n > length xs) then Nothing else Just (xs !! n)
 
@@ -60,3 +57,15 @@ wordlines = map words . lines
 
 unwordlines :: [[String]] -> String
 unwordlines = unlines . map unwords
+
+ternary :: (a -> a -> a) -> (a -> a -> a -> a)
+ternary binary a b c = a `binary` b `binary` c
+
+quaternary :: (a -> a -> a) -> (a -> a -> a -> a -> a)
+quaternary binary a b c d = a `binary` b `binary` c `binary` d
+
+quinary :: (a -> a -> a) -> (a -> a -> a -> a -> a -> a)
+quinary binary a b c d e = a `binary` b `binary` c `binary` d `binary` e
+
+
+
