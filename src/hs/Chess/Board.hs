@@ -16,47 +16,51 @@ import Control.Applicative
 
 type Field = Battle Flags
 type Board = Field -- move to interface file as newtype
+type Target = Square
 set = draft
 
 moves :: Move.Set -> Field -> [Field]
 moves move field = do
-    field <- filter (not.check) $ allFields move field
+    field <- filter (not . check) $ fields move field
     return (flip field)
 
-allFields :: Move.Set -> Field -> [Field]
-allFields move = ternary (++)
-    <$> castles move
-    <*> passants move
-    <*> fields move
-
 fields :: Move.Set -> Field -> [Field]
-fields move field = do
+fields move = ternary (++)
+    <$> passants move
+    <*> castles move
+    <*> placements move
+
+placements :: Move.Set -> Field -> [Field]
+placements move field = do
     soldier <- filter (soldierMatch move) $ (soldiers . good) field 
     target <- filter (targetMatch move) $ targets soldier field 
     promotion <- filter (promotionMatch move) $ promotions (authority soldier) target
     let source = location soldier
     let newSoldier = (promote promotion) . (march target) $ soldier
-    let setter = update (source,target)
+    let setter = update field (source,target)
     return .
         (setFlag setter) .
         (place newSoldier) .
         (clear source) $ field
 
-passants :: Move.Set -> Field -> [Field]
-passants move = const []
-
 castles :: Move.Set -> Field -> [Field]
 castles move = const []
 
-targets :: Soldier -> Field -> [Square]
+passants :: Move.Set -> Field -> [Field]
+passants move = const []
+
+targets :: Soldier -> Field -> [Target]
 targets soldier field = [E1,E2]
 
-promotions :: Piece -> Square -> [Piece]
+promotions :: Piece -> Target -> [Piece]
 promotions Pawn sq | (rank sq == R8) || (rank sq == R1) = pieces
 promotions piece _ = [piece] 
 
-update :: (Square,Square) -> Flags -> Flags
-update (from,to) = id
+update :: Field -> (Square,Square) -> (Flags -> Flags)
+update field (from,to) = id
+
+passant :: Field -> (Square,Square) -> Maybe Square
+passant field (from,to) = Nothing
 
 threatened :: Square -> Field -> Bool
 threatened square field = False 
@@ -75,7 +79,7 @@ checkmate :: Board -> Bool
 checkmate = (&&) <$> check <*> gameover
 
 stalemate :: Board -> Bool
-stalemate = (&&) <$> (not.check) <*> gameover
+stalemate = (&&) <$> (not . check) <*> gameover
 
 implication :: Board -> Board -> Maybe Move
 implication = undefined
