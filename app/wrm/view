@@ -6,34 +6,18 @@ graph=$(realpath $graph)
 mkdir -p $graph
 disp_lock=$3
 
-tmp=~/.config/wrm/tmp/$$
-mkdir -p $tmp
-tree=$tmp/tree
-tmptree=$tmp/tmptree
-touch $tree
-touch $tmptree
-trap "rm -r $tmp" EXIT
-
 read #burn first line?
 
 while read input; do
-    brd write wrm <<<"$input"
-	while ! mkdir $disp_lock 2>/dev/null; do
-		sleep 0.2
-	done
+    cut -d' ' -f1 <<<"$input" | brd 'set' 'wrm'
 	tput cup 0 0
     mode=$(cat $mode_ptr)
     if [ "$mode" == 'tree' ]; then
         printf '\n'; printf '\n'; printf '\n'; printf '\n'
         line=$(cut -d' ' -f2 <<<$input)
-        depth=$(cut -d' ' -f3 <<<$input)
-        cut -d' ' -f4 <<<$input | tr , '\n' | cut -d'_' -f7 | tr '\n' ' ' | sed 's/\] /\]/g' | tr ']' '\n' >$tmptree
-        if ! diff $tree $tmptree >/dev/null; then
-            cp $tmptree $tree
-            tput ed
-        fi
-        tree_width=$(gwc -L <$tree) # not portable
-        splay $line $depth  <$tree | center $tree_width
+        clock=$(cut -d' ' -f3 <<<$input)
+        cut -d' ' -f4 <<<$input | tr , '\n' | cut -d'_' -f7 | tr '\n' ' ' | sed 's/\] /\]/g' | tr ']' '\n' | splay $line $clock
+
     elif [ "$mode" == 'comment' ]; then
         clear
         key=$(cut -d' ' -f1 <<<$input | sed 's/\///g' | sed 's/_//' | cut -d'_' -f1)
@@ -44,6 +28,5 @@ while read input; do
     else
         brd show wrm
     fi
-	rm -r $disp_lock #2>/dev/null
 done
 

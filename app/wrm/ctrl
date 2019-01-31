@@ -50,9 +50,9 @@ while read -n1 key; do
 			pieces=$(cut -d' ' -f2 <<<$line)
             brd pieces=$pieces wrm
 		elif [ "$line" = 'w' ]; then
-			tail -1 $hist | cut -d' ' -f4 | sed 's/\],/\]/g' | tr , ' ' | tr ']' '\n' >$tree
+			tri grid wrm >$tree
 		elif [ "$line" = 'wq' ]; then
-			tail -1 $hist | cut -d' ' -f4 | sed 's/\],/\]/g' | tr , ' ' | tr ']' '\n' >$tree
+			tri grid wrm >$tree
             clear
 			exit
 		elif [ "$line" = 'q' ]; then

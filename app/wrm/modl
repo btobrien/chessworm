@@ -3,4 +3,4 @@
 tree=$1
 
 cd $(dirname $0)
-./engn | tri $tree
+./engn | zipline $tree
