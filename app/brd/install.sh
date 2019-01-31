@@ -1,8 +1,8 @@
 #!/bin/bash
 
 cd $(dirname $0)
-mkdir -p  ~/.brd/brds
+mkdir -p  ~/.config/brd/brds
 chmod +x *.sh
-cp *.sh ~/.brd/
+cp *.sh ~/.config/brd/
 cp ./brd.sh ~/bin/brd
 

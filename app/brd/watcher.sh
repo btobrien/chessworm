@@ -7,6 +7,6 @@ trap "tput cnorm; tput rmcup" EXIT
 
 while read input; do
     tput cup 0 0
-    ~/.brd/display.sh <<<"$input"
+    ~/.config/brd/show.sh
 done
 
