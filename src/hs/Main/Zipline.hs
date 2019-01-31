@@ -4,7 +4,7 @@ import System.Environment
 import Data.List
 import Control.Monad
 
-import Tree.Climb
+import Tree.Zipline
 
 type State = (Tree String, Location)
 

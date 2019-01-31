@@ -1,8 +1,8 @@
 
-all : tri peel unpeel pgntag nextmove mvprompt glyph
+all : zipline peel unpeel pgntag nextmove mvprompt glyph
 
-tri : Main/Tri.hs Tree/Climb.hs
-	ghc -o ~/bin/tri Main/Tri.hs
+zipline : Main/Zipline.hs Tree/Zipline.hs
+	ghc -o ~/bin/zipline Main/Zipline.hs
 
 peel : Main/Peel.hs Monad/Parser.hs Pgn/Parser.hs Tree/Rose.hs
 	ghc -o ~/bin/peel Main/Peel.hs

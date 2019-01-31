@@ -1,5 +1,5 @@
 
-module Tree.Climb where
+module Tree.Zipline where
 
 import Data.List
 
@@ -71,7 +71,7 @@ traverse :: Eq a => Tree a -> [a] -> Location
 traverse t ln = (height t ln, length ln - 1)
 
 result :: Eq a => Tree a -> [a] -> (Tree a, Location)
-result t ln = (t, Tree.Climb.traverse t ln)
+result t ln = (t, Tree.Zipline.traverse t ln)
 
 lift :: Eq a => Tree a -> Location -> Location
 lift t (h,d) = (h,d')
