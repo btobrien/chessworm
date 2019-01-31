@@ -5,29 +5,30 @@ stty -echo; tput civis
 
 config=~/.config/wrm
 mkdir -p $config
+
 tree=${1:-$config/default}
-graph=${2:-$config/def_graph}
 tree=$(realpath $tree)
+mkdir -p $(dirname $tree); touch $tree
+
+graph=${GRAPH:-$config/def_graph}
 graph=$(realpath $graph)
-mkdir -p $(dirname $tree); touch $tree #should mkdir if never saved?
-tree_string=$(cut -d':' -f2 <$tree)
+
+brd new wrm
 
 tmp=$config/tmp/$$
 mkdir -p $tmp
-modl_fifo=$tmp/modl.fifo; mkfifo $modl_fifo
+modl=$tmp/modl.fifo; mkfifo $modl
 disp_lock=$tmp/disp.lock; rm -r $disp_lock 2>/dev/null
 hist=$tmp/hist.txt
-hist=~/hist.txt
-flip=$tmp/flip.bool
-showtree=$tmp/showtree.bool
-touch $showtree
-showcomment=$tmp/showcomment.bool
+
+mode=$tmp/mode.enum
+echo 'tree' >$mode
 
 cd $(dirname $0)
-./modl $tree <$modl_fifo | tee $hist | ./view $graph $flip $showtree $showcomment $disp_lock &
-echo 'print' >$modl_fifo
+./modl $tree <$modl | tee $hist | ./view $mode $graph $disp_lock &
+echo 'print' >$modl
 
-trap "echo exit >$modl_fifo; rm -r $tmp; tput rmcup; stty echo; tput cnorm" EXIT #rmcup on background interupt too
+trap "echo exit >$modl; rm -r $tmp; stty echo; tput cnorm; tput rmcup" EXIT #rmcup on background interupt too
 
 while read -n1 key; do
 
@@ -42,14 +43,12 @@ while read -n1 key; do
 		tput cuu1; tput el
 		stty -echo
 		rm -r $disp_lock
+
 		if [ "$line" = 'f' ]; then
-			if [ -f $flip ]; then
-				rm $flip
-			else
-				touch $flip
-			fi
+            brd flip wrm
 		elif [ "$(cut -d' ' -f1 <<<$line)" = 'board' ]; then
-			cp ~/bin/$(cut -d' ' -f2 <<<$line) ~/bin/board   # have specific board disp dir
+			pieces=$(cut -d' ' -f2 <<<$line)
+            brd pieces=$pieces wrm
 		elif [ "$line" = 'w' ]; then
 			tail -1 $hist | cut -d' ' -f4 | sed 's/\],/\]/g' | tr , ' ' | tr ']' '\n' >$tree
 		elif [ "$line" = 'wq' ]; then
@@ -59,24 +58,30 @@ while read -n1 key; do
 		elif [ "$line" = 'q' ]; then
             clear
 			exit
-		elif [ "$line" == 'e' ]; then
-			vim $graph/$(tail -1 <$hist | cut -d' ' -f1 | sed 's/\///g' | sed 's/_//' | cut -d'_' -f1)  # please dry
-			clear; stty -echo; tput civis
+        elif [ "$line" = 'show board' ]; then
+            clear
+            echo 'board' >$mode
+        elif [ "$line" = 'show tree' ]; then
+            clear
+            echo 'tree' >$mode
+        elif [ "$line" = 'show comment' ]; then
+            clear
+            echo 'comment' >$mode
 		fi
 
-		echo print >$modl_fifo
+		echo print >$modl
 		continue
 	fi
 
 	if [ "$key" == 'c' ]; then
 		read -n1 key
 		if [ "$key" == 'c' ]; then
-			echo chop >$modl_fifo
+			echo chop >$modl
 			key='m'
 			sleep 0.1
 		fi
 	elif [ "$key" == 'M' ]; then
-		echo prev >$modl_fifo
+		echo prev >$modl
 		key='m'
 		sleep 0.1
 	fi
@@ -95,66 +100,53 @@ while read -n1 key; do
 		rm -r $disp_lock
 
 		[ "$move" == '' ] && continue
-		echo move "$(tail -1 <$hist | cut -d' ' -f1)" $move >$modl_fifo
+		echo move "$(tail -1 <$hist | cut -d' ' -f1)" $move >$modl
 
 	elif [ "$key" == 'j' ]; then
-		echo next >$modl_fifo
+		echo next >$modl
 	elif [ "$key" == 'k' ]; then
-		echo prev >$modl_fifo
+		echo prev >$modl
 	elif [ "$key" == 'J' ]; then
-		echo slide >$modl_fifo
+		echo slide >$modl
 	elif [ "$key" == 'K' ]; then
-		echo lift >$modl_fifo
+		echo lift >$modl
 	elif [ "$key" == 'H' ]; then
-		echo branch >$modl_fifo
+		echo branch >$modl
 	elif [ "$key" == 'h' ]; then
-		echo fall >$modl_fifo
+		echo fall >$modl
 	elif [ "$key" == 'L' ]; then
-		echo snap >$modl_fifo
+		echo snap >$modl
 	elif [ "$key" == 'l' ]; then
-		echo climb >$modl_fifo
-    elif [ "$key" = 'f' ]; then
-        clear
-        if [ -f $showtree ]; then
-            rm $showtree
-        else
-            touch $showtree
-        fi
-		echo print >$modl_fifo
-    elif [ "$key" = 's' ]; then
-        clear
-        if [ -f $showcomment ]; then
-            rm $showcomment
-        else
-            touch $showcomment
-        fi
-		echo print >$modl_fifo
+		echo climb >$modl
 	elif [ "$key" == 'g' ]; then
 		read -n1 key
 		if [ "$key" == 'g' ]; then
-			echo root >$modl_fifo
+			echo root >$modl
 		elif [ "$key" == 'h' ]; then
-			echo bottom >$modl_fifo
+			echo bottom >$modl
 		elif [ "$key" == 'l' ]; then
-			echo top >$modl_fifo
+			echo top >$modl
 		fi
 	elif [ "$key" == 'd' ]; then
 		read -n1 key
 		if [ "$key" == 'd' ]; then
-			echo chop >$modl_fifo
+			echo chop >$modl
 		elif [ "$key" == 'k' ]; then
-			echo chop_branch >$modl_fifo
+			echo chop_branch >$modl
         elif [ "$key" == 'g' ]; then
             node=$(tail -1 <$hist | cut -d' ' -f1 | glyph)
-            echo rename "$node" >$modl_fifo
+            echo rename "$node" >$modl
         fi
 	elif [ "$key" == 'G' ]; then
-		echo leaf >$modl_fifo
+		echo leaf >$modl
 	elif [ "$key" == 'u' ]; then
-		echo promote >$modl_fifo
+		echo promote >$modl
 	elif [ "$key" == 'U' ]; then
-		echo mainline >$modl_fifo
-
+		echo mainline >$modl
+    elif [ "$key" == 'e' ]; then
+        vim $graph/$(tail -1 <$hist | cut -d' ' -f1 | sed 's/\///g' | sed 's/_//' | cut -d'_' -f1)  # please dry
+        clear; stty -echo; tput civis
+		echo print >$modl
 	elif [ "$key" == 'a' ]; then
 		clock=$(tail -1 <$hist | cut -d' ' -f3 | sed 's/ //')
         [ "$clock" == "-1" ] && continue
@@ -176,12 +168,12 @@ while read -n1 key; do
             printf '\a'
             continue
         fi
-		echo rename "$node$glyph" >$modl_fifo
+		echo rename "$node$glyph" >$modl
 
 	elif [ "$key" == 'Z' ]; then
 		printf '\a'
 	elif [ "$key" == 'z' ]; then
 		clear
-		echo print >$modl_fifo
+		echo print >$modl
 	fi
 done
