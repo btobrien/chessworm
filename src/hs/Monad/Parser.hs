@@ -26,7 +26,7 @@ item = P (\inp -> case inp of
 
 end :: Parser ()
 end = P (\inp -> case inp of
-    [] -> Just ((),[]) 
+    "" -> Just ((),"") 
     _ -> Nothing)
 
 instance Functor Parser where

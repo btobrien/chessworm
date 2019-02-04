@@ -8,5 +8,5 @@ import Pgn.Printer
 main = do
     inp <- getContents
     let tree = (map.map) read . wordlines $ inp
-    putTrees $ unpeel undefined tree
+    putTrees $ unpeel tree
     putStrLn "*" -- have arg define result

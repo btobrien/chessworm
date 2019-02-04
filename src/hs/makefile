@@ -4,7 +4,7 @@ all : tri peel unpeel pgntag nextmove mvprompt glyph
 tri : Main/Tri.hs Tree/Climb.hs
 	ghc -o ~/bin/tri Main/Tri.hs
 
-peel : Main/Peel.hs Monad/Parser.hs Pgn/Parser.hs Tree/Rose.hs
+peel : Main/Peel.hs Monad/Parser.hs Pgn/Parser.hs
 	ghc -o ~/bin/peel Main/Peel.hs
 
 unpeel : Main/Unpeel.hs Pgn/Parser.hs 
