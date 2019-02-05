@@ -1,6 +1,4 @@
 
-
-
 import Utils
 import Pgn.Parser
 import Tree.Splay
