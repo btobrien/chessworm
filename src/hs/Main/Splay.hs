@@ -1,10 +1,14 @@
 
-import Utils
-import Pgn.Parser
+import Data.Tree
 import Tree.Splay
+import Tree.Peel
+import Utils
 
 main = do
-    inp <- getContents
-    case parse game inp of
-        Nothing -> error "failed to parse pgn"
-        Just ((gs,_),_) -> putStr . unlines . map showAll $ (concat . map peel) gs
+    grid <- fmap wordlines getContents
+    let width = maximum . (map maximum) . ((map . map) length) $ grid
+    putStr . splay width . addRoot . unpeel $ grid 
+
+addRoot ts = Node diamond ts
+    where diamond = "\x25c6" 
+

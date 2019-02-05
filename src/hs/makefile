@@ -7,6 +7,9 @@ tri : Main/Tri.hs Tree/Climb.hs
 peel : Main/Peel.hs Monad/Parser.hs Pgn/Parser.hs
 	ghc -o ~/bin/peel Main/Peel.hs
 
+splay : Main/Splay.hs Tree/Splay.hs Tree/Peel.hs Utils.hs 
+	ghc -o ~/bin/splay2 Main/Splay.hs
+
 unpeel : Main/Unpeel.hs Pgn/Parser.hs 
 	ghc -o ~/bin/unpeel Main/Unpeel.hs
 
