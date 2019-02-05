@@ -13,6 +13,7 @@ unpeel :: Eq a => [[a]] -> [Tree a]
 unpeel = map unpeel' . groupBy samenext
 
 unpeel' :: Eq a => [[a]] -> Tree a
+unpeel' [[x]] = (Node x [])  -- ??
 unpeel' ls = Node val children
     where
     val = head . head $ ls
