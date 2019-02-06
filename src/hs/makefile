@@ -1,5 +1,5 @@
 
-all : tri peel unpeel pgntag nextmove mvprompt glyph
+all : tri peel unpeel pgntag nextmove mvprompt glyph splay
 
 tri : Main/Tri.hs Tree/Climb.hs
 	ghc -o ~/bin/tri Main/Tri.hs
