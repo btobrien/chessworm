@@ -1,5 +1,5 @@
 
-module Tree.Splay where
+module Tree.Splay (splay) where
 
 import Data.Tree
 import Data.Char
@@ -9,29 +9,28 @@ import Control.Applicative
 import qualified Data.Foldable as Fold
 
 splay :: Tree String -> String
-splay t = unlines $ map (branchars . (uncurry zip)) $ zip unbranched (tail firstss)
+splay t = unlines $ map addbranches (zip unbranched firsts)
     where 
-    unbranched = splaylevels . levels . leafcount . stringstretch $ t
-    firstss = map firsts unbranched ++ [repeat False]
+    unbranched = expandlevels . levels . leafcount . stringstretch $ t
+    expandlevels = map (concat . map expand)
+    firsts = tail $ map firstmap unbranched ++ [repeat False]
 
 depth :: Tree a -> Int
 depth = length . levels
 
 stretch :: Tree a -> Tree (Maybe a)
-stretch t = stretchHelper (depth t) t
+stretch t = stretch' (depth t) t
 
-stretchHelper :: Int -> Tree a -> Tree (Maybe a)
-stretchHelper depth (Node x []) = Node (Just x) $ extension (depth-1)
+stretch' :: Int -> Tree a -> Tree (Maybe a)
+stretch' depth (Node x []) = Node (Just x) $ extension (depth-1)
     where extension n = (!!n) $ iterate (\x -> [Node Nothing x]) []
-stretchHelper depth (Node x ts) = Node (Just x) $ map (stretchHelper (depth-1)) ts
+stretch' depth (Node x ts) = Node (Just x) $ map (stretch' (depth-1)) ts
 
-splaylevels :: [[(String,Int)]] -> [String]
-splaylevels ls = map concat . (map . map) (expand len) $ ls
-    where len = length . fst . head . head $ ls
-
-expand :: Int -> (String,Int) -> String
-expand wid (s,num) = s ++ (replicate buf ' ')  
-    where buf = (num - 1) * wid
+stringstretch :: Tree String -> Tree String
+stringstretch t = fmap (makeWidth . fromJustElse "") . stretch $ t
+    where 
+    makeWidth str = take width (str ++ repeat ' ')
+    width = (+1) . Fold.maximum . fmap length $ t
 
 leafcount ::  Tree a -> Tree (a,Int)
 leafcount (Node x []) = Node (x,1) []
@@ -41,23 +40,29 @@ leafcount (Node x ts) = Node (x,count) ts'
     count = sum $ map numleafs ts'
     numleafs = snd . rootLabel
 
-stringstretch :: Tree String -> Tree String
-stringstretch t = fmap (makeWidth width) . fmap (fromJustElse "") . stretch $ t
+expand :: (String,Int) -> String
+expand (s,num) = s ++ (replicate buf ' ')  
     where 
-    width = (+1) . Fold.maximum . fmap length $ t
-    makeWidth n s = take n $ s ++ repeat ' '
+    buf = (num - 1) * wid
+    wid = length s
 
-firsts :: [Char] -> [Bool]
-firsts [] = repeat False
-firsts cs = (not . isSpace . head) cs : (map isFirst (zip cs (tail cs))) ++ repeat False
-    where isFirst (x,y) = isSpace x && (not . isSpace) y
+firstmap :: [Char] -> [Bool]
+firstmap [] = repeat False
+firstmap cs = (b:bs) ++ repeat False
+    where 
+    b = not . isSpace . head $ cs
+    bs = map isFirst (buddies cs)
+    isFirst (x,y) = isSpace x && (not . isSpace) y
 
-branchars :: [(Char,Bool)] -> [Char]
-branchars [] = []
-branchars [cb] = [branchar cb ' ']
-branchars (cb:cbs) = (c:cs)
+addbranches :: ([Char],[Bool]) -> [Char]
+addbranches = addbranches' . uncurry zip
+
+addbranches' :: [(Char,Bool)] -> [Char]
+addbranches' [] = []
+addbranches' [cb] = [branchar cb ' ']
+addbranches' (cb:cbs) = (c:cs)
     where
-    cs = branchars cbs
+    cs = addbranches' cbs
     c = branchar cb (head cs)
     
 branchar :: (Char,Bool) -> Char -> Char
@@ -66,7 +71,7 @@ branchar (' ', False) c
 branchar (' ', True) c 
     | isBranch c = tee
     | otherwise =  corner
-branchar (c, _) _ = c
+branchar (c',_) _ = c'
 
 isBranch :: Char -> Bool
 isBranch = ternary (||)
