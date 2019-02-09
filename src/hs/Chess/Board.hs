@@ -36,12 +36,12 @@ placements move field = do
     target <- filter (targetMatch move) $ targets soldier field 
     promotion <- filter (promotionMatch move) $ promotions (authority soldier) target
     let source = location soldier
-    let newSoldier = (promote promotion) . (march target) $ soldier
+    let newSoldier = promote promotion . march target $ soldier
     let setter = update field (source,target)
     return .
-        (setFlag setter) .
-        (place newSoldier) .
-        (clear source) $ field
+        setFlag setter .
+        place newSoldier .
+        clear source $ field
 
 castles :: Move.Set -> Field -> [Field]
 castles move = const []
@@ -66,14 +66,14 @@ threatened :: Square -> Field -> Bool
 threatened square field = False 
 
 throne :: Field -> Square
-throne = location . head . (filter isKing) . (soldiers . good) 
+throne = location . head . filter isKing . soldiers . good
     where isKing = (King==) . authority
 
 check :: Field -> Bool
 check field = threatened (throne field) field
 
 gameover :: Board -> Bool
-gameover = null . (moves Move.any)
+gameover = null . moves Move.any
 
 checkmate :: Board -> Bool
 checkmate = (&&) <$> check <*> gameover

@@ -22,7 +22,7 @@ clear square (Battle g e) =
 
 discharge :: Square -> Army a -> Army a
 discharge square (Army ss f) = Army (remove ss) f
-    where remove = filter (not . (on square))
+    where remove = filter (not . on square)
 
 place :: Soldier -> Battle a -> Battle a
 place s (Battle (Army ss f) e) =
