@@ -6,7 +6,7 @@ import Chess.Squares (Square)
 
 data Soldier = Soldier {
     authority :: Piece,
-    location :: Square }
+    location :: Square } deriving (Eq)
 
 instance Show Soldier where
     show (Soldier p s) = "(" ++ show p ++ "," ++ show s ++ ")" 
