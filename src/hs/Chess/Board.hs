@@ -4,7 +4,7 @@ module Chess.Board where
 import Chess.Squares
 import Chess.Pieces
 import Chess.Soldier
-import Chess.Move (Move, Set(..))
+import Chess.Move (Set(..))
 import qualified Chess.Move as Move
 import Chess.Flags (Flags)
 import Chess.Battle
@@ -81,5 +81,5 @@ checkmate = (&&) <$> check <*> gameover
 stalemate :: Board -> Bool
 stalemate = (&&) <$> (not . check) <*> gameover
 
-implication :: Board -> Board -> Maybe Move
+implication :: Board -> Board -> Maybe Move.Move
 implication = undefined

@@ -53,6 +53,9 @@ ring = const []
 bubble :: Square -> [Square]
 bubble = const []
 
+readMaybe :: String -> Maybe Square
+readMaybe = undefined
+
 instance Show Square where
     show A8 = "a8"
     show B8 = "b8"
