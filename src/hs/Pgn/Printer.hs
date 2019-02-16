@@ -57,5 +57,5 @@ putGame (trees,tags) = do
     mapM_ putTag tags 
     putStrLn "" 
     putTrees trees
-    putStrLn . show $ result (head trees)
+    print $ result (head trees)
 

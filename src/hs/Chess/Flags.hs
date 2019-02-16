@@ -23,7 +23,7 @@ newPair = (new first,new second)
 instance Show Flags where
     show (F c s l e) = 
         shade c $
-        (showIf s "K") ++ (showIf l "Q") ++ (showJust e)
+        showIf s "K" ++ showIf l "Q" ++ showJust e
             where showIf b s = if b then s else ""
 
 isShort :: String ->  Bool

@@ -2,6 +2,7 @@
 module Monad.Parser where
 
 import Control.Applicative
+import Control.Monad (void)
 import Data.Char
 import Data.Maybe
 
@@ -17,7 +18,7 @@ pa << pb = do
 newtype Parser a = P (String -> Maybe (a,String))
 
 parse :: Parser a -> String -> Maybe (a,String)
-parse (P p) inp = p inp
+parse (P p) = p
 
 item :: Parser Char
 item = P (\inp -> case inp of
@@ -60,7 +61,7 @@ instance Alternative Parser where
         x -> x)
 
 runParser :: Parser a -> String -> a
-runParser p xs = case (parse p xs) of
+runParser p xs = case parse p xs of
     Just (n,[]) -> n
     Just (_,leftovers) -> error ("leftovers: " ++ leftovers)
     Nothing -> error "invalid input"
@@ -95,13 +96,13 @@ string :: String -> Parser String
 string = foldr (\x p -> do char x; fmap (x:) p) (return [])
 
 space :: Parser ()
-space = many (sat isSpace) >> return ()
+space = void $ many (sat isSpace)
 
 nat :: Parser Int
 nat = readParser (some digit)
 
 neg :: Parser Int
-neg = char '-' >> fmap (negate) nat
+neg = char '-' >> fmap negate nat
 
 int :: Parser Int
 int = nat <|> neg
@@ -114,10 +115,10 @@ token p = do
     return v
 
 word :: Parser String
-word = token . some $ (sat $ not.isSpace)
+word = token . some $ sat (not . isSpace)
 
 delim :: Char -> Parser String
-delim d = token $ many (sat $ not.(==d)) << char d
+delim d = token $ many (sat (/=d)) << char d
 
 inside :: Char -> Char -> Parser String
 inside a b = space >> char a >> delim b

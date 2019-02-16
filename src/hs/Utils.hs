@@ -3,12 +3,10 @@ module Utils where
 
 import Data.Char (isSpace)
 import Data.List
+import Data.Maybe
 
 (!!?) :: [a] -> Int -> Maybe a
-xs !!? n = if (n < 0 || n > length xs) then Nothing else Just (xs !! n)
-
-fromJustElse :: a -> Maybe a -> a
-fromJustElse a = maybe a id
+xs !!? n = if n < 0 || n > length xs then Nothing else Just (xs !! n)
 
 showJust :: Show a => Maybe a -> String
 showJust ma = case ma of
@@ -25,7 +23,7 @@ buddies :: [a] -> [(a,a)]
 buddies xs = zip xs (tail xs)
 
 limit :: Eq a => (a -> a) -> a -> a
-limit f x = if (x == x') then x else limit f x'
+limit f x = if x == x' then x else limit f x'
     where x' = f x
 
 while :: Eq a => (a -> Maybe a) -> a -> a

@@ -13,11 +13,11 @@ unpeel :: Eq a => [[a]] -> [Tree a]
 unpeel = map unpeel' . groupBy samenext
 
 unpeel' :: Eq a => [[a]] -> Tree a
-unpeel' [[x]] = (Node x [])  -- ??
+unpeel' [[x]] = Node x [] -- ??
 unpeel' ls = Node val children
     where
     val = head . head $ ls
     children = map unpeel' . groupBy samenext . map tail $ ls
 
-samenext x y = (head x == head y)
+samenext x y = head x == head y
 

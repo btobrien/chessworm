@@ -25,6 +25,9 @@ mvprompt : Main/MovePrompt.hs
 glyph : Main/Glyph.hs
 	ghc -o ~/bin/glyph Main/Glyph.hs
 
+lint : 
+	hlint -i"Use lambda-case" -i"Use String" .
+
 clean :
 	find . -name '*.hi' -delete
 	find . -name '*.o' -delete

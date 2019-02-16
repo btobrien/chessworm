@@ -26,7 +26,7 @@ getFileTree fname = do
     return $ if null ls then nulltree else map words ls
 
 treeScan :: State -> [String] -> [State]
-treeScan init = scanl nextState init
+treeScan = scanl nextState
     where nextState = flip readcmd
 
 putState :: State -> IO ()
@@ -44,7 +44,7 @@ showTree = intercalate "]," . map (intercalate ",")
 
 currentVal :: State -> String
 currentVal (_,(_,-1)) = "-"
-currentVal s = uncurry get $ s
+currentVal s = uncurry get s
 
 readcmd :: String -> (State -> State)
 readcmd [] = id

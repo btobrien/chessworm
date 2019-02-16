@@ -4,9 +4,10 @@ module Chess.Move where
 import Chess.Squares
 import Chess.Pieces
 import Chess.Soldier (Soldier)
-import Utils (ternary)
 import Monad.Parser
+import Data.Maybe
 import Utils
+
 
 import Prelude hiding (any)
 import Control.Applicative
@@ -17,9 +18,9 @@ data Move = Move {
     promotion :: Piece }
 
 data Set = Set { 
-    soldierMatch :: (Soldier -> Bool),
-    targetMatch :: (Square -> Bool),
-    promotionMatch :: (Piece -> Bool),
+    soldierMatch :: Soldier -> Bool,
+    targetMatch :: Square -> Bool,
+    promotionMatch :: Piece -> Bool,
     castleShort :: Bool,
     castleLong :: Bool }
 
@@ -31,7 +32,7 @@ getSet :: Parser Set
 getSet = undefined
 
 getPiece :: Parser Piece
-getPiece = fmap (fromJustElse Pawn . piece) letter
+getPiece = fmap (fromMaybe Pawn . piece) letter
 
 getTarget :: Parser Square
 getTarget = undefined
@@ -53,7 +54,7 @@ longCastle = Set (const False) (const False) (const False) False True
 
 matches :: Set -> Move -> Bool
 matches set  = ternary (&&)
-    <$> (soldierMatch set) . soldier
-    <*> (targetMatch set) . target
-    <*> (promotionMatch set) . promotion
+    <$> soldierMatch set . soldier
+    <*> targetMatch set . target
+    <*> promotionMatch set . promotion
 

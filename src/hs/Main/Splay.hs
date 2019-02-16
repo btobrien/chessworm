@@ -8,6 +8,6 @@ main = do
     grid <- fmap wordlines getContents
     putStr . splay . addRoot . unpeel $ grid 
 
-addRoot ts = Node diamond ts
+addRoot = Node diamond
     where diamond = "\x25c6" 
 

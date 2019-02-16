@@ -5,14 +5,15 @@ import Data.Tree
 import Data.Char
 import Utils
 import Control.Applicative
+import Data.Maybe
 
 import qualified Data.Foldable as Fold
 
 splay :: Tree String -> String
-splay t = unlines $ map addbranches (zip unbranched firsts)
+splay t = unlines $ zipWith addbranches unbranched firsts
     where 
     unbranched = expandlevels . levels . leafcount . stringstretch $ t
-    expandlevels = map (concat . map expand)
+    expandlevels = map $ concatMap expand
     firsts = tail $ map firstmap unbranched ++ [repeat False]
 
 depth :: Tree a -> Int
@@ -27,7 +28,7 @@ stretch' depth (Node x []) = Node (Just x) $ extension (depth-1)
 stretch' depth (Node x ts) = Node (Just x) $ map (stretch' (depth-1)) ts
 
 stringstretch :: Tree String -> Tree String
-stringstretch t = fmap (makeWidth . fromJustElse "") . stretch $ t
+stringstretch t = fmap (makeWidth . fromMaybe "") . stretch $ t
     where 
     makeWidth str = take width (str ++ repeat ' ')
     width = (+1) . Fold.maximum . fmap length $ t
@@ -41,7 +42,7 @@ leafcount (Node x ts) = Node (x,count) ts'
     numleafs = snd . rootLabel
 
 expand :: (String,Int) -> String
-expand (s,num) = s ++ (replicate buf ' ')  
+expand (s,num) = s ++ replicate buf ' '
     where 
     buf = (num - 1) * wid
     wid = length s
@@ -54,13 +55,13 @@ firstmap cs = (b:bs) ++ repeat False
     bs = map isFirst (buddies cs)
     isFirst (x,y) = isSpace x && (not . isSpace) y
 
-addbranches :: ([Char],[Bool]) -> [Char]
-addbranches = addbranches' . uncurry zip
+addbranches :: [Char] -> [Bool] -> [Char]
+addbranches cs = addbranches' . zip cs
 
-addbranches' :: [(Char,Bool)] -> [Char]
+addbranches' :: [(Char,Bool)] -> String
 addbranches' [] = []
 addbranches' [cb] = [branchar cb ' ']
-addbranches' (cb:cbs) = (c:cs)
+addbranches' (cb:cbs) = c:cs
     where
     cs = addbranches' cbs
     c = branchar cb (head cs)

@@ -4,8 +4,6 @@ module Chess.Battle where
 
 import Chess.Squares
 import Chess.Soldier
-import Utils (fromJustElse)
-
 import Data.Maybe
 
 data Army a = Army {

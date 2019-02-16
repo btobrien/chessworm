@@ -37,7 +37,7 @@ ancestor :: Eq a => [a] -> [a] -> Int
 ancestor xs ys = subtract 1 . length . takeWhile equal $ zip xs ys
 
 sharePathThrough :: Eq a => Int -> [a] -> [a] -> Bool
-sharePathThrough d ln1 ln2 = (path d ln1) `isPrefixOf` ln2
+sharePathThrough d ln1 ln2 = path d ln1 `isPrefixOf` ln2
 
 highers :: Eq a => Tree a -> Location -> Tree a
 highers t (h,d) = takeWhile (not.sharePathThrough d ln) t
@@ -91,7 +91,7 @@ slide t (h,d) = (h,d')
     sibs = siblings t (h,d)
     a  = ancestor ln (head sibs) + 1
     a' = ancestor ln (last sibs) + 1
-    d' = if length sibs == 1 then (length ln - 1) else min a a'
+    d' = if length sibs == 1 then length ln - 1 else min a a'
 
 climb :: Eq a => Tree a -> Location -> Location
 climb t (h,d) = if (not.null) highs && areCousins then (h',d) else (h,d)
@@ -139,7 +139,7 @@ chop t (h,d) = result t' ln'
     ln = t !! h
     ln' = take d ln
     onlyCousin = isOnlyCousin t (h,d)
-    t' = if (d==0 || not onlyCousin)
+    t' = if d==0 || not onlyCousin
             then filter (not.sharePathThrough d ln) t
             else highers t (h,d) ++ [ln'] ++ lowers t (h,d)
 
@@ -170,7 +170,7 @@ root _ (h,_) = (h,0)
 
 leaf :: Eq a => Tree a -> Location -> Location
 leaf t (h,_) = (h,d)
-    where d = (subtract 1) . length $ (t !! h)
+    where d = subtract 1 $ length (t !! h)
 
 top :: Eq a => Tree a -> Location -> Location
 top t = limit (climb t)

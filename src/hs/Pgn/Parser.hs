@@ -55,7 +55,7 @@ trees = done <|> do
     m <- getMove
     g <- getGlyph
     c <- getComment
-    siblings <- fmap concat $ many subtrees
+    siblings <- concat <$> many subtrees
     children <- trees
     let me = Node (Move p m g c) children 
     return (me:siblings)
