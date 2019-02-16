@@ -1,10 +1,12 @@
 
 module Chess.Move where
 
-import Chess.Squares (Square)
-import Chess.Pieces (Piece) 
+import Chess.Squares
+import Chess.Pieces
 import Chess.Soldier (Soldier)
 import Utils (ternary)
+import Monad.Parser
+import Utils
 
 import Prelude hiding (any)
 import Control.Applicative
@@ -17,10 +19,37 @@ data Move = Move {
 data Set = Set { 
     soldierMatch :: (Soldier -> Bool),
     targetMatch :: (Square -> Bool),
-    promotionMatch :: (Piece -> Bool) }
+    promotionMatch :: (Piece -> Bool),
+    castleShort :: Bool,
+    castleLong :: Bool }
 
 parse :: String -> [Set]
-parse = undefined
+parse "o-o" = [shortCastle]
+parse "o-o-o" = [longCastle]
+
+getSet :: Parser Set
+getSet = undefined
+
+getPiece :: Parser Piece
+getPiece = fmap (fromJustElse Pawn . piece) letter
+
+getTarget :: Parser Square
+getTarget = undefined
+
+strip :: String -> String
+strip = filter ((&&) <$> (/='+') <*> (/='x')) 
+
+any :: Set
+any = Set (const True) (const True) (const True) True True
+
+none :: Set
+none = Set (const False) (const False) (const False) False False
+
+shortCastle :: Set
+shortCastle = Set (const False) (const False) (const False) True False
+
+longCastle :: Set
+longCastle = Set (const False) (const False) (const False) False True
 
 matches :: Set -> Move -> Bool
 matches set  = ternary (&&)
@@ -28,14 +57,3 @@ matches set  = ternary (&&)
     <*> (targetMatch set) . target
     <*> (promotionMatch set) . promotion
 
-any :: Set
-any = Set (const True) (const True) (const True)
-
-none :: Set
-none = Set (const False) (const False) (const False)
-
-shortCastle :: Set
-shortCastle = undefined
-
-longCastle :: Set
-longCastle = undefined

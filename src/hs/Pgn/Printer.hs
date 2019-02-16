@@ -4,8 +4,8 @@ module Pgn.Printer where
 import System.IO
 import Data.List
 import Control.Monad
+import Data.Tree
 
-import Tree.Rose
 import Pgn.Parser
 
 -- collapse space functions?
@@ -19,14 +19,10 @@ showComment c = " {" ++ c ++ "}"
 showIntGlyph 0 = ""
 showIntGlyph n = " $" ++ show n
 
-showMove _ (Leaf _) = ""
 showMove numstr (Node (Move p m g c) _) = showPrecomment p ++ numstr ++ m ++ showIntGlyph g ++ showComment c
 
 showNum n = show (1 + (n `div` 2)) ++ dot ++ " "
     where dot = if even n then "." else "..."
-
-isNode (Node _ _) = True
-isNode _ = False
 
 putSubTree :: Int -> MoveTree -> IO ()
 putSubTree n m = do
@@ -37,10 +33,10 @@ putSubTree n m = do
     putStr "\b\b) "  -- backspaces??
 
 putSubTrees :: Int -> MoveTree -> IO ()
-putSubTrees _ (Leaf _) = return ()
+putSubTrees _ (Node _ []) = return ()
 putSubTrees n (Node _ (t:ts)) = do
-    when (even n && isNode t) (putStr $ showNum n)
-    putStr $ showMove [] t 
+    when (even n) (putStr $ showNum n)
+    putStr $ showMove "" t 
     putStr " " 
     mapM_ (putSubTree n) ts 
     let n' = n+1

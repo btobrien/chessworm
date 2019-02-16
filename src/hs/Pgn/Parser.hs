@@ -11,11 +11,10 @@ module Pgn.Parser (
 import Control.Applicative
 import Data.Char
 import System.IO
+import Data.Tree
 
 import Monad.Parser
 import Pgn.Glyph
-import Tree.Rose
-import Tree.Peel (mainleaf)
 
 data Result = White | Draw | Black | Unknown 
     deriving (Eq, Ord)
@@ -45,9 +44,9 @@ stripGlyph :: Move -> Move
 stripGlyph (Move p m 0 c) = let (m',g) = strip m in Move p m' g c 
 stripGlyph (Move p m g c) = let (m',_) = strip m in Move p m' g c 
 
-type MoveTree = Tree Result Move
+type MoveTree = Tree Move
 
-result = mainleaf
+result = const Unknown
 
 trees :: Parser [MoveTree]
 trees = done <|> do
@@ -65,7 +64,7 @@ subtrees :: Parser [MoveTree]
 subtrees = symbol "(" >> trees
 
 done :: Parser [MoveTree]
-done = fmap (\x -> [Leaf x]) getResult
+done = getResult >> return []
 
 getMove :: Parser String
 getMove = token . some $ sat (not.delim)

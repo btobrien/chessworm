@@ -1,54 +1,32 @@
 #!/bin/bash
 
-graph=$1
+mode_ptr=$1
+graph=$2
 graph=$(realpath $graph)
 mkdir -p $graph
-flip_file=$2
-showtree_file=$3
-showcomment_file=$4
-disp_lock=$5
+disp_lock=$3
 
-tmp=~/.config/wrm/tmp/$$
-mkdir -p $tmp
-tree=$tmp/tree
-tmptree=$tmp/tmptree
-touch $tree
-touch $tmptree
-trap "rm -r $tmp" EXIT
-
-read #burn first line
+read #burn first line?
 
 while read input; do
-	while ! mkdir $disp_lock 2>/dev/null; do
-		sleep 0.2
-	done
+    cut -d' ' -f1 <<<"$input" | brd 'set' 'wrm'
 	tput cup 0 0
-	if [ -f "$showtree_file" ]; then
-        if [ -f "$flip_file" ]; then
-            board <<<"$input" | flip | border | center
-        else
-            board <<<"$input" | border | center
-        fi
-    else
+    mode=$(cat $mode_ptr)
+    if [ "$mode" == 'tree' ]; then
         printf '\n'; printf '\n'; printf '\n'; printf '\n'
         line=$(cut -d' ' -f2 <<<$input)
-        depth=$(cut -d' ' -f3 <<<$input)
-        cut -d' ' -f4 <<<$input | tr , '\n' | cut -d'_' -f7 | tr '\n' ' ' | sed 's/\] /\]/g' | tr ']' '\n' >$tmptree
-        if ! diff $tree $tmptree >/dev/null; then
-            cp $tmptree $tree
-            tput ed
-        fi
-        tree_width=$(gwc -L <$tree) # not portable
-        splay $line $depth  <$tree | center $tree_width
-    fi
-    tput ed
-    key=$(cut -d' ' -f1 <<<$input | sed 's/\///g' | sed 's/_//' | cut -d'_' -f1)
-    if [ -f "$showcomment_file" ]; then
+        clock=$(cut -d' ' -f3 <<<$input)
+        cut -d' ' -f4 <<<$input | tr , '\n' | cut -d'_' -f7 | tr '\n' ' ' | sed 's/\] /\]/g' | tr ']' '\n' | splay $line $clock
+
+    elif [ "$mode" == 'comment' ]; then
+        clear
+        key=$(cut -d' ' -f1 <<<$input | sed 's/\///g' | sed 's/_//' | cut -d'_' -f1)
         if [ -f $graph/$key ]; then
             printf '\n'; printf '\n'
             cat $graph/$key | center
         fi
+    else
+        brd show wrm
     fi
-	rm -r $disp_lock &2>/dev/null
 done
 

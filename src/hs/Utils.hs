@@ -21,6 +21,9 @@ equal = uncurry (==)
 pair :: a -> b -> (a,b)
 pair a b = (a,b)
 
+buddies :: [a] -> [(a,a)]
+buddies xs = zip xs (tail xs)
+
 limit :: Eq a => (a -> a) -> a -> a
 limit f x = if (x == x') then x else limit f x'
     where x' = f x

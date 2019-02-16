@@ -7,6 +7,9 @@ data Piece = Pawn | Knight | Bishop | Rook | Queen | King
 pieces :: [Piece]
 pieces = enumFrom . toEnum $ 0
 
+piece :: Char -> Maybe Piece
+piece = undefined
+
 instance Show Piece where
     show King = "K"
     show Queen = "Q"
@@ -14,6 +17,9 @@ instance Show Piece where
     show Bishop = "B"
     show Knight = "N"
     show Pawn = "P"
+
+title :: Piece -> Char
+title = head . show
 
 value :: Piece -> Int
 value Pawn = 1
