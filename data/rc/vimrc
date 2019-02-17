@@ -1,0 +1,79 @@
+
+syntax on
+set tabstop=4
+set softtabstop=4
+set expandtab
+set shiftwidth=4
+set incsearch
+set hlsearch
+set smarttab
+set smartindent
+set smartcase
+set autoindent
+"set cindent
+filetype plugin indent on
+set hidden
+set autoread
+set noruler
+set nowrap
+set ignorecase
+
+set fillchars+=vert:\ 
+set path=$PWD/**
+let g:netrw_banner=0
+
+nnoremap <c-c> <esc>
+nnoremap mf za
+nnoremap mF zA
+nnoremap m: :w !
+nnoremap Y y$
+vnoremap $ $h
+
+"Buffers"
+:nn K :exe"try\n prev!\n catch/:E164:/\n last!\n endtry"<CR>
+:nn J :exe"try\n next!\n catch/:E165:/\n rewind!\n endtry"<CR>
+nnoremap dm J
+nnoremap <c-j> :cnext<cr>
+nnoremap <c-k> :cprev<cr>
+nnoremap <bs><bs> :argdelete %<CR>
+nnoremap ++ :exe"try\n argdelete! %\n catch/:E480:/\n\n endtry"<CR>:argadd! %<CR>
+
+"Search"
+vnoremap / y/\V<C-r>"<CR>gv
+vnoremap m y/\V<C-r>"<CR><C-o>
+inoremap <C-f> <ESC>/\V<C-r>-<CR>
+nnoremap mm viwy/\V\<<C-r>"\><CR><C-O>
+:command! -nargs=1 Grep normal :let target = <f-args><CR>:w !grep -wrnI <C-r>=target<CR> .<CR>
+nnoremap gr mL"gyiw :!grep -wnrI '<C-r>g' . >~/.vim/quickfix.out<cr>:cf ~/.vim/quickfix.out<cr>
+nnoremap gR "gyiw :Grep <C-r>g<CR>
+nnoremap gl mL:cf ~/.vim/quickfix.out<cr>
+nnoremap gL :w !cat ~/.vim/quickfix.out<cr>
+"haskell"
+nnoremap gm mL!lsed 's/\./\//g'<cr>/\u<CR>:noh<CR>"myiWu:find <C-r>m.hs<cr>
+nnoremap gn mL:!grep -wrnI "`sed 's/\//\\\./g' <<<'%<'`" . >~/.vim/quickfix.out<cr>:cf ~/.vim/quickfix.out<cr>
+nnoremap gN :w !grep -wrnI "`sed 's/\//\\\./g' <<<'%<'`" .<CR>
+nnoremap gd mL"gyiw :!grep -wnrI '<C-r>g ::' . >~/.vim/quickfix.out<cr>:cf ~/.vim/quickfix.out<cr>
+nnoremap gD "gyiw :w !grep -wnrI '<C-r>g ::' .<cr>
+"cpp (make toggle)"
+nnoremap gh mL:find `basename %<.h`<CR> 
+nnoremap gH mL:find `basename %<.cpp`<CR>
+
+"Paste"
+nnoremap gp `[v`]
+nnoremap <C-p> p`[v`]>
+nnoremap yp "0p
+nnoremap yP "0P
+
+"highlight"
+nnoremap <silent> <C-l> :noh<CR><C-l>
+noh
+
+
+"graveyard"
+"
+":command! E normal! :w<CR>:Explore<CR>
+"nnoremap <c-j> mmo<ESC>`m
+"nnoremap <c-k> mmO<ESC>`m
+"set showtabline=0
+
+
