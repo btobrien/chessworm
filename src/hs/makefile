@@ -25,6 +25,9 @@ mvprompt : Main/MovePrompt.hs
 glyph : Main/Glyph.hs
 	ghc -o ~/bin/glyph Main/Glyph.hs
 
+board : Chess/Init.hs Chess/Board.hs Chess/Battle.hs Monad/Parser.hs Utils.hs Chess/Move.hs
+	ghc Chess/Init.hs
+
 lint : 
 	hlint -i"Use lambda-case" -i"Use String" .
 

@@ -6,8 +6,16 @@ import Control.Monad (void)
 import Data.Char
 import Data.Maybe
 
-tryAlso :: Alternative m => (a -> m a) -> a -> m a
-tryAlso p x = p x <|> pure x
+--TODO: Generalize
+try :: (a -> Maybe b) -> Parser a -> Parser b
+try f gen = do
+    x <- gen
+    case f x of
+        Nothing -> empty
+        Just x' -> return x'
+
+(<||>) :: Alternative m => m a -> a -> m a
+mx <||> y = mx <|> pure y
 
 (<<) :: Monad m => m a -> m b -> m a
 pa << pb = do
@@ -20,18 +28,13 @@ newtype Parser a = P (String -> Maybe (a,String))
 parse :: Parser a -> String -> Maybe (a,String)
 parse (P p) = p
 
-item :: Parser Char
-item = P (\inp -> case inp of
-    [] -> Nothing 
-    (x:xs) -> Just (x,xs))
-
-end :: Parser ()
-end = P (\inp -> case inp of
-    "" -> Just ((),"") 
-    _ -> Nothing)
+tryParse :: Parser a -> String -> Maybe a
+tryParse p inp = case parse p inp of
+    Nothing -> Nothing
+    Just (s,_) -> Just s
 
 instance Functor Parser where
--- fmap :: (a -> b) -> Parser a -> Parser b
+--  fmap :: (a -> b) -> Parser a -> Parser b
     fmap g p = P (\inp -> case parse p inp of
         Nothing -> Nothing
         Just (v,out) -> Just (g v, out))
@@ -60,19 +63,39 @@ instance Alternative Parser where
         Nothing -> parse py inp
         x -> x)
 
-runParser :: Parser a -> String -> a
-runParser p xs = case parse p xs of
-    Just (n,[]) -> n
-    Just (_,leftovers) -> error ("leftovers: " ++ leftovers)
-    Nothing -> error "invalid input"
-
 readParser :: Read a => Parser String -> Parser a
 readParser = fmap read
 
+next :: Parser Char
+next = P (\inp -> case inp of
+    "" -> Nothing 
+    (x:xs) -> Just (x,xs))
+
+back :: Parser Char
+back = P (\inp -> case inp of
+    "" -> Nothing 
+    xs -> Just (last xs, init xs))
+
+reverse :: Parser ()
+reverse = P (\inp -> Just ((), Prelude.reverse inp))
+
+end :: Parser ()
+end = P (\inp -> case inp of
+    "" -> Just ((),"") 
+    _ -> Nothing)
+
 sat :: (Char -> Bool) -> Parser Char
 sat p = do
-    x <- item
+    x <- next
     if p x then return x else empty
+
+satback :: (Char -> Bool) -> Parser Char
+satback p = do
+    x <- back
+    if p x then return x else empty
+
+charback :: Char -> Parser Char
+charback x = satback (==x)
 
 digit :: Parser Char
 digit = sat isDigit

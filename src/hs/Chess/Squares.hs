@@ -13,7 +13,7 @@ data Square =
         deriving (Enum, Eq)
 
 squares :: [Square]
-squares = enumFrom . toEnum $ 1
+squares = enumFrom . toEnum $ 0
 
 data File = A | B | C | D | E | F | G | H
     deriving (Enum, Eq)
@@ -21,11 +21,17 @@ data File = A | B | C | D | E | F | G | H
 data Rank = R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8
     deriving (Enum, Eq)
 
-file :: Square -> File
+file :: Char -> Maybe File
 file = undefined
 
-rank :: Square -> Rank
+rank :: Char -> Maybe Rank
 rank = undefined
+
+fileOf :: Square -> File
+fileOf = undefined
+
+rankOf :: Square -> Rank
+rankOf = undefined
 
 square :: (File,Rank) -> Square
 square = undefined

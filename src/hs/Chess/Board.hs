@@ -53,7 +53,7 @@ targets :: Soldier -> Field -> [Target]
 targets soldier field = [E1,E2]
 
 promotions :: Piece -> Target -> [Piece]
-promotions Pawn sq | (rank sq == R8) || (rank sq == R1) = pieces
+promotions Pawn sq | (rankOf sq == R8) || (rankOf sq == R1) = pieces
 promotions piece _ = [piece] 
 
 update :: Field -> (Square,Square) -> (Flags -> Flags)

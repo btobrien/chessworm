@@ -71,13 +71,13 @@ getMove = token . some $ sat (not.delim)
     where delim c = isSpace c || (c == ')')
 
 getComment :: Parser String
-getComment = inside '{' '}' <|> return ""
+getComment = inside '{' '}' <||> ""
 
 getGlyph :: Parser Int
-getGlyph = (symbol "$" >> natural) <|> return 0
+getGlyph = (symbol "$" >> natural) <||> 0
 
 movenum :: Parser ()
-movenum = natdots <|> return ()
+movenum = natdots <||> ()
     where natdots = natural >> some (symbol ".") >> return ()
 
 getResult :: Parser Result

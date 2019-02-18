@@ -8,14 +8,10 @@ import Monad.Parser
 import Data.Maybe
 import Utils
 
-
 import Prelude hiding (any)
 import Control.Applicative
 
-data Move = Move { 
-    soldier :: Soldier,
-    target :: Square,
-    promotion :: Piece }
+data Move = CastleShort | CastleLong | Move Soldier Square Piece
 
 data Set = Set { 
     soldierMatch :: Soldier -> Bool,
@@ -24,18 +20,28 @@ data Set = Set {
     castleShort :: Bool,
     castleLong :: Bool }
 
-parse :: String -> [Set]
-parse "o-o" = [shortCastle]
-parse "o-o-o" = [longCastle]
+tryReadMove :: String -> Maybe Set
+tryReadMove "o-o" = Just shortCastle
+tryReadMove "o-o-o" = Just longCastle
+tryReadMove inp = tryParse getSet $ strip inp
 
+-- TODO: have piece not include pawn
 getSet :: Parser Set
-getSet = undefined
+getSet = do
+    p <- try piece next <||> Pawn
+    p' <- (fmap piece back << charback '=') <||> Nothing
+    targetRank <- try rank back
+    targetFile <- try file back
+    sourceFile <- fmap file next <||> Nothing 
+    sourceRank <- fmap rank next <||> Nothing
+    let target = square (targetFile,targetRank)
+    return $ matcher p (sourceFile,sourceRank) target p'
 
-getPiece :: Parser Piece
-getPiece = fmap (fromMaybe Pawn . piece) letter
-
-getTarget :: Parser Square
-getTarget = undefined
+matcher :: Piece -> (Maybe File, Maybe Rank) -> Square -> Maybe Piece -> Set
+matcher p source target mp = Set (squareMatcher source) (==target) promatch False False
+    where promatch = case mp of
+        Nothing -> (==p)
+        Just p' -> (==p') 
 
 strip :: String -> String
 strip = filter ((&&) <$> (/='+') <*> (/='x')) 
@@ -43,8 +49,8 @@ strip = filter ((&&) <$> (/='+') <*> (/='x'))
 any :: Set
 any = Set (const True) (const True) (const True) True True
 
-none :: Set
-none = Set (const False) (const False) (const False) False False
+empty :: Set
+empty = Set (const False) (const False) (const False) False False
 
 shortCastle :: Set
 shortCastle = Set (const False) (const False) (const False) True False
@@ -52,9 +58,8 @@ shortCastle = Set (const False) (const False) (const False) True False
 longCastle :: Set
 longCastle = Set (const False) (const False) (const False) False True
 
-matches :: Set -> Move -> Bool
-matches set  = ternary (&&)
-    <$> soldierMatch set . soldier
-    <*> targetMatch set . target
-    <*> promotionMatch set . promotion
+contains :: Set -> Move -> Bool
+contains = undefined
 
+toSet :: Move -> Set
+toSet = undefined
