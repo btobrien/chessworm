@@ -1,5 +1,5 @@
 
-all : zipline peel unpeel pgntag nextmove mvprompt glyph splay
+all : zipline peel unpeel pgntag nextmove mvprompt glyph splay board
 
 zipline : Main/Zipline.hs Tree/Zipline.hs
 	ghc -o ~/bin/zipline Main/Zipline.hs

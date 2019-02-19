@@ -16,6 +16,9 @@ showJust ma = case ma of
 equal :: Eq a => (a,a) -> Bool
 equal = uncurry (==)
 
+squared :: Num a => a -> a
+squared a = a * a
+
 pair :: a -> b -> (a,b)
 pair a b = (a,b)
 

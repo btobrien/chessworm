@@ -4,6 +4,7 @@ module Chess.Battle where
 
 import Chess.Squares
 import Chess.Soldier
+import Chess.Pieces -- have Soldier import for you
 import Data.Maybe
 
 data Army a = Army {
@@ -13,6 +14,12 @@ data Army a = Army {
 data Battle a = Battle {
     good :: Army a,
     evil :: Army a } deriving Show
+
+locations :: Army a -> [Square]
+locations = map location . soldiers
+
+authorities :: Army a -> [Piece]
+authorities = map authority . soldiers
 
 clear :: Square -> Battle a -> Battle a
 clear square (Battle g e) = 

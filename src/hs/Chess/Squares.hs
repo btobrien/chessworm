@@ -1,5 +1,7 @@
 
 module Chess.Squares where
+import Utils
+import Control.Applicative
 
 data Square =
     A8 | B8 | C8 | D8 | E8 | F8 | G8 | H8 |
@@ -24,27 +26,27 @@ data File = A | B | C | D | E | F | G | H
 data Rank = R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8
     deriving (Show, Enum, Eq)
 
-file :: Char -> Maybe File
-file 'a' = Just A
-file 'b' = Just B
-file 'c' = Just C
-file 'd' = Just D
-file 'e' = Just E
-file 'f' = Just F
-file 'g' = Just G
-file 'h' = Just H
-file _ = Nothing
+toFile :: Char -> Maybe File
+toFile 'a' = Just A
+toFile 'b' = Just B
+toFile 'c' = Just C
+toFile 'd' = Just D
+toFile 'e' = Just E
+toFile 'f' = Just F
+toFile 'g' = Just G
+toFile 'h' = Just H
+toFile _ = Nothing
 
-rank :: Char -> Maybe Rank
-rank '1' = Just R1
-rank '2' = Just R2
-rank '3' = Just R3
-rank '4' = Just R4
-rank '5' = Just R5
-rank '6' = Just R6
-rank '7' = Just R7
-rank '8' = Just R8
-rank _ = Nothing
+toRank :: Char -> Maybe Rank
+toRank '1' = Just R1
+toRank '2' = Just R2
+toRank '3' = Just R3
+toRank '4' = Just R4
+toRank '5' = Just R5
+toRank '6' = Just R6
+toRank '7' = Just R7
+toRank '8' = Just R8
+toRank _ = Nothing
 
 fileOf :: Square -> File
 fileOf = toEnum . (`mod` dimension) . fromEnum
@@ -52,8 +54,8 @@ fileOf = toEnum . (`mod` dimension) . fromEnum
 rankOf :: Square -> Rank
 rankOf = toEnum . rankFlip . (`div` dimension) . fromEnum
 
-square :: (File,Rank) -> Square
-square (f,r) = toEnum $ x + (dimension * y)
+toSquare :: (File,Rank) -> Square
+toSquare (f,r) = toEnum $ x + (dimension * y)
     where
     x = fromEnum f
     y = rankFlip (fromEnum r)
@@ -61,31 +63,8 @@ square (f,r) = toEnum $ x + (dimension * y)
 rankFlip :: Int -> Int
 rankFlip r = dimension - r - 1
 
-data Direction = Up
-
-directions :: [Direction]
-directions = []
-
-step :: Square -> Direction -> Maybe Square
-step = const $ const Nothing
-
-shift :: Square -> Direction -> Maybe Square
-shift = const $ const Nothing
-
-cross :: Square -> [Square]
-cross = const []
-
-plus :: Square -> [Square]
-plus = const []
-
-ring :: Square -> [Square]
-ring = const []
-
-bubble :: Square -> [Square]
-bubble = const []
-
-readMaybe :: String -> Maybe Square
-readMaybe = undefined
+tryRead :: String -> Maybe Square
+tryRead = undefined
 
 instance Show Square where
     show A8 = "a8"

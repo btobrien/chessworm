@@ -35,28 +35,29 @@ moveParser :: Parser Move
 moveParser = do
     p <- get piece next <||> Pawn
     p' <- try piece back << charback '=' <||> Nothing
-    targetRank <- get rank back
-    targetFile <- get file back
-    sourceFile <- try file next
-    sourceRank <- try rank next
-    let target = square (targetFile,targetRank)
+    targetRank <- get toRank back
+    targetFile <- get toFile back
+    sourceFile <- try toFile next
+    sourceRank <- try toRank next
+    let target = toSquare (targetFile,targetRank)
     return $ Move p (sourceFile,sourceRank) target p'
 
 toSet :: Move -> Set
 toSet CastleShort = Set (const False) (const False) (const False) True False
 toSet CastleLong = Set (const False) (const False) (const False) False True
-toSet (Move p (mf,mr) target mp) = 
-    Set soldierSet (==target) promotionSet False False
-        where 
-        promotionSet = case mp of
-            Nothing -> (==p)
-            Just p' -> (==p') 
+toSet (Move p (mf,mr) target mp) = Set soldierSet targetSet promotionSet False False
+    where 
+    targetSet = (==target) 
 
-        soldierSet = ternary (&&) 
-            <$> (==p) . authority
-            <*> matchMaybe mf . fileOf . location
-            <*> matchMaybe mr . rankOf . location
+    promotionSet = case mp of
+        Nothing -> (==p)
+        Just p' -> (==p') 
 
+    soldierSet = ternary (&&) 
+        <$> (==p) . authority
+        <*> matchMaybe mf . fileOf . location
+        <*> matchMaybe mr . rankOf . location
+        where
         matchMaybe mx = case mx of
             Nothing -> const True
             Just x -> (==x)

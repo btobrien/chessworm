@@ -2,7 +2,7 @@
 module Chess.Flags where
 
 import Chess.Move
-import Chess.Colors
+import Chess.Color
 import Chess.Squares (Square)
 import Utils (showJust)
 
@@ -25,11 +25,3 @@ instance Show Flags where
         shade c $
         showIf s "K" ++ showIf l "Q" ++ showJust e
             where showIf b s = if b then s else ""
-
-isShort :: String ->  Bool
-isShort = undefined
-
-isLong :: String -> Bool
-isLong = undefined
-
-isCastle = (||) <$> isShort <*> isLong

@@ -9,14 +9,16 @@ import qualified Chess.Move as Move
 import Chess.Flags (Flags)
 import Chess.Battle
 import Utils (ternary)
+import Chess.Directions
+import Chess.Color
 
 import Prelude hiding (flip)
 import Data.Maybe
+import Data.List
 import Control.Applicative
 
 type Field = Battle Flags
 type Board = Field -- move to interface file as newtype
-type Target = Square
 set = draft
 
 moves :: Move.Set -> Field -> [Field]
@@ -49,19 +51,31 @@ castles move = const []
 passants :: Move.Set -> Field -> [Field]
 passants move = const []
 
-targets :: Soldier -> Field -> [Target]
-targets soldier field = [E1,E2]
+targets :: Soldier -> Field -> [Square]
+targets soldier field = movements soldier \\ friendzones
+    where
+    friendzones = locations (good field)
+    unblocked = not . cutoff (location soldier) (friendzones ++ locations (evil field))
+    movements (Soldier King square) = bubble square
+    movements (Soldier Queen square) = filter unblocked (star square)
+    movements (Soldier Rook square) = filter unblocked (plus square)
+    movements (Soldier Bishop square) = filter unblocked (cross square)
+    movements (Soldier Knight square) = filter unblocked (ring square)
+    movements (Soldier Pawn square) = []
 
-promotions :: Piece -> Target -> [Piece]
-promotions Pawn sq | (rankOf sq == R8) || (rankOf sq == R1) = pieces
+promotions :: Piece -> Square -> [Piece]
+promotions Pawn sq | (rankOf sq == R8) || (rankOf sq == R1) = pieces \\ [Pawn, King]
 promotions piece _ = [piece] 
 
+-- TODO
 update :: Field -> (Square,Square) -> (Flags -> Flags)
 update field (from,to) = id
 
+-- TODO
 passant :: Field -> (Square,Square) -> Maybe Square
 passant field (from,to) = Nothing
 
+-- TODO
 threatened :: Square -> Field -> Bool
 threatened square field = False 
 
@@ -80,6 +94,9 @@ checkmate = (&&) <$> check <*> gameover
 
 stalemate :: Board -> Bool
 stalemate = (&&) <$> (not . check) <*> gameover
+
+dump :: Board -> [Colored Soldier]
+dump = const []
 
 implication :: Board -> Board -> Maybe Move.Move
 implication = undefined
