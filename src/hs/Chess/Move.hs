@@ -43,10 +43,11 @@ moveParser = do
     return $ Move p (sourceFile,sourceRank) target p'
 
 toSet :: Move -> Set
+toSet CastleShort = Set (const False) (const False) (const False) True False
+toSet CastleLong = Set (const False) (const False) (const False) False True
 toSet (Move p (mf,mr) target mp) = 
     Set soldierSet (==target) promotionSet False False
         where 
-
         promotionSet = case mp of
             Nothing -> (==p)
             Just p' -> (==p') 
@@ -65,9 +66,3 @@ any = Set (const True) (const True) (const True) True True
 
 empty :: Set
 empty = Set (const False) (const False) (const False) False False
-
-shortCastle :: Set
-shortCastle = Set (const False) (const False) (const False) True False
-
-longCastle :: Set
-longCastle = Set (const False) (const False) (const False) False True
