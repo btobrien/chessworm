@@ -1,10 +1,10 @@
 
-module Chess.Colors where
+module Chess.Color where
 
 import Data.Char
 
 data Color = White | Black 
-    deriving Eq
+    deriving (Show,Eq)
 
 first :: Color
 first = White
@@ -19,4 +19,6 @@ next Black = White
 shade :: Color -> String -> String
 shade White = id
 shade Black = map toLower 
+
+data Colored a = Colored { color :: Color, val :: a } deriving Show
 
