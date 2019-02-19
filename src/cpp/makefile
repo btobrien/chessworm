@@ -1,6 +1,6 @@
 cflags = -std=c++11
 
-all : fens snp disps splay border
+all : fens snp disps splayover border
 
 fens : chess/board/main.cpp board.o
 	g++ $(cflags) -o ~/bin/fens chess/board/main.cpp board.o -I`pwd`
@@ -8,8 +8,8 @@ fens : chess/board/main.cpp board.o
 snp : snap/main.cpp snap/snap_tree.h include/read.h
 	g++ $(cflags) -o ~/bin/snp snap/main.cpp -I`pwd`
 
-splay : splay/main.cpp splay/splay.cpp
-	g++ $(cflags) -o ~/bin/splay splay/main.cpp splay/splay.cpp
+splayover : splay/main.cpp splay/splay.cpp
+	g++ $(cflags) -o ~/bin/splayover splay/main.cpp splay/splay.cpp
 
 disps : shapes shapes2 pieces
 
