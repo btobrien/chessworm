@@ -3,8 +3,8 @@ syntax on
 filetype plugin indent on
 set tabstop=4  "number of visual spaces per <tab>"
 set softtabstop=4 "number of spaces inserted/removed when editing"
-set expandtab "turns <tab> into spaces"
 set shiftwidth=4 "how many spaces > and < move"
+set expandtab "turns <tab> into spaces"
 set incsearch "search as letters are entered"
 set hlsearch "highlight matches"
 set smartindent
@@ -19,12 +19,14 @@ set path=$PWD/**
 set fillchars+=vert:\ 
 let g:netrw_banner=0
 
+"general"
 nnoremap <c-c> <esc>
 nnoremap m: :w !
 nnoremap Y y$
 vnoremap $ $h
 nnoremap mf za
 nnoremap mF zA
+nnoremap mv `[v`]
 
 "paste"
 nnoremap <C-p> p`[v`]>
@@ -41,8 +43,8 @@ nnoremap <space>; i<cr><tab><esc>
 "buffers"
 nnoremap <bs><bs> :argdelete %<cr>
 nnoremap ++ :exe"try\n argdelete! %\n catch/:E480:/\n\n endtry"<cr>:argadd! %<cr>
-:nn K :exe"try\n prev!\n catch/:E164:/\n last!\n endtry"<cr>
 :nn J :exe"try\n next!\n catch/:E165:/\n rewind!\n endtry"<cr>
+:nn K :exe"try\n prev!\n catch/:E164:/\n last!\n endtry"<cr>
 nnoremap <c-j> :cnext<cr>
 nnoremap <c-k> :cprev<cr>
 
@@ -66,8 +68,13 @@ nnoremap gD "gyiw :w !grep -wnrI '<C-r>g ::' .<cr>
 nnoremap gh mL:find `basename %<.h`<cr> 
 nnoremap gp mL:find `basename %<.cpp`<cr>
 
+"git"
+nnoremap g- :w !git diff %<CR>
+nnoremap g= :w !git status<CR>
+
 noh
-"graveyard"
+
+
 ":command! -nargs=1 Grep normal :let target = <f-args><cr>:w !grep -wrnI <C-r>=target<cr> .<cr>
 
 
