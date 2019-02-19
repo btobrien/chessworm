@@ -37,12 +37,10 @@ draft :: (a,a) -> ([Soldier],[Soldier]) -> Battle a
 draft (f,f') (a,a') = Battle (Army a f) (Army a' f')
 
 friend :: Battle a -> Square -> Bool
-friend battle square = any (on square) $
-    soldiers (good battle)
+friend battle square = any (on square) $ soldiers (good battle)
 
 enemy :: Battle a -> Square -> Bool
-enemy battle square = any (on square) $
-    soldiers (evil battle)
+enemy battle square = any (on square) $ soldiers (evil battle)
 
 vacant :: Battle a -> Square -> Bool
 vacant battle = isJust . (battle `at`)

@@ -3,7 +3,7 @@ module Chess.Move where
 
 import Chess.Squares
 import Chess.Pieces
-import Chess.Soldier (Soldier)
+import Chess.Soldier
 import Monad.Parser
 import Data.Maybe
 import Utils
@@ -11,7 +11,10 @@ import Utils
 import Prelude hiding (any)
 import Control.Applicative
 
-data Move = CastleShort | CastleLong | Move Soldier Square Piece
+data Move = 
+    CastleShort | CastleLong |
+    Move Piece (Maybe File, Maybe Rank) Square (Maybe Piece)
+        deriving Show
 
 data Set = Set { 
     soldierMatch :: Soldier -> Bool,
@@ -20,31 +23,42 @@ data Set = Set {
     castleShort :: Bool,
     castleLong :: Bool }
 
-tryReadMove :: String -> Maybe Set
-tryReadMove "o-o" = Just shortCastle
-tryReadMove "o-o-o" = Just longCastle
-tryReadMove inp = tryParse getSet $ strip inp
+tryRead :: String -> Maybe Move
+tryRead = tryRead' . strip . trim
+    where 
+    strip = filter $ (&&) <$> (/='+') <*> (/='x')
+    tryRead' "o-o" = Just CastleShort
+    tryRead' "o-o-o" = Just CastleLong
+    tryRead' inp = tryParse moveParser inp
 
--- TODO: have piece not include pawn
-getSet :: Parser Set
-getSet = do
-    p <- try piece next <||> Pawn
-    p' <- (fmap piece back << charback '=') <||> Nothing
-    targetRank <- try rank back
-    targetFile <- try file back
-    sourceFile <- fmap file next <||> Nothing 
-    sourceRank <- fmap rank next <||> Nothing
+moveParser :: Parser Move
+moveParser = do
+    p <- get piece next <||> Pawn
+    p' <- try piece back << charback '=' <||> Nothing
+    targetRank <- get rank back
+    targetFile <- get file back
+    sourceFile <- try file next
+    sourceRank <- try rank next
     let target = square (targetFile,targetRank)
-    return $ matcher p (sourceFile,sourceRank) target p'
+    return $ Move p (sourceFile,sourceRank) target p'
 
-matcher :: Piece -> (Maybe File, Maybe Rank) -> Square -> Maybe Piece -> Set
-matcher p source target mp = Set (squareMatcher source) (==target) promatch False False
-    where promatch = case mp of
-        Nothing -> (==p)
-        Just p' -> (==p') 
+toSet :: Move -> Set
+toSet (Move p (mf,mr) target mp) = 
+    Set soldierSet (==target) promotionSet False False
+        where 
 
-strip :: String -> String
-strip = filter ((&&) <$> (/='+') <*> (/='x')) 
+        promotionSet = case mp of
+            Nothing -> (==p)
+            Just p' -> (==p') 
+
+        soldierSet = ternary (&&) 
+            <$> (==p) . authority
+            <*> matchMaybe mf . fileOf . location
+            <*> matchMaybe mr . rankOf . location
+
+        matchMaybe mx = case mx of
+            Nothing -> const True
+            Just x -> (==x)
 
 any :: Set
 any = Set (const True) (const True) (const True) True True
@@ -57,9 +71,3 @@ shortCastle = Set (const False) (const False) (const False) True False
 
 longCastle :: Set
 longCastle = Set (const False) (const False) (const False) False True
-
-contains :: Set -> Move -> Bool
-contains = undefined
-
-toSet :: Move -> Set
-toSet = undefined

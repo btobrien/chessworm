@@ -7,12 +7,15 @@ import Data.Char
 import Data.Maybe
 
 --TODO: Generalize
-try :: (a -> Maybe b) -> Parser a -> Parser b
-try f gen = do
+get :: (a -> Maybe b) -> Parser a -> Parser b
+get f gen = do
     x <- gen
     case f x of
         Nothing -> empty
         Just x' -> return x'
+
+try :: (a -> Maybe b) -> Parser a -> Parser (Maybe b)
+try f gen = fmap Just (get f gen) <||> Nothing
 
 (<||>) :: Alternative m => m a -> a -> m a
 mx <||> y = mx <|> pure y

@@ -8,7 +8,13 @@ pieces :: [Piece]
 pieces = enumFrom . toEnum $ 0
 
 piece :: Char -> Maybe Piece
-piece = undefined
+piece 'K' = Just King
+piece 'Q' = Just Queen
+piece 'R' = Just Rook
+piece 'B' = Just Bishop
+piece 'N' = Just Knight
+piece 'P' = Just Pawn
+piece _ = Nothing
 
 instance Show Piece where
     show King = "K"

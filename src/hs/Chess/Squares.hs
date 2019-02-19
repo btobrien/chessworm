@@ -12,29 +12,54 @@ data Square =
     A1 | B1 | C1 | D1 | E1 | F1 | G1 | H1
         deriving (Enum, Eq)
 
+dimension :: Int
+dimension = 8
+
 squares :: [Square]
 squares = enumFrom . toEnum $ 0
 
 data File = A | B | C | D | E | F | G | H
-    deriving (Enum, Eq)
+    deriving (Show, Enum, Eq)
 
 data Rank = R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8
-    deriving (Enum, Eq)
+    deriving (Show, Enum, Eq)
 
 file :: Char -> Maybe File
-file = undefined
+file 'a' = Just A
+file 'b' = Just B
+file 'c' = Just C
+file 'd' = Just D
+file 'e' = Just E
+file 'f' = Just F
+file 'g' = Just G
+file 'h' = Just H
+file _ = Nothing
 
 rank :: Char -> Maybe Rank
-rank = undefined
+rank '1' = Just R1
+rank '2' = Just R2
+rank '3' = Just R3
+rank '4' = Just R4
+rank '5' = Just R5
+rank '6' = Just R6
+rank '7' = Just R7
+rank '8' = Just R8
+rank _ = Nothing
 
 fileOf :: Square -> File
-fileOf = undefined
+fileOf = toEnum . (`mod` dimension) . fromEnum
 
 rankOf :: Square -> Rank
-rankOf = undefined
+rankOf = toEnum . rankFlip . (`div` dimension) . fromEnum
 
 square :: (File,Rank) -> Square
-square = undefined
+square (f,r) = toEnum $ x + (dimension * y)
+    where
+    x = fromEnum f
+    y = rankFlip (fromEnum r)
+
+rankFlip :: Int -> Int
+rankFlip r = dimension - r - 1
 
 data Direction = Up
 

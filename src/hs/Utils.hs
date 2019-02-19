@@ -38,8 +38,8 @@ trim :: String -> String
 trim = f . f
     where f = reverse . dropWhile isSpace
 
-tryRead :: Read a => String -> Maybe a
-tryRead s = case reads s of 
+readMaybe :: Read a => String -> Maybe a
+readMaybe s = case reads s of 
     [(x, "")] -> Just x
     _         -> Nothing
 
