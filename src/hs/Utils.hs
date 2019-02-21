@@ -71,5 +71,9 @@ quaternary binary a b c d = a `binary` b `binary` c `binary` d
 quinary :: (a -> a -> a) -> (a -> a -> a -> a -> a -> a)
 quinary binary a b c d e = a `binary` b `binary` c `binary` d `binary` e
 
+comparing :: (Ord a) => (b -> a) -> b -> b -> Ordering
+comparing p x y = compare (p x) (p y)
 
+sortOn :: Ord b => (a -> b) -> [a] -> [a]
+sortOn f = map snd . sortBy (comparing fst) . map (\x -> let y = f x in y `seq` (y,x))
 
