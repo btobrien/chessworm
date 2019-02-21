@@ -54,8 +54,8 @@ passants move = const []
 targets :: Soldier -> Field -> [Square]
 targets soldier field = movements soldier \\ friendzones
     where
-    friendzones = locations (good field)
-    unblocked = not . cutoff (location soldier) (friendzones ++ locations (evil field))
+    friendzones = (locations . good) field
+    unblocked = not . cutoff (location soldier) (friendzones ++ (locations . evil) field)
     movements (Soldier King square) = bubble square
     movements (Soldier Queen square) = filter unblocked (star square)
     movements (Soldier Rook square) = filter unblocked (plus square)

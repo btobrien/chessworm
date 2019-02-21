@@ -1,7 +1,7 @@
 
 module Chess.Init where
 
-import Chess.Squares (Square(..))
+import Chess.Squares
 import Chess.Pieces
 import Chess.Soldier
 import Chess.Color
@@ -10,6 +10,7 @@ import Chess.Board
 import qualified Chess.Move as Move
 import Data.Maybe
 import Chess.Fen
+import Utils
 
 new :: Board
 new = set Flags.newPair ([
