@@ -20,5 +20,10 @@ shade :: Color -> String -> String
 shade White = id
 shade Black = map toLower 
 
-data Colored a = Colored { color :: Color, val :: a } deriving Show
+data Colored a = Colored { colorOf :: Color, val :: a }
 
+instance (Show a) => Show (Colored a) where
+    show cx = shade (colorOf cx) $ show (val cx)
+
+instance Functor Colored where
+    fmap f cx = Colored (colorOf cx) (f (val cx))
