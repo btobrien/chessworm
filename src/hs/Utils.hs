@@ -41,6 +41,9 @@ trim :: String -> String
 trim = f . f
     where f = reverse . dropWhile isSpace
 
+diffOn :: Enum b => (a -> b) -> a -> a -> Int
+diffOn f x y = fromEnum (f y) - fromEnum (f x)
+
 readMaybe :: Read a => String -> Maybe a
 readMaybe s = case reads s of 
     [(x, "")] -> Just x
@@ -52,6 +55,9 @@ til gen f = do
     case f x of
         Just x' -> return x'
         Nothing -> gen `til` f 
+
+everyone :: Enum a => [a]
+everyone = enumFrom . toEnum $ 0
 
 showAll :: Show a => [a] -> String
 showAll = unwords . map show
@@ -76,4 +82,7 @@ comparing p x y = compare (p x) (p y)
 
 sortOn :: Ord b => (a -> b) -> [a] -> [a]
 sortOn f = map snd . sortBy (comparing fst) . map (\x -> let y = f x in y `seq` (y,x))
+
+groupOn :: Eq b => (a -> b) -> [a] -> [[a]]
+groupOn f = groupBy (\x y -> f x == f y)
 
