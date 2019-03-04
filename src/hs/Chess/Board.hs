@@ -54,16 +54,22 @@ passants move = const []
 targets :: Soldier -> Field -> [Square]
 targets soldier field = movements soldier \\ friendzones
     where
-    friendzones = (locations . good) field
-    blockers = friendzones ++ (locations . evil) field
-    unblocked = accesible blockers
     movements (Soldier King square) = filter (bubble square) squares
     movements (Soldier Queen square) = filter (unblocked star square) squares
     movements (Soldier Rook square) = filter (unblocked plus square) squares
     movements (Soldier Bishop square) = filter (unblocked cross square) squares
     movements (Soldier Knight square) = filter (ring square) squares
-    --movements (Soldier Pawn square) | startPawn color square = pawnPush color ++ pawnCaptures 
-    --movements (Soldier Pawn square) | otherwise = pawnPush ++ pawnCapture
+    movements (Soldier Pawn square) = pawnMovements field square 
+
+    friendzones = (locations . good) field
+    unblocked = accesible blockers
+        where blockers = friendzones ++ (locations . evil) field
+
+
+pawnMovements :: Field -> Square -> [Square]
+pawnMovements field square = []
+--movements (Soldier Pawn square) | startPawn color square = pawnPush color ++ pawnCaptures 
+--movements (Soldier Pawn square) | otherwise = pawnPush ++ pawnCapture
 
 promotions :: Piece -> Square -> [Piece]
 promotions Pawn square | (rankOf square == R8) || (rankOf square == R1) = pieces \\ [Pawn, King]
