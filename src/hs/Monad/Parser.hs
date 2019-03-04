@@ -15,10 +15,10 @@ get f gen = do
         Just x' -> return x'
 
 try :: (a -> Maybe b) -> Parser a -> Parser (Maybe b)
-try f gen = fmap Just (get f gen) <||> Nothing
+try f gen = fmap Just (get f gen) <|>= Nothing
 
-(<||>) :: Alternative m => m a -> a -> m a
-mx <||> y = mx <|> pure y
+(<|>=) :: Alternative m => m a -> a -> m a
+mx <|>= y = mx <|> pure y
 
 (<<) :: Monad m => m a -> m b -> m a
 pa << pb = do

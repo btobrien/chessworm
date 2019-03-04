@@ -33,8 +33,8 @@ tryRead = tryRead' . strip . trim
 
 moveParser :: Parser Move
 moveParser = do
-    p <- get piece next <||> Pawn
-    p' <- try piece back << charback '=' <||> Nothing
+    p <- get piece next <|>= Pawn
+    p' <- try piece back << charback '=' <|>= Nothing
     targetRank <- get toRank back
     targetFile <- get toFile back
     sourceFile <- try toFile next

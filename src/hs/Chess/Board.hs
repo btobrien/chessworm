@@ -8,7 +8,7 @@ import Chess.Move (Set(..))
 import qualified Chess.Move as Move
 import Chess.Flags (Flags)
 import Chess.Battle
-import Utils (ternary)
+import Utils
 import Chess.Directions
 import Chess.Color
 
@@ -27,10 +27,10 @@ moves move field = do
     return (flip field)
 
 fields :: Move.Set -> Field -> [Field]
-fields move = ternary (++)
-    <$> passants move
-    <*> castles move
-    <*> placements move
+fields move = 
+    passants move <++> 
+    castles move <++> 
+    placements move
 
 placements :: Move.Set -> Field -> [Field]
 placements move field = do
@@ -55,16 +55,18 @@ targets :: Soldier -> Field -> [Square]
 targets soldier field = movements soldier \\ friendzones
     where
     friendzones = (locations . good) field
-    unblocked = not . cutoff (location soldier) (friendzones ++ (locations . evil) field)
-    movements (Soldier King square) = bubble square
-    movements (Soldier Queen square) = filter unblocked (star square)
-    movements (Soldier Rook square) = filter unblocked (plus square)
-    movements (Soldier Bishop square) = filter unblocked (cross square)
-    movements (Soldier Knight square) = filter unblocked (ring square)
-    movements (Soldier Pawn square) = []
+    blockers = friendzones ++ (locations . evil) field
+    unblocked = accesible blockers
+    movements (Soldier King square) = filter (bubble square) squares
+    movements (Soldier Queen square) = filter (unblocked star square) squares
+    movements (Soldier Rook square) = filter (unblocked plus square) squares
+    movements (Soldier Bishop square) = filter (unblocked cross square) squares
+    movements (Soldier Knight square) = filter (ring square) squares
+    --movements (Soldier Pawn square) | startPawn color square = pawnPush color ++ pawnCaptures 
+    --movements (Soldier Pawn square) | otherwise = pawnPush ++ pawnCapture
 
 promotions :: Piece -> Square -> [Piece]
-promotions Pawn sq | (rankOf sq == R8) || (rankOf sq == R1) = pieces \\ [Pawn, King]
+promotions Pawn square | (rankOf square == R8) || (rankOf square == R1) = pieces \\ [Pawn, King]
 promotions piece _ = [piece] 
 
 -- TODO

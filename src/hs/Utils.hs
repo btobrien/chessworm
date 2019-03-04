@@ -68,6 +68,18 @@ wordlines = map words . lines
 unwordlines :: [[String]] -> String
 unwordlines = unlines . map unwords
 
+infixl 8 <&&>
+(<&&>) :: (a -> Bool) -> (a -> Bool) -> (a -> Bool)
+p <&&> p' = (&&) <$> p <*> p'
+
+infixl 8 <||>
+(<||>) :: (a -> Bool) -> (a -> Bool) -> (a -> Bool)
+p <||> p' = (||) <$> p <*> p'
+
+infixl 8 <++>
+(<++>) :: (a -> [b]) -> (a -> [b]) -> (a -> [b])
+p <++> p' = (++) <$> p <*> p'
+
 ternary :: (a -> a -> a) -> (a -> a -> a -> a)
 ternary binary a b c = a `binary` b `binary` c
 
