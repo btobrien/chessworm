@@ -6,6 +6,7 @@ import Chess.Squares
 import Chess.Soldier
 import Chess.Pieces -- have Soldier import for you
 import Data.Maybe
+import Utils
 
 data Army a = Army {
     soldiers :: [Soldier],
@@ -26,8 +27,8 @@ clear square (Battle g e) =
     Battle (discharge square g) (discharge square e)
 
 discharge :: Square -> Army a -> Army a
-discharge square (Army ss f) = Army (remove ss) f
-    where remove = filter (not . on square)
+discharge square (Army ss f) = Army (removeFrom ss) f
+    where removeFrom = filter (not . on square)
 
 place :: Soldier -> Battle a -> Battle a
 place s (Battle (Army ss f) e) =
@@ -49,8 +50,14 @@ friend battle square = any (on square) $ soldiers (good battle)
 enemy :: Battle a -> Square -> Bool
 enemy battle square = any (on square) $ soldiers (evil battle)
 
-vacant :: Battle a -> Square -> Bool
-vacant battle = isJust . (battle `at`)
+occupied :: Battle a -> Square -> Bool
+occupied battle = not . isJust . (battle `at`)
+
+occupieds :: Battle a -> [Square]
+occupieds = locations . good <++> locations . evil
+
+friendzones :: Battle a -> [Square]
+friendzones = locations . good
 
 at :: Battle a -> Square -> Maybe Soldier
 at (Battle g e) square = listToMaybe $

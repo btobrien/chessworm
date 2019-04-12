@@ -26,7 +26,7 @@ data Set = Set {
 tryRead :: String -> Maybe Move
 tryRead = tryRead' . strip . trim
     where 
-    strip = filter $ (&&) <$> (/='+') <*> (/='x')
+    strip = filter $ (/='+') <&&> (/='x')
     tryRead' "o-o" = Just CastleShort
     tryRead' "o-o-o" = Just CastleLong
     tryRead' inp = tryParse moveParser inp
@@ -53,10 +53,10 @@ toSet (Move p (mf,mr) target mp) = Set soldierSet targetSet promotionSet False F
         Nothing -> (==p)
         Just p' -> (==p') 
 
-    soldierSet = ternary (&&) 
-        <$> (==p) . authority
-        <*> matchMaybe mf . fileOf . location
-        <*> matchMaybe mr . rankOf . location
+    soldierSet =
+        (==p) . authority <&&>
+        matchMaybe mf . fileOf . location <&&>
+        matchMaybe mr . rankOf . location
         where
         matchMaybe mx = case mx of
             Nothing -> const True

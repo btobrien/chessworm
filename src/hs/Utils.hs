@@ -4,6 +4,7 @@ module Utils where
 import Data.Char (isSpace)
 import Data.List
 import Data.Maybe
+import Control.Applicative
 
 (!!?) :: [a] -> Int -> Maybe a
 xs !!? n = if n < 0 || n > length xs then Nothing else Just (xs !! n)
@@ -72,13 +73,25 @@ infixl 8 <&&>
 (<&&>) :: (a -> Bool) -> (a -> Bool) -> (a -> Bool)
 p <&&> p' = (&&) <$> p <*> p'
 
+infixl 8 <<&&>>
+(<<&&>>) :: (a -> b -> Bool) -> (a -> b -> Bool) -> (a -> b -> Bool)
+p <<&&>> p' = (<&&>) <$> p <*> p'
+
 infixl 8 <||>
 (<||>) :: (a -> Bool) -> (a -> Bool) -> (a -> Bool)
 p <||> p' = (||) <$> p <*> p'
 
+infixl 8 <<||>>
+(<<||>>) :: (a -> b -> Bool) -> (a -> b -> Bool) -> (a -> b -> Bool)
+p <<||>> p' = (<||>) <$> p <*> p'
+
 infixl 8 <++>
 (<++>) :: (a -> [b]) -> (a -> [b]) -> (a -> [b])
 p <++> p' = (++) <$> p <*> p'
+
+infixl 8 <<++>>
+(<<++>>) :: (a -> b -> [c]) -> (a -> b -> [c]) -> (a -> b -> [c])
+p <<++>> p' = (<++>) <$> p <*> p'
 
 ternary :: (a -> a -> a) -> (a -> a -> a -> a)
 ternary binary a b c = a `binary` b `binary` c

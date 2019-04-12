@@ -7,8 +7,8 @@ import Utils
 import Control.Applicative
 import Data.List
 
-plus :: Square -> Square -> Bool
-plus square = (file==) . fileOf <||> (rank==) . rankOf
+isPlus :: Square -> Square -> Bool
+isPlus square = (file==) . fileOf <||> (rank==) . rankOf
     where
     file = fileOf square
     rank = rankOf square
@@ -16,29 +16,31 @@ plus square = (file==) . fileOf <||> (rank==) . rankOf
 toPoint :: Square -> (Int,Int)
 toPoint = pair <$> fromEnum . fileOf <*> fromEnum . rankOf
 
-cross :: Square -> Square -> Bool 
-cross square = (0==) . manhattanDiff source . toPoint
+isCross :: Square -> Square -> Bool 
+isCross square = (0==) . manhattanDiff source . toPoint
     where
     source = toPoint square
     manhattanDiff (x,y) (x',y') = abs (x-x') - abs (y-y')
 
-ring :: Square -> Square -> Bool 
-ring square = (3==) . manhattanDist source . toPoint
+isRing :: Square -> Square -> Bool 
+isRing square = (3==) . manhattanDist source . toPoint
     where
     source = toPoint square
     manhattanDist (x,y) (x',y') = abs (x-x') + abs (y-y')
 
-bubble :: Square -> Square -> Bool 
-bubble square = (<=2) . squareDist source . toPoint
+isBubble :: Square -> Square -> Bool 
+isBubble square = (<=2) . squareDist source . toPoint
     where
     source = toPoint square
     squareDist (x,y) (x',y') = squared (x-x') + squared (y-y') 
 
-star :: Square -> Square -> Bool 
-star square = plus square <||> cross square
+isStar :: Square -> Square -> Bool 
+isStar = isPlus <<||>> isCross
+
+north = undefined
 
 cutoff :: [Square] -> Square -> Square -> Bool
-cutoff blockers source target = or . map between $ blockers
+cutoff blockers source target = any between blockers
     where
     between = betweenFiles <&&> betweenRanks <&&> (/=source) <&&> (/=target)
     betweenFiles square = (x square) `intbetween` (x source) $ (x target)
@@ -47,7 +49,18 @@ cutoff blockers source target = or . map between $ blockers
     x = fromEnum . fileOf
     y = fromEnum . rankOf
 
-accesible :: [Square] -> (Square -> Square -> Bool) -> Square -> Square -> Bool
-accesible occupieds mobility square = mobility square <&&> (not . cutoff blockers square)
-    where blockers = filter (mobility square) occupieds
+unblocked :: [Square] -> (Square -> [Square]) -> (Square -> [Square])
+unblocked blockers mobility square = candidates \\ generate (cutoff relevantBlockers square)
+    where
+    candidates = mobility square
+    relevantBlockers = blockers `intersect` candidates
+
+generate :: (Square -> Bool) -> [Square]
+generate mobility = filter mobility squares
+
+plus = generate . isPlus
+cross = generate . isCross
+ring = generate . isRing
+bubble = generate . isBubble
+star = generate . isStar
 
