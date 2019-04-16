@@ -46,23 +46,23 @@ placements move field = do
         clear source $ field
 
 targets :: Soldier -> Field -> [Square]
-targets (Soldier piece square) field = movements piece square \\ friendzones field
+targets (Soldier piece square) field = generate $ mobility piece square <&&> (not . isFriend) field
     where
-    movements King = bubble
-    movements Queen = unblocked (occupieds field) star
-    movements Rook = unblocked (occupieds field) plus
-    movements Bishop = unblocked (occupieds field) cross
-    movements Knight = ring
-    movements Pawn = pawnMovements field 
+    mobility King = bubble
+    mobility Queen = unblocked (occupieds field) isStar
+    mobility Rook = unblocked (occupieds field) isPlus
+    mobility Bishop = unblocked (occupieds field) isCross
+    mobility Knight = isRing
+    mobility Pawn = pawnMobility field 
 
-pawnMovements :: Field -> Square -> [Square]
-pawnMovements = pawnPush <<++>> pawnDoublePush <<++>> pawnCapture
+pawnMobility :: Field -> Square -> Square -> Bool
+pawnMobility = pawnPush <<||>> pawnDoublePush <<||>> pawnCapture
 
-pawnPush :: Field -> Square -> [Square]
+pawnPush :: Field -> Square -> Square -> Bool
 pawnPush field square | True = undefined --north (generate north square) <&&> not . occupied field
 pawnPush field sqaure | otherwise = undefined --south square <&&> not . occupied field
 
-pawnDoublePush :: Field -> Square -> [Square]
+pawnDoublePush :: Field -> Square -> Square -> Bool
 pawnDoublePush = undefined 
 --pawnDoublePush field | whiteToMove = north square <&&> not . occupied field
 --pawnDoublePush field | otherwise = south square <&&> not . occupied field

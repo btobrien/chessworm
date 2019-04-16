@@ -37,9 +37,12 @@ isBubble square = (<=2) . squareDist source . toPoint
 isStar :: Square -> Square -> Bool 
 isStar = isPlus <<||>> isCross
 
-north = undefined
+isAbove = undefined
+isAbove2 = undefined
+isBelow = undefined
+isBelow2 = undefined
 
-cutoff :: [Square] -> Square -> Square -> Bool
+cutoff :: [Square] -> (Square -> Square -> Bool)
 cutoff blockers source target = any between blockers
     where
     between = betweenFiles <&&> betweenRanks <&&> (/=source) <&&> (/=target)
@@ -49,11 +52,10 @@ cutoff blockers source target = any between blockers
     x = fromEnum . fileOf
     y = fromEnum . rankOf
 
-unblocked :: [Square] -> (Square -> [Square]) -> (Square -> [Square])
-unblocked blockers mobility square = candidates \\ generate (cutoff relevantBlockers square)
+unblocked :: [Square] -> (Square -> Square -> Bool) -> (Square -> Square -> Bool)
+unblocked blockers mobility square = mobility square <&&> not . cutoff relevantBlockers square
     where
-    candidates = mobility square
-    relevantBlockers = blockers `intersect` candidates
+    relevantBlockers = filter (mobility square) blockers
 
 generate :: (Square -> Bool) -> [Square]
 generate mobility = filter mobility squares

@@ -44,11 +44,11 @@ setFlag setter (Battle (Army s f) e) =
 draft :: (a,a) -> ([Soldier],[Soldier]) -> Battle a
 draft (f,f') (a,a') = Battle (Army a f) (Army a' f')
 
-friend :: Battle a -> Square -> Bool
-friend battle square = any (on square) $ soldiers (good battle)
+isFriend :: Battle a -> Square -> Bool
+isFriend battle square = any (on square) $ soldiers (good battle)
 
-enemy :: Battle a -> Square -> Bool
-enemy battle square = any (on square) $ soldiers (evil battle)
+isEnemy :: Battle a -> Square -> Bool
+isEnemy battle square = any (on square) $ soldiers (evil battle)
 
 occupied :: Battle a -> Square -> Bool
 occupied battle = not . isJust . (battle `at`)
