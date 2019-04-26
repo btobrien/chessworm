@@ -28,9 +28,9 @@ moves move field = do
 
 fields :: Move.Set -> Field -> [Field]
 fields = 
-    passants <<++>> 
+    placements <<++>> 
     castles <<++>>
-    placements
+    passants
 
 placements :: Move.Set -> Field -> [Field]
 placements move field = do
@@ -78,33 +78,38 @@ isWhite = (White==) . color . flag . good
 
 promotions :: Square -> Piece -> [Piece]
 promotions square Pawn | (rankOf square == R8) || (rankOf square == R1) = pieces \\ [Pawn, King]
-promotions _ piece = [piece] 
+promotions _     piece | otherwise = [piece] 
 
 castles :: Move.Set -> Field -> [Field]
 castles = castlesShort <<++>> castlesLong
 
+data Side = Short | Long
+
 castlesShort :: Move.Set -> Field -> [Field]
 castlesShort move field | not (castleShort move) = []
 castlesShort move field | (not . short . flag . good) field = []
-castlesShort move field = castle (G,H,F) field
+castlesShort move field | otherwise = castle Short field
 
 castlesLong :: Move.Set -> Field -> [Field]
 castlesLong move field | not (castleLong move) = []
 castlesLong move field | (not . long . flag . good) field = []
-castlesLong move field = castle (C,A,D) field
+castlesLong move field | otherwise = castle Long field
 
-castle :: (File,File,File) -> Field -> [Field]
-castle (g,h,f) field =
+castle :: Side -> Field -> [Field]
+castle side field =
     if 
         any (isThreatened field) [king .. newKing] ||
         any (isOccupied field) (tail [king .. newKing])
     then []
     else
         (:[]) .
-        setFlag updateShort .
+        setFlag (updateCastle side) .
         (rook `moveTo` newRook) .
         (king `moveTo` newKing) $ field
     where
+    castleFiles Short = (G,H,F)
+    castleFiles Long = (C,A,D)
+    (g,h,f) = castleFiles side
     king = throneOf field
     rank = rankOf king
     newKing = toSquare (g,rank)
@@ -113,11 +118,23 @@ castle (g,h,f) field =
 
 
 passants :: Move.Set -> Field -> [Field]
-passants move = const []
+passants move field = do
+    soldier <- filter (isPawn <&&> soldierMatch move) $ (soldiers . good) field
+    let source = location soldier
+    target <- filter (isPassantTarget source <&&> targetMatch move) $ (maybeToList . passant . flag . evil) field  -- encapsulate..?
+    return . (source `moveTo` target) . clear (aboveFrom target) $ field
+    where
+    isPawn = (Pawn==) . authority
+    aboveFrom = if (isWhite field) then upFrom else downFrom
+    isPassantTarget = if (isWhite field) then isDiagAbove else isDiagBelow
 
 -- TODO
 update :: Field -> (Square,Square) -> (Flags -> Flags)
 update field (from,to) = id
+
+updateCastle :: Side -> Flags -> Flags
+updateCastle Short = updateShort 
+updateCastle Long = updateLong 
 
 updateShort :: Flags -> Flags
 updateShort = undefined 
@@ -126,8 +143,8 @@ updateLong :: Flags -> Flags
 updateLong = undefined 
 
 -- TODO
-passant :: Field -> (Square,Square) -> Maybe Square
-passant field (from,to) = Nothing
+--passant :: Field -> (Square,Square) -> Maybe Square
+--passant field (from,to) = Nothing
 
 -- TODO
 isThreatened :: Field -> Square -> Bool

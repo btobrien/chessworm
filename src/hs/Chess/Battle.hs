@@ -31,8 +31,8 @@ discharge square (Army ss f) = Army (removeFrom ss) f
     where removeFrom = filter (not . on square)
 
 place :: Soldier -> Battle a -> Battle a
-place s (Battle (Army ss f) e) =
-    Battle (Army (s:ss) f) e 
+place soldier = addSoldier soldier . clear (location soldier)
+    where addSoldier s (Battle (Army ss f) e) = Battle (Army (s:ss) f) e 
 
 flip :: Battle a -> Battle a
 flip f = Battle (evil f) (good f)
@@ -74,5 +74,5 @@ moveTo :: Square -> Square -> (Battle a -> Battle a)
 moveTo source target field =
     case field `at` source of
         Nothing -> field
-        Just soldier -> place (march target soldier) . clear target $ field
+        Just soldier -> place (march target soldier) . clear source $ field
 

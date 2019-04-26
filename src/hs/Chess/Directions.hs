@@ -73,3 +73,5 @@ ring = generate . isRing
 bubble = generate . isBubble
 star = generate . isStar
 
+upFrom = undefined
+downFrom = undefined
