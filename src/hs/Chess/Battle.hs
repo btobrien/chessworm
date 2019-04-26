@@ -50,8 +50,11 @@ isFriend battle square = any (on square) $ soldiers (good battle)
 isEnemy :: Battle a -> Square -> Bool
 isEnemy battle square = any (on square) $ soldiers (evil battle)
 
-occupied :: Battle a -> Square -> Bool
-occupied battle = not . isJust . (battle `at`)
+isOccupied :: Battle a -> Square -> Bool
+isOccupied battle = isJust . (battle `at`)
+
+isVacant :: Battle a -> Square -> Bool
+isVacant battle = not . isOccupied battle
 
 occupieds :: Battle a -> [Square]
 occupieds = locations . good <++> locations . evil
@@ -66,4 +69,10 @@ at (Battle g e) square = listToMaybe $
 
 on :: Square -> Soldier -> Bool
 on square = (square==) . location
+
+moveTo :: Square -> Square -> (Battle a -> Battle a)
+moveTo source target field =
+    case field `at` source of
+        Nothing -> field
+        Just soldier -> place (march target soldier) . clear target $ field
 

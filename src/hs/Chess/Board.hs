@@ -37,40 +37,44 @@ placements move field = do
     soldier <- filter (soldierMatch move) $ (soldiers . good) field 
     target <- filter (targetMatch move) $ targets soldier field 
     promotion <- filter (promotionMatch move) $ promotions target (authority soldier)
-    let source = location soldier
+    let start = location soldier
     let newSoldier = promote promotion . march target $ soldier
-    let setter = update field (source,target)
+    let setter = update field (start,target)
     return .
         setFlag setter .
         place newSoldier .
-        clear source $ field
+        clear start $ field
 
 targets :: Soldier -> Field -> [Square]
-targets (Soldier piece square) field = generate $ mobility piece square <&&> (not . isFriend) field
+targets (Soldier piece start) field = generate $ isTarget piece start <&&> not . isFriend field
     where
-    mobility King = bubble
-    mobility Queen = unblocked (occupieds field) isStar
-    mobility Rook = unblocked (occupieds field) isPlus
-    mobility Bishop = unblocked (occupieds field) isCross
-    mobility Knight = isRing
-    mobility Pawn = pawnMobility field 
+    isTarget King = isBubble
+    isTarget Queen = unblocked (occupieds field) isStar
+    isTarget Rook = unblocked (occupieds field) isPlus
+    isTarget Bishop = unblocked (occupieds field) isCross
+    isTarget Knight = isRing
+    isTarget Pawn = isPawnTarget field 
 
-pawnMobility :: Field -> Square -> Square -> Bool
-pawnMobility = pawnPush <<||>> pawnDoublePush <<||>> pawnCapture
+isPawnTarget :: Field -> Square -> Square -> Bool
+isPawnTarget = isPawnPush <<<||>>> isPawnPush2 <<<||>>> isPawnCapture
 
-pawnPush :: Field -> Square -> Square -> Bool
-pawnPush field square | True = undefined --north (generate north square) <&&> not . occupied field
-pawnPush field sqaure | otherwise = undefined --south square <&&> not . occupied field
+isPawnPush :: Field -> Square -> Square -> Bool
+isPawnPush field start | isWhite field = isDirectAbove 1 start <&&> isVacant field
+isPawnPush field start | otherwise = isDirectBelow 1 start <&&> isVacant field
 
-pawnDoublePush :: Field -> Square -> Square -> Bool
-pawnDoublePush = undefined 
---pawnDoublePush field | whiteToMove = north square <&&> not . occupied field
---pawnDoublePush field | otherwise = south square <&&> not . occupied field
+isPawnPush2 :: Field -> Square -> Square -> Bool
+isPawnPush2 field start | isWhite field && (rankOf start == R2) =
+    unblocked (occupieds field) (isDirectAbove 2) start <&&> isVacant field
+isPawnPush2 field start | not (isWhite field) && (rankOf start == R7) =
+    unblocked (occupieds field) (isDirectBelow 2) start <&&> isVacant field
+isPawnPush2 field start | otherwise = const False
 
-pawnCapture = undefined
+isPawnCapture :: Field -> Square -> Square -> Bool
+isPawnCapture field start | isWhite field =  isDiagAbove start <&&> isEnemy field
+isPawnCapture field start | otherwise = isDiagBelow start <&&> isEnemy field
 
-sndRank :: Field -> Square -> Bool
-sndRank = undefined
+isWhite :: Field -> Bool
+isWhite = (White==) . color . flag . good
 
 promotions :: Square -> Piece -> [Piece]
 promotions square Pawn | (rankOf square == R8) || (rankOf square == R1) = pieces \\ [Pawn, King]
@@ -92,8 +96,8 @@ castlesLong move field = castle (C,A,D) field
 castle :: (File,File,File) -> Field -> [Field]
 castle (g,h,f) field =
     if 
-        any (threatened field) [king .. newKing] ||
-        any (occupied field) (tail [king .. newKing])
+        any (isThreatened field) [king .. newKing] ||
+        any (isOccupied field) (tail [king .. newKing])
     then []
     else
         (:[]) .
@@ -107,12 +111,6 @@ castle (g,h,f) field =
     rook = toSquare(h,rank)
     newRook = toSquare(f,rank)
 
-
-moveTo :: Square -> Square -> Field -> Field
-moveTo source target field =
-    case field `at` source of
-        Nothing -> field
-        Just soldier -> place (march target soldier) . clear target $ field
 
 passants :: Move.Set -> Field -> [Field]
 passants move = const []
@@ -132,8 +130,8 @@ passant :: Field -> (Square,Square) -> Maybe Square
 passant field (from,to) = Nothing
 
 -- TODO
-threatened :: Field -> Square -> Bool
-threatened field square = False 
+isThreatened :: Field -> Square -> Bool
+isThreatened field square = False 
 
 kingOf :: Field -> Soldier
 kingOf = head . filter isKing . soldiers . good
@@ -143,7 +141,7 @@ throneOf :: Field -> Square
 throneOf = location . kingOf
 
 check :: Field -> Bool
-check field = threatened field (throneOf field)
+check field = isThreatened field (throneOf field)
 
 gameover :: Board -> Bool
 gameover = null . moves Move.any

@@ -7,58 +7,65 @@ import Utils
 import Control.Applicative
 import Data.List
 
-isPlus :: Square -> Square -> Bool
-isPlus square = (file==) . fileOf <||> (rank==) . rankOf
-    where
-    file = fileOf square
-    rank = rankOf square
+rankDiff :: Square -> Square -> Int
+rankDiff a b = intRank a - intRank b
 
-toPoint :: Square -> (Int,Int)
-toPoint = pair <$> fromEnum . fileOf <*> fromEnum . rankOf
+isPlus :: Square -> Square -> Bool
+isPlus start = (file==) . fileOf <||> (rank==) . rankOf
+    where
+    file = fileOf start
+    rank = rankOf start
 
 isCross :: Square -> Square -> Bool 
-isCross square = (0==) . manhattanDiff source . toPoint
+isCross start = (0==) . manhattanDiff source . toPoint
     where
-    source = toPoint square
+    source = toPoint start
     manhattanDiff (x,y) (x',y') = abs (x-x') - abs (y-y')
 
 isRing :: Square -> Square -> Bool 
-isRing square = (3==) . manhattanDist source . toPoint
+isRing start = (3==) . manhattanDist source . toPoint
     where
-    source = toPoint square
+    source = toPoint start
     manhattanDist (x,y) (x',y') = abs (x-x') + abs (y-y')
 
 isBubble :: Square -> Square -> Bool 
-isBubble square = (<=2) . squareDist source . toPoint
+isBubble start = (<=2) . squareDist source . toPoint
     where
-    source = toPoint square
+    source = toPoint start
     squareDist (x,y) (x',y') = squared (x-x') + squared (y-y') 
 
 isStar :: Square -> Square -> Bool 
 isStar = isPlus <<||>> isCross
 
-isAbove = undefined
-isAbove2 = undefined
-isBelow = undefined
-isBelow2 = undefined
+isDirectAbove :: Int -> Square -> Square -> Bool
+isDirectAbove n start target = (fileOf start == fileOf target) && (rankDiff target start == n)
+
+isDirectBelow :: Int -> Square -> Square -> Bool
+isDirectBelow n = flip (isDirectAbove n)
+
+isDiagAbove :: Square -> Square -> Bool
+isDiagAbove start target = (isCross start target) && (rankDiff target start == 1)
+
+isDiagBelow :: Square -> Square -> Bool
+isDiagBelow = flip isDiagAbove
 
 cutoff :: [Square] -> (Square -> Square -> Bool)
-cutoff blockers source target = any between blockers
+cutoff blockers start target = any between blockers
     where
-    between = betweenFiles <&&> betweenRanks <&&> (/=source) <&&> (/=target)
-    betweenFiles square = (x square) `intbetween` (x source) $ (x target)
-    betweenRanks square = (y square) `intbetween` (y source) $ (y target)
+    between = betweenFiles <&&> betweenRanks <&&> (/=start) <&&> (/=target)
+    betweenFiles square = (x square) `intbetween` (x start) $ (x target)
+    betweenRanks square = (y square) `intbetween` (y start) $ (y target)
     intbetween c a b = 0 >= (c - a) * (c - b) 
-    x = fromEnum . fileOf
-    y = fromEnum . rankOf
+    x = intFile
+    y = intFile
 
 unblocked :: [Square] -> (Square -> Square -> Bool) -> (Square -> Square -> Bool)
-unblocked blockers mobility square = mobility square <&&> not . cutoff relevantBlockers square
+unblocked blockers mobility start = mobility start <&&> not . cutoff relevantBlockers start
     where
-    relevantBlockers = filter (mobility square) blockers
+    relevantBlockers = filter (mobility start) blockers
 
 generate :: (Square -> Bool) -> [Square]
-generate mobility = filter mobility squares
+generate f = filter f squares
 
 plus = generate . isPlus
 cross = generate . isCross

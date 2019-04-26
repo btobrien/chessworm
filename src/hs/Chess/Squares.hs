@@ -55,10 +55,19 @@ toRank '8' = Just R8
 toRank _ = Nothing
 
 fileOf :: Square -> File
-fileOf = toEnum . (`mod` dimension) . fromEnum
+fileOf = toEnum . intFile
+
+intFile :: Square -> Int
+intFile = (`mod` dimension) . fromEnum
 
 rankOf :: Square -> Rank
-rankOf = toEnum . (`div` dimension) . fromEnum
+rankOf = toEnum . intRank
+
+intRank :: Square -> Int
+intRank = (`div` dimension) . fromEnum
+
+toPoint :: Square -> (Int,Int)
+toPoint = pair <$> intFile <*> intRank
 
 toSquare :: (File,Rank) -> Square
 toSquare (f,r) = toEnum $ x + (dimension * y)
