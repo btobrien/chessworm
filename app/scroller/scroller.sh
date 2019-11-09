@@ -31,6 +31,7 @@ while read -n1 key; do
             ((cursor--)) && tput ri
         else
             tput ri
+            # can probably make faster with awk
             head -n$index <$buffer | tail -n1
             tput ri
         fi

@@ -4,7 +4,6 @@ mode_ptr=$1
 graph=$2
 graph=$(realpath $graph)
 mkdir -p $graph
-disp_lock=$3
 
 read #burn first line?
 

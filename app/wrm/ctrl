@@ -25,9 +25,10 @@ mode=$tmp/mode.enum
 echo 'tree' >$mode
 
 cd $(dirname $0)
-./modl $tree <$modl | tee $hist | ./view $mode $graph $disp_lock &
+./modl $tree <$modl | tee $hist | ./view $mode $graph &
 echo 'print' >$modl
 
+# TODO: recall command to delete all bg processes
 trap "echo exit >$modl; rm -r $tmp; stty echo; tput cnorm; tput rmcup" EXIT #rmcup on background interupt too
 
 while read -n1 key; do
