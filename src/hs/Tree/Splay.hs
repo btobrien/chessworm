@@ -1,5 +1,5 @@
 
-module Tree.Splay (splay) where
+module Tree.Splay (splayn, width) where
 
 import Data.Tree
 import Data.Char
@@ -10,7 +10,18 @@ import Data.Maybe
 import qualified Data.Foldable as Fold
 
 splay :: Tree String -> String
-splay t = unlines $ zipWith addbranches unbranched firsts
+splay = unlines . splays
+
+splayn :: Tree String -> String
+splayn t = unlines . zipWith addNumber [0..] . splays $ t 
+
+addNumber :: Int -> String -> String
+addNumber 0 str = (++str) $ replicate 5 ' '
+addNumber n str =  (++str) . take 5 $ show n ++ repeat ' '
+
+
+splays :: Tree String -> [String]
+splays t = zipWith addbranches unbranched firsts
     where 
     unbranched = expandlevels . levels . leafcount . stringstretch $ t
     expandlevels = map $ concatMap expand
@@ -30,8 +41,10 @@ stretch' depth (Node x ts) = Node (Just x) $ map (stretch' (depth-1)) ts
 stringstretch :: Tree String -> Tree String
 stringstretch t = fmap (makeWidth . fromMaybe "") . stretch $ t
     where 
-    makeWidth str = take width (str ++ repeat ' ')
-    width = (+1) . Fold.maximum . fmap length $ t
+    makeWidth str = take (width t) (str ++ repeat ' ')
+
+width :: Tree String -> Int
+width = (+1) . Fold.maximum . fmap length
 
 leafcount ::  Tree a -> Tree (a,Int)
 leafcount (Node x []) = Node (x,1) []

@@ -3,6 +3,9 @@ import System.IO
 import System.Environment
 import Data.List
 import Control.Monad
+import Control.Applicative
+import Data.Maybe
+import Data.List.Split (splitOn)
 
 import Tree.Zipline
 
@@ -10,14 +13,11 @@ type State = (Tree String, Location)
 
 main = do 
     hSetBuffering stdout NoBuffering
-    inp <- getContents
-    tree <- getTree
-    mapM_ putState $ treeScan (tree,start) (lines inp)
-
-getTree :: IO (Tree String)
-getTree = do
-    args <- getArgs
-    if null args then return nulltree else getFileTree (head args)
+    filename <- listToMaybe <$> getArgs
+    original <- fromMaybe (return nulltree) (getFileTree <$> filename)
+    trees <- treeScan (original,start) . map (splitOn ";") . lines <$> getContents
+    mapM_ (putState.lean) trees
+    fromMaybe (return ()) $ flip writeFile (showTreeFile.fst.last$trees) <$> filename
 
 getFileTree :: String -> IO (Tree String)
 getFileTree fname = do
@@ -25,9 +25,9 @@ getFileTree fname = do
     let ls = lines file
     return $ if null ls then nulltree else map words ls
 
-treeScan :: State -> [String] -> [State]
+treeScan :: State -> [[String]] -> [State]
 treeScan = scanl nextState
-    where nextState = flip readcmd
+    where nextState = flip readcmds
 
 putState :: State -> IO ()
 putState s@(t,(h,d)) = do 
@@ -40,11 +40,17 @@ putState s@(t,(h,d)) = do
     putStrLn.showTree $ t
 
 showTree :: Tree String -> String
-showTree = intercalate "]," . map (intercalate ",")
+showTree t = intercalate "]," . map (intercalate ",") $ t
+
+showTreeFile :: Tree String -> String
+showTreeFile = unlines . map (intercalate " ")
 
 currentVal :: State -> String
 currentVal (_,(_,-1)) = "-"
 currentVal s = uncurry get s
+
+readcmds :: [String] -> (State -> State)
+readcmds = foldr (flip (.)) id . map readcmd
 
 readcmd :: String -> (State -> State)
 readcmd [] = id
@@ -54,7 +60,7 @@ readcmd str = readargs cmd args
 readargs :: String -> [String] -> (State -> State)
 readargs "next" _ = move next
 readargs "prev" _ = move (\_ l -> prev l)
-readargs "slide" _ = move slide
+readargs "slide" _ = move slide . lean
 readargs "lift" _ = move lift
 readargs "leaf" _ = move leaf
 readargs "root" _ = move root

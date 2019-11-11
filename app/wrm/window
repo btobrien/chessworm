@@ -1,0 +1,9 @@
+#!/bin/bash
+
+base=$1
+offset=$2
+
+set -o pipefail
+
+tr ',' '\n' | cut -d'_' -f7 | tr '\n' ' ' | sed 's/\] /\]/g' | tr ']' '\n' | splay | tail -n +$((base + 1)) | head -n $2
+#tr ',' '\n' | cut -d'_' -f7 | tr '\n' ' ' | sed 's/\] /\]/g' | tr ']' '\n' | haircut $((base + offset)) | splay | tail -n $offset

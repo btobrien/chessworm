@@ -1,26 +1,9 @@
 #!/bin/bash
 
-set -o pipefail
-
 while true; do
-	if read -a cmd; then
-
-		if [ "$cmd" = 'exit' ]; then
-			exit
-		fi
-
-		if [ "$cmd" = 'move' ]; then
-			position=${cmd[1]}
-			move=${cmd[2]}
-			if ! fens 2>/dev/null "$(tr _ ' ' <<<$position)" <<<"$move" | tr ' ' _ | add; then
-				printf "\a" >&2
-				echo print
-			fi
-			continue
-		fi
-
-		echo ${cmd[@]}
-
+	if read cmd; then
+		[ "$cmd" = 'exit' ] && exit
+		echo $cmd
 	fi
 done
 

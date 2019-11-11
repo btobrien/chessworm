@@ -2,48 +2,48 @@
 
 tput smcup
 stty -echo; tput civis
+set -o pipefail
 
-config=~/.config/wrm
+config=$HOME/.config/wrm
 mkdir -p $config
 
 tree=${1:-$config/default}
 tree=$(realpath $tree)
 mkdir -p $(dirname $tree); touch $tree
 
-graph=${GRAPH:-$config/def_graph}
+graph=${GRAPH:-$config/graph}
 graph=$(realpath $graph)
+mkdir -p $graph
 
 brd new wrm
 
-tmp=$config/tmp/$$
-mkdir -p $tmp
-modl=$tmp/modl.fifo; mkfifo $modl
-disp_lock=$tmp/disp.lock; rm -r $disp_lock 2>/dev/null
-hist=$tmp/hist.txt
-
-mode=$tmp/mode.enum
-echo 'tree' >$mode
+scope=$config/scope/$$
+mkdir -p $scope
+zipline=$scope/zipline; mkfifo $zipline
+hist=$scope/hist.txt
 
 cd $(dirname $0)
-./modl $tree <$modl | tee $hist | ./view $mode $graph &
-echo 'print' >$modl
 
-# TODO: recall command to delete all bg processes
-trap "echo exit >$modl; rm -r $tmp; stty echo; tput cnorm; tput rmcup" EXIT #rmcup on background interupt too
+./engn <$zipline | zipline $tree | tee $hist | ./view &
+echo 'print' >$zipline
+
+trap "echo exit >$zipline; rm -r $scope; stty echo; tput cnorm; tput rmcup" EXIT #rmcup on background interupt too
 
 while read -n1 key; do
+	if [ "$key" == 'j' ]; then
+		echo next >$zipline
+        continue
+	elif [ "$key" == 'k' ]; then
+		echo prev >$zipline
+        continue
+    fi
 
 	if [ "$key" == ':' ]; then
-		while ! mkdir $disp_lock 2>/dev/null; do
-			sleep 0.1
-		done
 		tput cup $(tput lines) 0; tput cuu1
 		tput cnorm; stty echo 
 		read -p':' -e line
-		tput civis
 		tput cuu1; tput el
 		stty -echo
-		rm -r $disp_lock
 
 		if [ "$line" = 'f' ]; then
             brd flip wrm
@@ -51,130 +51,111 @@ while read -n1 key; do
 			pieces=$(cut -d' ' -f2 <<<$line)
             brd pieces=$pieces wrm
 		elif [ "$line" = 'w' ]; then
-			tri grid wrm >$tree
-		elif [ "$line" = 'wq' ]; then
-			tri grid wrm >$tree
             clear
+		elif [ "$line" = 'wq' ]; then
 			exit
 		elif [ "$line" = 'q' ]; then
             clear
 			exit
-        elif [ "$line" = 'show board' ]; then
-            clear
-            echo 'board' >$mode
-        elif [ "$line" = 'show tree' ]; then
-            clear
-            echo 'tree' >$mode
-        elif [ "$line" = 'show comment' ]; then
-            clear
-            echo 'comment' >$mode
 		fi
 
-		echo print >$modl
+		echo print >$zipline
 		continue
 	fi
 
-	if [ "$key" == 'c' ]; then
-		read -n1 key
-		if [ "$key" == 'c' ]; then
-			echo chop >$modl
-			key='m'
-			sleep 0.1
-		fi
-	elif [ "$key" == 'M' ]; then
-		echo prev >$modl
-		key='m'
-		sleep 0.1
+	if [ "$key" == 'O' ]; then
+        echo 'prev' >$zipline
+		key='o'
+	elif [ "$key" == 'i' ]; then
+        # requires new addpriority zipline cmd
+        continue
+	elif [ "$key" == 'c' ]; then
+        continue
 	fi
 
-	if [ "$key" == 'm' ]; then
-		while ! mkdir $disp_lock 2>/dev/null; do
-			sleep 0.1  #flock??
-		done
-		clock=$(tail -1 <$hist | cut -d' ' -f3 | sed 's/ //')
-		tput cup $(tput lines) 0; tput cuu1
-		tput cnorm; stty echo 
-        read -p" $(mvprompt $clock)" -e move
-		tput civis
-		tput cuu1; tput el
-		stty -echo
-		rm -r $disp_lock
-
-		[ "$move" == '' ] && continue
-		echo move "$(tail -1 <$hist | cut -d' ' -f1)" $move >$modl
-
-	elif [ "$key" == 'j' ]; then
-		echo next >$modl
-	elif [ "$key" == 'k' ]; then
-		echo prev >$modl
+	if [ "$key" == 'o' ]; then
+        echo "add ." >$zipline
+        position=$(tail -n2 <$hist | head -1 | cut -d' ' -f1)
+        stty echo 
+        while true; do
+            read -e move
+            if [ "$move" == '' ]; then
+                clear
+                echo 'chop' >$zipline
+                break
+            fi
+            oldpos=$position
+            position=$(fens 2>/dev/null "$(tr _ ' ' <<<$position)" <<<"$move" | tr ' ' _) 
+            if [ "$position" == '' ]; then
+                echo 'chop; add .' >$zipline
+                position=$oldpos
+                continue
+            fi
+            awk '{ print "chop; add " $0 "; add ." }' <<<"$position" >$zipline
+            brd set wrm <<<"$position"
+        done
+        stty -echo 
 	elif [ "$key" == 'J' ]; then
-		echo slide >$modl
+		echo slide >$zipline
 	elif [ "$key" == 'K' ]; then
-		echo lift >$modl
+		echo lift >$zipline
 	elif [ "$key" == 'H' ]; then
-		echo branch >$modl
+		echo snap >$zipline
 	elif [ "$key" == 'h' ]; then
-		echo fall >$modl
+		echo climb >$zipline
 	elif [ "$key" == 'L' ]; then
-		echo snap >$modl
+		echo branch >$zipline
 	elif [ "$key" == 'l' ]; then
-		echo climb >$modl
+		echo fall >$zipline
 	elif [ "$key" == 'g' ]; then
 		read -n1 key
 		if [ "$key" == 'g' ]; then
-			echo root >$modl
+			echo root >$zipline
 		elif [ "$key" == 'h' ]; then
-			echo bottom >$modl
+			echo bottom >$zipline
 		elif [ "$key" == 'l' ]; then
-			echo top >$modl
+			echo top >$zipline
 		fi
 	elif [ "$key" == 'd' ]; then
 		read -n1 key
 		if [ "$key" == 'd' ]; then
-			echo chop >$modl
+            clear
+			echo chop >$zipline
 		elif [ "$key" == 'k' ]; then
-			echo chop_branch >$modl
+            clear
+			echo 'lift; next; chop' >$zipline
         elif [ "$key" == 'g' ]; then
             node=$(tail -1 <$hist | cut -d' ' -f1 | glyph)
-            echo rename "$node" >$modl
+            clear
+            echo rename "$node" >$zipline
+        else
+            continue
         fi
 	elif [ "$key" == 'G' ]; then
-		echo leaf >$modl
-	elif [ "$key" == 'u' ]; then
-		echo promote >$modl
-	elif [ "$key" == 'U' ]; then
-		echo mainline >$modl
+		echo leaf >$zipline
+	elif [ "$key" == '<' ]; then
+        echo promote >$zipline
+    elif [ "$key" == '>' ]; then
+        echo 'branch; promote; branch' >$zipline
+	elif [ "$key" == 'M' ]; then
+		echo mainline >$zipline
     elif [ "$key" == 'e' ]; then
         vim $graph/$(tail -1 <$hist | cut -d' ' -f1 | sed 's/\///g' | sed 's/_//' | cut -d'_' -f1)  # please dry
-        clear; stty -echo; tput civis
-		echo print >$modl
+        clear; stty -echo
+		echo print >$zipline
 	elif [ "$key" == 'a' ]; then
 		clock=$(tail -1 <$hist | cut -d' ' -f3 | sed 's/ //')
         [ "$clock" == "-1" ] && continue
         node=$(tail -1 <$hist | cut -d' ' -f1 | glyph)
         move=$(cut -d'_' -f7 <<<"$node")
-		while ! mkdir $disp_lock 2>/dev/null; do
-			sleep 0.1  #flock??
-		done
-		tput cup $(tput lines) 0; tput cuu1
-		tput cnorm; stty echo 
-        read -p" $(mvprompt $clock)$move" -e glyph
-		tput civis
-		tput cuu1; tput el
+		stty echo
+        read -p"$move" -e glyph
 		stty -echo
-		rm -r $disp_lock
-
 		[ "$glyph" == '' ] && continue
+		echo rename "$node$glyph" >$zipline
         if ! glyph "$glyph" <<<null >/dev/null; then
-            printf '\a'
-            continue
+            clear
+            echo rename "$node" >$zipline
         fi
-		echo rename "$node$glyph" >$modl
-
-	elif [ "$key" == 'Z' ]; then
-		printf '\a'
-	elif [ "$key" == 'z' ]; then
-		clear
-		echo print >$modl
 	fi
 done

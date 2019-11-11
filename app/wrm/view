@@ -1,31 +1,46 @@
 #!/bin/bash
 
-mode_ptr=$1
-graph=$2
-graph=$(realpath $graph)
-mkdir -p $graph
-
-read #burn first line?
+top=0
 
 while read input; do
-    cut -d' ' -f1 <<<"$input" | brd 'set' 'wrm'
-	tput cup 0 0
-    mode=$(cat $mode_ptr)
-    if [ "$mode" == 'tree' ]; then
-        printf '\n'; printf '\n'; printf '\n'; printf '\n'
-        line=$(cut -d' ' -f2 <<<$input)
-        clock=$(cut -d' ' -f3 <<<$input)
-        cut -d' ' -f4 <<<$input | tr , '\n' | cut -d'_' -f7 | tr '\n' ' ' | sed 's/\] /\]/g' | tr ']' '\n' | splay $line $clock
 
-    elif [ "$mode" == 'comment' ]; then
-        clear
-        key=$(cut -d' ' -f1 <<<$input | sed 's/\///g' | sed 's/_//' | cut -d'_' -f1)
-        if [ -f $graph/$key ]; then
-            printf '\n'; printf '\n'
-            cat $graph/$key | center
-        fi
-    else
-        brd show wrm
+    node=$(cut -d' ' -f1 <<<"$input") 
+    [ "$node" != '.' ] && brd 'set' 'wrm' <<<"$node"
+
+    line=$(cut -d' ' -f2 <<<$input)
+    clock=$(cut -d' ' -f3 <<<$input); ((clock++))
+    tree=$(cut -d' ' -f4 <<<$input)
+
+    length=$(tput lines); ((length--)); ((length--))
+
+    if (( $clock <= $top )) && (( $clock != 0 )); then
+        top=$(( clock - 1 ))
+        oldtree=''
     fi
+
+    if ! [ "$tree" == "$oldtree" ]; then
+        tput civis
+        tput cup 0 0
+        ./window $top $length <<<"$tree"
+        width=$?
+        oldtree=$tree
+        tput ed
+        tput cnorm
+    fi
+
+    bottom=$((top + length ))
+    diff=$(( clock - bottom + 1 ))
+    if (( $diff > 0 )); then
+        tput cup $length  0
+        ./window $bottom $diff <<<"$tree"
+        echo
+        top=$(( top + diff ))
+    fi
+
+    tput cup $((clock - top)) $((width * line + 5))
 done
 
+        #key=$(cut -d' ' -f1 <<<$input | sed 's/\///g' | sed 's/_//' | cut -d'_' -f1)
+        #if [ -f $graph/$key ]; then
+            #cat $graph/$key | center
+        #fi

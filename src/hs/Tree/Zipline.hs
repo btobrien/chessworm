@@ -117,7 +117,7 @@ snap t (h,d) = if h == h' then snap t (h,d'-1) else (h',d')
     where (h',d') = climb t . lift t $ (h,d+1)
 
 branch :: Eq a => Tree a -> Location -> Location
-branch t (h,d) | h+1 >= length t || d <= 0  = (h,d)
+branch t (h,d) | null (lowers t (h,d)) || d <= 0  = (h,d)
 branch t (h,d) = if h == h' then branch t (h,d'-1) else (h',d')
     where (h',d') = fall t . lift t $ (h,d+1)
 
@@ -134,7 +134,7 @@ add a t (h,d) | d' == length ln         = pair (append t h a) (h,d')
             else highers t (h,d) ++ sibs ++ [ln'] ++ lowers t (h,d)
 
 chop :: Eq a => Tree a -> Location -> (Tree a, Location)
-chop t (h,d) = result t' ln'
+chop t (h,d) = if null t' then (nulltree,start) else result t' ln' 
     where
     ln = t !! h
     ln' = take d ln
@@ -181,4 +181,16 @@ bottom t = limit (fall t)
 mainline :: Eq a => Tree a -> Location -> (Tree a, Location)
 mainline t (0,d) = (t,(0,d))
 mainline t (h,d) = uncurry mainline $ promote t (h,d)
+
+lean :: Eq a => (Tree a, Location) -> (Tree a, Location)
+lean (t,(h,d)) = (t,(h',d))
+    where
+    h' = length $  highers t (h,d)
+
+searchOn :: Eq b => (a -> b) -> (Tree a, Location) -> Location
+searchOn f (t,(h,d)) = undefined
+
+
+
+
 
