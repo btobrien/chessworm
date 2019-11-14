@@ -190,7 +190,16 @@ lean (t,(h,d)) = (t,(h',d))
 searchOn :: Eq b => (a -> b) -> (Tree a, Location) -> Location
 searchOn f (t,(h,d)) = undefined
 
+fold :: Eq a => Tree a -> Location -> Tree a
+fold = undefined
 
+unfoldBefore :: (Tree a, Location) -> (Tree a, Location)
+unfoldBefore = undefined
+
+trim :: Eq a => a -> Tree a -> Location -> (Tree a, Location)
+trim x t (h,d) = (,) (map trimBranch t) (h,d)
+    where
+    trimBranch = takeWhile (not.(==x))
 
 
 
