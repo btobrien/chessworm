@@ -196,10 +196,12 @@ fold = undefined
 unfoldBefore :: (Tree a, Location) -> (Tree a, Location)
 unfoldBefore = undefined
 
-trim :: Eq a => a -> Tree a -> Location -> (Tree a, Location)
-trim x t (h,d) = (,) (map trimBranch t) (h,d)
-    where
-    trimBranch = takeWhile (not.(==x))
+trim :: Eq a => a -> Tree a -> Tree a
+trim a = map (takeTo a)
+
+takeTo _ [] = []
+takeTo a (x:_) | a == x = [x]
+takeTo a (x:xs) = x : takeTo a xs
 
 
 
