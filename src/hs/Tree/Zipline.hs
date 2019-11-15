@@ -199,9 +199,7 @@ unfoldBefore = undefined
 trim :: Eq a => a -> Tree a -> Tree a
 trim a = map (takeTo a)
 
-takeTo _ [] = []
-takeTo a (x:_) | a == x = [x]
-takeTo a (x:xs) = x : takeTo a xs
+takeTo a = unfoldr (\xs -> if null xs then Nothing else if (head xs) == a then Just (a,[]) else Just (head xs, tail xs))
 
 
 
