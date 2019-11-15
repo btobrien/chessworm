@@ -161,9 +161,11 @@ sub t (h,d) = pair t' (h',d - d0)
     h' = h - length (highers t (h,d))
     t' = map (drop d0) (siblings t (h,d))
 
-rename :: Eq a => a -> Tree a -> Location -> Tree a
-rename a t (h,d) = highers t (h,d) ++ sibs ++ lowers t (h,d)
-    where sibs = map (replace d a) $ siblings t (h,d)
+rename :: Eq a => (a -> a) -> Tree a -> Location -> Tree a
+rename f t (h,d) = highers t (h,d) ++ sibs ++ lowers t (h,d)
+    where
+    a = get t (h,d)
+    sibs = map (replace d (f a)) $ siblings t (h,d)
 
 root :: Tree a -> Location -> Location
 root _ (h,_) = (h,0)
@@ -190,16 +192,32 @@ lean (t,(h,d)) = (t,(h',d))
 searchOn :: Eq b => (a -> b) -> (Tree a, Location) -> Location
 searchOn f (t,(h,d)) = undefined
 
-fold :: Eq a => Tree a -> Location -> Tree a
-fold = undefined
+mapBefore :: Eq a => (a -> a) -> (Tree a, Location) -> (Tree a, Location)
+mapBefore f (t,(h,d)) = (t', (h,d))
+    where
+    ln = t !! h
+    ds = map (min d . ancestor ln) t
+    t' = zipWith (mapTo f) ds t
 
-unfoldBefore :: (Tree a, Location) -> (Tree a, Location)
-unfoldBefore = undefined
+mapAfter :: Eq a => (a -> a) -> (Tree a, Location) -> (Tree a, Location)
+mapAfter f (t,(h,d)) = (t', (h,d))
+    where
+    ln = t !! h
+    ds = map (min d . ancestor ln) t
+    t' = zipWith (mapTo f) ds t
 
-trim :: Eq a => a -> Tree a -> Tree a
-trim a = map (takeTo a)
+mapTo :: (a -> a) -> Int -> [a] -> [a]
+mapTo f depth ln = map f before ++ after 
+    where (before, after) = splitAt (depth+1) ln
 
-takeTo a = unfoldr (\xs -> if null xs then Nothing else if (head xs) == a then Just (a,[]) else Just (head xs, tail xs))
+mapFrom :: (a -> a) -> Int -> [a] -> [a]
+mapFrom f depth ln = before ++ map f after 
+    where (before, after) = splitAt (depth+1) ln
+
+trim :: (a -> Bool) -> Tree a -> Tree a
+trim end = map takeTo 
+    where 
+    takeTo = unfoldr (\xs -> if null xs then Nothing else if end (head xs) then Just (head xs,[]) else Just (head xs, tail xs))
 
 
 
