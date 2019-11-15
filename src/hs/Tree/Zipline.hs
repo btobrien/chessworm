@@ -199,16 +199,14 @@ mapBefore f (t,(h,d)) = (t', (h,d))
     ds = map (min d . ancestor ln) t
     t' = zipWith (mapTo f) ds t
 
-mapAfter :: Eq a => (a -> a) -> (Tree a, Location) -> (Tree a, Location)
-mapAfter f (t,(h,d)) = (t', (h,d))
-    where
-    ln = t !! h
-    ds = map (min d . ancestor ln) t
-    t' = zipWith (mapTo f) ds t
-
 mapTo :: (a -> a) -> Int -> [a] -> [a]
 mapTo f depth ln = map f before ++ after 
     where (before, after) = splitAt (depth+1) ln
+
+mapAfter :: Eq a => (a -> a) -> (Tree a, Location) -> (Tree a, Location)
+mapAfter f (t,(h,d)) = (t',(h,d))
+    where
+    t' = highers t (h,d) ++ map (mapFrom f d) (siblings t (h,d)) ++ lowers t (h,d)
 
 mapFrom :: (a -> a) -> Int -> [a] -> [a]
 mapFrom f depth ln = before ++ map f after 

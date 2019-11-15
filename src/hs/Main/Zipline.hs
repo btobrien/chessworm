@@ -78,6 +78,7 @@ readargs "branch" _ = move branch
 readargs "fold" _ = modify (rename togglefold)
 readargs "foldAll" _ = modTree $ (map.map) fold
 readargs "unfoldAll" _ = modTree $ (map.map) unfold
+readargs "unfoldDown" _ = mapAfter unfold
 readargs _ _ = id
 
 move = uncurry . constTree
