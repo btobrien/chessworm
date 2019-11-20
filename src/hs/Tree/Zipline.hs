@@ -212,10 +212,10 @@ mapFrom :: (a -> a) -> Int -> [a] -> [a]
 mapFrom f depth ln = before ++ map f after 
     where (before, after) = splitAt (depth+1) ln
 
-trim :: (a -> Bool) -> Tree a -> Tree a
-trim end = map takeTo 
+trim :: Eq a => (a -> Bool) -> (a -> a) -> Tree a -> Tree a
+trim end tie = map takeTo 
     where 
-    takeTo = unfoldr (\xs -> if null xs then Nothing else if end (head xs) then Just (head xs,[]) else Just (head xs, tail xs))
+    takeTo = unfoldr (\xs -> if null xs then Nothing else if end (head xs) then Just (tie (head xs),[]) else Just (head xs, tail xs))
 
 
 

@@ -74,7 +74,7 @@ while read -n1 key; do
 	fi
 
 	if [ "$key" == 'o' ]; then
-        echo "add ." >$zipline
+        echo "add ^" >$zipline
         position=$(tail -n2 <$hist | head -1 | cut -d' ' -f1)
         stty echo 
         while true; do
@@ -87,11 +87,11 @@ while read -n1 key; do
             oldpos=$position
             position=$(fens 2>/dev/null "$(tr _ ' ' <<<$position)" <<<"$move" | tr ' ' _) 
             if [ "$position" == '' ]; then
-                echo 'chop; add .' >$zipline
+                echo 'chop; add ^' >$zipline
                 position=$oldpos
                 continue
             fi
-            awk '{ print "chop; add " $0 "; add ." }' <<<"$position" >$zipline
+            awk '{ print "chop; add " $0 "; add ^" }' <<<"$position" >$zipline
             brd set wrm <<<"$position"
         done
         stty -echo 
@@ -130,6 +130,15 @@ while read -n1 key; do
             echo rename "$node" >$zipline
         else
             continue
+        fi
+	elif [ "$key" == 'f' ]; then
+		read -n1 key
+		if [ "$key" == 'f' ]; then
+            #clear
+			echo fold >$zipline
+		elif [ "$key" == 'k' ]; then
+            clear
+			echo 'fold; prev' >$zipline
         fi
 	elif [ "$key" == 'G' ]; then
 		echo leaf >$zipline

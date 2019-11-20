@@ -40,7 +40,7 @@ putState s@(t,(h,d)) = do
     putStrLn.showTree $ t
 
 showTree :: Tree String -> String
-showTree t = intercalate "]," . map (intercalate ",") . (map.map) hidefold $ t
+showTree t = intercalate "]," . map (intercalate ",") $ t
 
 showTreeFile :: Tree String -> String
 showTreeFile = unlines . map (intercalate " ")
@@ -85,11 +85,11 @@ move = uncurry . constTree
 modify = uncurry . constLoc
 modTree f (t,l) = (f t,l)
 
-view = lean . modTree (trim isfold) . mapBefore unfold
+view = lean . modTree (trim isfold hidefold) . mapBefore unfold
 
-isfold = ('*'==) . head
-fold xs = if isfold xs then xs else '*':xs
+isfold = ('.'==) . head
+fold xs = if isfold xs then xs else '.':xs
 unfold xs = if isfold xs then tail xs else xs
-togglefold xs = if isfold xs then tail xs else '*':xs
-hidefold xs = if isfold xs then "*" else xs
+togglefold xs = if isfold xs then tail xs else '.':xs
+hidefold xs = if isfold xs then "." else xs
 

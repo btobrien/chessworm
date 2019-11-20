@@ -4,6 +4,7 @@ module Tree.Peel (peel, unpeel) where
 
 import Data.List
 import Data.Tree
+import Utils
 
 peel :: Tree a -> [[a]]
 peel (Node x []) = [[x]]
@@ -13,11 +14,14 @@ unpeel :: Eq a => [[a]] -> [Tree a]
 unpeel = map unpeel' . groupBy samenext
 
 unpeel' :: Eq a => [[a]] -> Tree a
-unpeel' [[x]] = Node x [] -- ??
 unpeel' ls = Node val children
     where
     val = head . head $ ls
-    children = map unpeel' . groupBy samenext . map tail $ ls
+    children = if isleaf ls
+        then []
+        else map unpeel' . groupBy samenext . map tail $ ls
 
 samenext x y = head x == head y
 
+isleaf :: Eq a => [[a]] -> Bool
+isleaf = all equal . buddies
